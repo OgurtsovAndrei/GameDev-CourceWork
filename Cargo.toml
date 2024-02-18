@@ -1,4 +1,4 @@
-workspace = { members = ["HexLib"] }
+workspace = { members = ["Hex"] }
 [package]
 name = "CourceWork"
 version = "0.1.0"
