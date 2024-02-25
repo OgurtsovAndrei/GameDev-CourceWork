@@ -1,27 +1,17 @@
 use bevy::{prelude::*, utils::HashMap, window::PrimaryWindow};
-use bevy::math::vec2;
+use bevy::input::mouse::MouseButtonInput;
+use glam::vec2;
 use hexx::{*, shapes};
 
-const HEX_SIZE: Vec2 = Vec2::splat(20.0);
-
-pub fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                resolution: (1_000.0, 1_000.0).into(),
-                ..default()
-            }),
-            ..default()
-        }))
-        .add_systems(Startup, (setup_camera, setup_grid))
-        .add_systems(Update, handle_input)
-        .run()
-}
+const HEX_SIZE: Vec2 = Vec2::splat(75.0);
+const FILE_GRID_HEIGHT_IN_FILE: usize = 1;
+const GRID_WEIGHT_IN_FILE: usize = 6;
 
 /// 3D Orthogrpahic camera setup
-fn setup_camera(mut commands: Commands) {
+pub(crate) fn setup_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
+
 
 #[derive(Debug, Resource)]
 struct HexGrid {
@@ -29,17 +19,17 @@ struct HexGrid {
     pub layout: HexLayout,
 }
 
-fn setup_grid(
+pub(crate) fn setup_grid(
     mut commands: Commands,
     mut atlases: ResMut<Assets<TextureAtlas>>,
     asset_server: Res<AssetServer>,
 ) {
-    let texture = asset_server.load("kenney/hexagonTerrain_sheet.png");
+    let texture = asset_server.load("images/Simple grid.png");
     let atlas = TextureAtlas::from_grid(
         texture,
-        vec2(120.0, 140.0),
-        7,
-        6,
+        vec2(600.0, 700.0),
+        GRID_WEIGHT_IN_FILE,
+        FILE_GRID_HEIGHT_IN_FILE,
         Some(vec2(2.0, 2.0)),
         None,
     );
@@ -50,11 +40,11 @@ fn setup_grid(
         ..default()
     };
     let sprite_size = layout.rect_size();
-    let entities = shapes::pointy_rectangle([-14, 14, -16, 16])
+    let entities = shapes::hexagon(Hex::ZERO, 2)
         .enumerate()
         .map(|(i, coord)| {
             let pos = layout.hex_to_world_pos(coord);
-            let index = i % (7 * 6);
+            let index = i % (FILE_GRID_HEIGHT_IN_FILE * GRID_WEIGHT_IN_FILE);
             let entity = commands
                 .spawn(SpriteSheetBundle {
                     sprite: TextureAtlasSprite {
@@ -63,7 +53,7 @@ fn setup_grid(
                         ..default()
                     },
                     texture_atlas: atlas.clone(),
-                    transform: Transform::from_xyz(pos.x, pos.y, 0.0),
+                    transform: Transform::from_xyz(pos.x, pos.y, -10.0),
                     ..default()
                 })
                 .id();
@@ -88,15 +78,53 @@ fn handle_input(
         .and_then(|p| camera.viewport_to_world_2d(cam_transform, p))
     {
         let hex_pos = grid.layout.world_pos_to_hex(pos);
-        let Some(entity) = grid.entities.get(&hex_pos).copied() else {
-            return;
-        };
-        if !buttons.just_pressed(MouseButton::Left) {
-            return;
-        }
-        let Ok(mut sprite) = tiles.get_mut(entity) else {
-            return;
-        };
-        sprite.index = (sprite.index + 1) % (7 * 6);
+        let Some(entity) = grid.entities.get(&hex_pos).copied() else { return; };
+        if !buttons.just_pressed(MouseButton::Left) { return; }
+        let Ok(mut sprite) = tiles.get_mut(entity) else { return; };
+        sprite.index = (sprite.index + 1) % (FILE_GRID_HEIGHT_IN_FILE * GRID_WEIGHT_IN_FILE);
+    }
+}
+
+fn handle_clicks(
+    buttons: Res<Input<MouseButton>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
+    cameras: Query<(&Camera, &GlobalTransform)>,
+) {
+    let window = windows.single();
+    let (camera, cam_transform) = cameras.single();
+    if let Some(pos) = window
+        .cursor_position()
+        .and_then(|p| camera.viewport_to_world_2d(cam_transform, p)) {
+        if !buttons.just_pressed(MouseButton::Left) { return; }
+        println!("{}", pos)
+    }
+}
+
+fn cursor_enter_window(mut events: EventReader<CursorEntered>) {
+    for event in events.read() {
+        println!("Enter window {:?}", event)
+    }
+}
+
+fn cursor_ddd(mut events: EventReader<CursorMoved>) {
+    for event in events.read() {
+        println!("Enter window {:?}", event)
+    }
+}
+
+fn cursor_click(mut events: EventReader<MouseButtonInput>) {
+    for event in events.read() {
+        println!("Click happens: {:?}", event)
+    }
+}
+
+fn cursor_position(
+    q_windows: Query<&Window, With<PrimaryWindow>>,
+) {
+    // Games typically only have one window (the primary window)
+    if let Some(position) = q_windows.single().cursor_position() {
+        println!("Cursor is inside the primary window, at {:?}", position);
+    } else {
+        println!("Cursor is not in the game window.");
     }
 }

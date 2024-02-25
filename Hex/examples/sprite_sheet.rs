@@ -1,5 +1,6 @@
 use bevy::{prelude::*, utils::HashMap, window::PrimaryWindow};
 use glam::vec2;
+
 use hexx::{*, shapes};
 
 const HEX_SIZE: Vec2 = Vec2::splat(50.0);
@@ -50,7 +51,7 @@ fn setup_grid(
         ..default()
     };
     let sprite_size = layout.rect_size();
-    let entities = shapes::hexagon(Hex::ZERO, 3)
+    let entities = shapes::hexagon(Hex::ZERO, 2)
         .enumerate()
         .map(|(i, coord)| {
             let pos = layout.hex_to_world_pos(coord);
