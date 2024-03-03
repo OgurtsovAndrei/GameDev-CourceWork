@@ -11,6 +11,7 @@ use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
 
 mod space_ships;
 mod game_state;
+mod buttons;
 mod world;
 
 
@@ -29,6 +30,7 @@ pub fn main() {
         .add_plugins(DefaultPickingPlugins)
         .add_systems(Startup, (world::setup_world_grid::setup_camera, world::setup_world_grid::setup_grid))
         .add_systems(Startup, (space_ships::spawn_ship))
+        .add_systems(Startup, buttons::setup_buttons)
         .add_systems(Update, world::setup_world_grid::handle_input)
         .add_systems(Update, toggle_game)
         .add_systems(Update, change_game_phase)
