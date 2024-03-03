@@ -8,15 +8,10 @@ use serde::Deserialize;
 use game_state::AppState;
 
 use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
-use crate::spire_sheet::remove_grid;
 
-mod hex_grid_withlight;
-mod hex_grid;
-mod field_of_move;
-mod with_picture;
-mod spire_sheet;
 mod space_ships;
 mod game_state;
+mod world;
 
 
 pub fn main() {
@@ -32,28 +27,12 @@ pub fn main() {
         .add_state::<GamePhaseState>()
         // .add_plugins(bevy_editor_pls::EditorPlugin::default())
         .add_plugins(DefaultPickingPlugins)
-        .add_systems(Startup, (spire_sheet::setup_camera, spire_sheet::setup_grid))
+        .add_systems(Startup, (world::spire_sheet::setup_camera, world::spire_sheet::setup_grid))
         .add_systems(Startup, (space_ships::spawn_ship))
-        .add_systems(Update, spire_sheet::handle_input)
+        .add_systems(Update, world::spire_sheet::handle_input)
         .add_systems(Update, toggle_game)
         .add_systems(Update, change_game_phase)
-        .add_systems(Update, remove_grid)
-        .add_systems(Update, zoom_in)
+        .add_systems(Update, world::spire_sheet::remove_grid)
+        .add_systems(Update, world::navigations_systems::zoom_system)
         .run()
-}
-
-pub fn zoom_in(
-    mut query: Query<&mut OrthographicProjection,
-        With<Camera>>, time: Res<Time>,
-    keyboard_input: Res<Input<KeyCode>>,
-) {
-    for mut projection in query.iter_mut() {
-        if keyboard_input.pressed(KeyCode::Equals) {
-            projection.scale -= 0.25 * time.delta_seconds();
-        }
-        if keyboard_input.pressed(KeyCode::Minus) {
-            projection.scale += 0.25 * time.delta_seconds();
-        }
-        println!("Current zoom scale: {}", projection.scale);
-    }
 }
