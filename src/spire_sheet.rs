@@ -3,6 +3,8 @@ use bevy::input::mouse::MouseButtonInput;
 use glam::vec2;
 use hexx::{*, shapes};
 
+use crate::space_ships::SpaceShip;
+
 const HEX_SIZE: Vec2 = Vec2::splat(75.0);
 const FILE_GRID_HEIGHT_IN_FILE: usize = 1;
 const GRID_WEIGHT_IN_FILE: usize = 6;
@@ -14,7 +16,7 @@ pub(crate) fn setup_camera(mut commands: Commands) {
 
 
 #[derive(Debug, Resource)]
-struct HexGrid {
+pub struct HexGrid {
     pub entities: HashMap<Hex, Entity>,
     pub layout: HexLayout,
 }
@@ -63,8 +65,21 @@ pub(crate) fn setup_grid(
     commands.insert_resource(HexGrid { entities, layout });
 }
 
+pub(crate) fn remove_grid(
+    mut commands: Commands, mut entities: Query<Entity, With<SpaceShip>>,
+    keyboard_input: Res<Input<KeyCode>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        println!("{}", 42);
+        for entity in &mut entities {
+            println!("{}", entity.index());
+            commands.entity(entity).despawn()
+        }
+    }
+}
+
 /// Input interaction
-fn handle_input(
+pub(crate) fn handle_input(
     buttons: Res<Input<MouseButton>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     cameras: Query<(&Camera, &GlobalTransform)>,

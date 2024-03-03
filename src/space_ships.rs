@@ -25,7 +25,7 @@ pub(crate) fn spawn_ship(
             },
             transform: Transform::from_xyz(-300., 300., 0.0),
             ..Default::default()
-        }, On::<Pointer<Click>>::run(move || info!("Spaceship pressed")), PickableBundle::default(),
+        }, On::<Pointer<Click>>::run(move || info!("Spaceship pressed")), PickableBundle::default(), SpaceShip {}
     )
     );
 }

@@ -1,10 +1,14 @@
 use bevy::app::{App, PluginGroup, Startup};
 use bevy::DefaultPlugins;
 use bevy::prelude::*;
-use bevy_mod_picking::*;
+use bevy_mod_picking::DefaultPickingPlugins;
 use hexx::*;
+use serde::Deserialize;
 
-use crate::spire_sheet::setup_grid;
+use game_state::AppState;
+
+use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
+use crate::spire_sheet::remove_grid;
 
 mod hex_grid_withlight;
 mod hex_grid;
@@ -12,14 +16,8 @@ mod field_of_move;
 mod with_picture;
 mod spire_sheet;
 mod space_ships;
+mod game_state;
 
-
-fn tut() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_plugins(bevy_editor_pls::prelude::EditorPlugin::default())
-        .run()
-}
 
 pub fn main() {
     App::new()
@@ -30,18 +28,32 @@ pub fn main() {
             }),
             ..default()
         }))
-        .add_plugins(bevy_editor_pls::EditorPlugin::default())
+        .add_state::<AppState>()
+        .add_state::<GamePhaseState>()
+        // .add_plugins(bevy_editor_pls::EditorPlugin::default())
         .add_plugins(DefaultPickingPlugins)
-        .add_systems(Startup, (spire_sheet::setup_camera, setup_grid, space_ships::spawn_ship))
+        .add_systems(Startup, (spire_sheet::setup_camera, spire_sheet::setup_grid))
+        .add_systems(Startup, (space_ships::spawn_ship))
+        .add_systems(Update, spire_sheet::handle_input)
+        .add_systems(Update, toggle_game)
+        .add_systems(Update, change_game_phase)
+        .add_systems(Update, remove_grid)
+        .add_systems(Update, zoom_in)
         .run()
 }
 
-/*fn main() {
-    // hex_grid_withlight::main();
-    // hex_grid::main();
-    // field_of_move::main();
-    // with_picture::main();
-    // spire_sheet::main();
-    // tut();
-}*/
-
+pub fn zoom_in(
+    mut query: Query<&mut OrthographicProjection,
+        With<Camera>>, time: Res<Time>,
+    keyboard_input: Res<Input<KeyCode>>,
+) {
+    for mut projection in query.iter_mut() {
+        if keyboard_input.pressed(KeyCode::Equals) {
+            projection.scale -= 0.25 * time.delta_seconds();
+        }
+        if keyboard_input.pressed(KeyCode::Minus) {
+            projection.scale += 0.25 * time.delta_seconds();
+        }
+        println!("Current zoom scale: {}", projection.scale);
+    }
+}
