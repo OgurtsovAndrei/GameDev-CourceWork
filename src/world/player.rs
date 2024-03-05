@@ -1,8 +1,7 @@
-use std::default;
 
 use bevy::ecs::{bundle::Bundle, component::Component, system::Commands};
 
-const INITIAL_MOVES: i32 = 10;
+pub const INITIAL_MOVES: i32 = 10;
 
 #[derive(Component)]
 pub struct Player;
