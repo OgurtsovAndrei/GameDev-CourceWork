@@ -1,15 +1,11 @@
-use bevy::asset::{AssetServer, Assets};
-use bevy::input::mouse::MouseButtonInput;
+use bevy::asset::{Assets, AssetServer};
 use bevy::input::Input;
-use bevy::prelude::{
-    default, Camera, Camera2dBundle, Commands, CursorEntered, CursorMoved, Entity, EventReader,
-    GlobalTransform, KeyCode, MouseButton, Query, Res, ResMut, Resource, SpriteSheetBundle,
-    TextureAtlas, TextureAtlasSprite, Transform, Window, With,
-};
+use bevy::input::mouse::MouseButtonInput;
+use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy::window::PrimaryWindow;
 use glam::{vec2, Vec2};
-use hexx::{shapes, Hex, HexLayout, HexOrientation};
+use hexx::{Hex, HexLayout, HexOrientation, shapes};
 
 use crate::space_ships::SpaceShip;
 
@@ -23,9 +19,18 @@ pub(crate) fn setup_camera(mut commands: Commands) {
 }
 
 #[derive(Debug, Resource)]
+pub struct Planet {
+    pub index_in_grid: usize,
+    pub resource: u32,
+    pub influence: u32,
+}
+
+#[derive(Debug, Resource)]
 pub struct HexGrid {
+    // pub resources: HashMap<>
     pub entities: HashMap<Hex, Entity>,
     pub layout: HexLayout,
+    pub planets: HashMap<usize, Planet>,
 }
 
 pub(crate) fn setup_grid(
@@ -49,11 +54,17 @@ pub(crate) fn setup_grid(
         ..default()
     };
     let sprite_size = layout.rect_size();
+    let mut planets: HashMap<usize, Planet> = HashMap::new();
     let entities = shapes::hexagon(Hex::ZERO, 2)
         .enumerate()
         .map(|(i, coord)| {
             let pos = layout.hex_to_world_pos(coord);
             let index = i % (FILE_GRID_HEIGHT_IN_FILE * GRID_WEIGHT_IN_FILE);
+            let planet = Planet {
+                index_in_grid: i,
+                resource: (index + 1) as u32,
+                influence: (5 - index) as u32,
+            };
             let entity = commands
                 .spawn(SpriteSheetBundle {
                     sprite: TextureAtlasSprite {
@@ -64,13 +75,42 @@ pub(crate) fn setup_grid(
                     texture_atlas: atlas.clone(),
                     transform: Transform::from_xyz(pos.x, pos.y, -10.0),
                     ..default()
-                })
+                }).with_children(|parent| {
+                let mut resource_transform = Transform::from_xyz(-5., -5., -1.);
+                resource_transform.scale = Vec3::splat(0.5);
+
+                let mut influence_transform = Transform::from_xyz(5., -5., -1.);
+                influence_transform.scale = Vec3::splat(0.5);
+
+                let resource_transform = Transform {
+                    translation: Vec3::new(-5., -5., -0.5),
+                    scale: Vec3::splat(0.5), // Half the original size
+                    ..Default::default()
+                };
+
+                let font = asset_server.load("fonts/FiraSans-Bold.ttf");
+                // Resource text
+                parent.spawn(TextBundle {
+                    text: Text::from_section(
+                        "123",
+                        TextStyle {
+                            font: font.clone(),
+                            font_size: 60.0,
+                            color: Color::WHITE,
+                        },
+                    ),
+                    transform: resource_transform,
+                    ..Default::default()
+                });
+            })
                 .id();
+            planets.insert(i, planet);
             (coord, entity)
         })
         .collect();
-    commands.insert_resource(HexGrid { entities, layout });
+    commands.insert_resource(HexGrid { entities, layout, planets });
 }
+
 
 pub(crate) fn remove_grid(
     mut commands: Commands,
