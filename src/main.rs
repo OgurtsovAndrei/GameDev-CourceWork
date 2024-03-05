@@ -1,13 +1,13 @@
 use bevy::app::{App, PluginGroup, Startup};
-use bevy::prelude::*;
 use bevy::DefaultPlugins;
+use bevy::prelude::*;
 use bevy_mod_picking::DefaultPickingPlugins;
 use hexx::*;
 use serde::Deserialize;
 
 use game_state::AppState;
 
-use crate::game_state::{change_game_phase, toggle_game, GamePhaseState};
+use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
 
 mod game_state;
 mod space_ships;
@@ -42,6 +42,6 @@ pub fn main() {
         .add_systems(Update, toggle_game)
         .add_systems(Update, change_game_phase)
         .add_systems(Update, world::setup_world_grid::remove_grid)
-        .add_systems(Update, world::navigations_systems::zoom_system)
+        .add_systems(Update, (world::navigations_systems::zoom_system, world::navigations_systems::move_system))
         .run()
 }
