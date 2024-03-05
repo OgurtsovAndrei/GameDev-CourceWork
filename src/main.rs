@@ -2,10 +2,9 @@ use bevy::app::{App, PluginGroup, Startup};
 use bevy::DefaultPlugins;
 use bevy::prelude::*;
 use bevy_mod_picking::DefaultPickingPlugins;
-use hexx::*;
-use serde::Deserialize;
 
 use game_state::AppState;
+use world::player;
 
 use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
 
@@ -34,10 +33,12 @@ pub fn main() {
                 world::setup_world_grid::setup_grid,
             ),
         )
-        .add_systems(Startup, (space_ships::spawn_ship))
+        .add_systems(Startup, player::spawn_players)
+        .add_systems(Startup, ui::stats::setup_stats)
+        .add_systems(Startup, space_ships::spawn_ship)
         .add_systems(Startup, ui::buttons::setup_buttons)
         .add_systems(Startup, ui::stats::setup_stats)
-        .add_systems(Startup, ui::stats::setup_stats)
+        .add_systems(Update, ui::stats::button_system)
         .add_systems(Update, world::setup_world_grid::handle_input)
         .add_systems(Update, toggle_game)
         .add_systems(Update, change_game_phase)
