@@ -2,6 +2,7 @@ use bevy::asset::{Assets, AssetServer};
 use bevy::input::Input;
 use bevy::input::mouse::MouseButtonInput;
 use bevy::prelude::*;
+use bevy::text::{BreakLineOn, Text2dBounds};
 use bevy::utils::HashMap;
 use bevy::window::PrimaryWindow;
 use glam::{vec2, Vec2};
@@ -76,32 +77,10 @@ pub(crate) fn setup_grid(
                     transform: Transform::from_xyz(pos.x, pos.y, -10.0),
                     ..default()
                 }).with_children(|parent| {
-                let mut resource_transform = Transform::from_xyz(-5., -5., -1.);
-                resource_transform.scale = Vec3::splat(0.5);
-
-                let mut influence_transform = Transform::from_xyz(5., -5., -1.);
-                influence_transform.scale = Vec3::splat(0.5);
-
-                let resource_transform = Transform {
-                    translation: Vec3::new(-5., -5., -0.5),
-                    scale: Vec3::splat(0.5), // Half the original size
-                    ..Default::default()
-                };
-
                 let font = asset_server.load("fonts/FiraSans-Bold.ttf");
-                // Resource text
-                parent.spawn(TextBundle {
-                    text: Text::from_section(
-                        "123",
-                        TextStyle {
-                            font: font.clone(),
-                            font_size: 60.0,
-                            color: Color::WHITE,
-                        },
-                    ),
-                    transform: resource_transform,
-                    ..Default::default()
-                });
+
+                parent.spawn(create_resource_text_bundle(font.clone(), planet.resource));
+                parent.spawn(create_influence_text_bundle(font.clone(), planet.influence));
             })
                 .id();
             planets.insert(i, planet);
@@ -109,6 +88,57 @@ pub(crate) fn setup_grid(
         })
         .collect();
     commands.insert_resource(HexGrid { entities, layout, planets });
+}
+
+fn create_text_bundle(text: String, resource_text_style: TextStyle, resource_transform: Transform) -> Text2dBundle {
+    let box_size = Vec2::new(50.0, 25.0);
+    return Text2dBundle {
+        text: Text {
+            sections: vec![TextSection::new(
+                text,
+                resource_text_style.clone(),
+            )],
+            linebreak_behavior: BreakLineOn::NoWrap,
+            alignment: Default::default(),
+        },
+        text_2d_bounds: Text2dBounds {
+            size: box_size,
+        },
+        transform: resource_transform,
+        ..default()
+    };
+}
+
+fn create_resource_text_bundle(font: Handle<Font>, value: u32) -> Text2dBundle {
+    let resource_text_style: TextStyle = TextStyle {
+        font,
+        font_size: 42.0,
+        color: Color::ORANGE,
+    };
+
+    let resource_transform = Transform {
+        translation: Vec3::new(-45., 33., 0.5),
+        scale: Vec3::splat(0.25), // Half the original size
+        ..Default::default()
+    };
+    let text: String = format!("Resource {}", value);
+    return create_text_bundle(text, resource_text_style, resource_transform);
+}
+
+fn create_influence_text_bundle(font: Handle<Font>, value: u32) -> Text2dBundle {
+    let resource_text_style: TextStyle = TextStyle {
+        font,
+        font_size: 42.0,
+        color: Color::CYAN,
+    };
+
+    let resource_transform = Transform {
+        translation: Vec3::new(-45., 26., 0.5),
+        scale: Vec3::splat(0.25), // Half the original size
+        ..Default::default()
+    };
+
+    create_text_bundle(format!("Influence {}", value), resource_text_style, resource_transform)
 }
 
 
