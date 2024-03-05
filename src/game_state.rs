@@ -24,13 +24,18 @@ pub fn toggle_game(
 ) {
     if keyboard_input.just_pressed(KeyCode::Space) {
         match current_state.get() {
-            AppState::MainMenuState => { commands.insert_resource(NextState(Some(AppState::GamePhaseState))) }
-            AppState::GamePhaseState => { commands.insert_resource(NextState(Some(AppState::MainMenuState))) }
-            AppState::GameOver => { commands.insert_resource(NextState(Some(AppState::MainMenuState))) }
+            AppState::MainMenuState => {
+                commands.insert_resource(NextState(Some(AppState::GamePhaseState)))
+            }
+            AppState::GamePhaseState => {
+                commands.insert_resource(NextState(Some(AppState::MainMenuState)))
+            }
+            AppState::GameOver => {
+                commands.insert_resource(NextState(Some(AppState::MainMenuState)))
+            }
         }
     }
 }
-
 
 pub fn change_game_phase(
     mut commands: Commands,
@@ -39,9 +44,15 @@ pub fn change_game_phase(
 ) {
     if current_app_state.get() == &AppState::GamePhaseState {
         match current_state.get() {
-            GamePhaseState::NewTurnPhase => { commands.insert_resource(NextState(Some(GamePhaseState::StrategiesPhase))) }
-            GamePhaseState::StrategiesPhase => { commands.insert_resource(NextState(Some(GamePhaseState::TacticPhase))) }
-            GamePhaseState::TacticPhase => { commands.insert_resource(NextState(Some(GamePhaseState::NewTurnPhase))) }
+            GamePhaseState::NewTurnPhase => {
+                commands.insert_resource(NextState(Some(GamePhaseState::StrategiesPhase)))
+            }
+            GamePhaseState::StrategiesPhase => {
+                commands.insert_resource(NextState(Some(GamePhaseState::TacticPhase)))
+            }
+            GamePhaseState::TacticPhase => {
+                commands.insert_resource(NextState(Some(GamePhaseState::NewTurnPhase)))
+            }
         }
     }
 }

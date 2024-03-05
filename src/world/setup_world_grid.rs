@@ -1,11 +1,15 @@
-use bevy::asset::{Assets, AssetServer};
-use bevy::input::Input;
+use bevy::asset::{AssetServer, Assets};
 use bevy::input::mouse::MouseButtonInput;
-use bevy::prelude::{Camera, Camera2dBundle, Commands, CursorEntered, CursorMoved, default, Entity, EventReader, GlobalTransform, KeyCode, MouseButton, Query, Res, ResMut, Resource, SpriteSheetBundle, TextureAtlas, TextureAtlasSprite, Transform, Window, With};
+use bevy::input::Input;
+use bevy::prelude::{
+    default, Camera, Camera2dBundle, Commands, CursorEntered, CursorMoved, Entity, EventReader,
+    GlobalTransform, KeyCode, MouseButton, Query, Res, ResMut, Resource, SpriteSheetBundle,
+    TextureAtlas, TextureAtlasSprite, Transform, Window, With,
+};
 use bevy::utils::HashMap;
 use bevy::window::PrimaryWindow;
-use glam::{Vec2, vec2};
-use hexx::{Hex, HexLayout, HexOrientation, shapes};
+use glam::{vec2, Vec2};
+use hexx::{shapes, Hex, HexLayout, HexOrientation};
 
 use crate::space_ships::SpaceShip;
 
@@ -17,7 +21,6 @@ const GRID_WEIGHT_IN_FILE: usize = 6;
 pub(crate) fn setup_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
-
 
 #[derive(Debug, Resource)]
 pub struct HexGrid {
@@ -70,7 +73,8 @@ pub(crate) fn setup_grid(
 }
 
 pub(crate) fn remove_grid(
-    mut commands: Commands, mut entities: Query<Entity, With<SpaceShip>>,
+    mut commands: Commands,
+    mut entities: Query<Entity, With<SpaceShip>>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
@@ -97,9 +101,15 @@ pub(crate) fn handle_input(
         .and_then(|p| camera.viewport_to_world_2d(cam_transform, p))
     {
         let hex_pos = grid.layout.world_pos_to_hex(pos);
-        let Some(entity) = grid.entities.get(&hex_pos).copied() else { return; };
-        if !buttons.just_pressed(MouseButton::Left) { return; }
-        let Ok(mut sprite) = tiles.get_mut(entity) else { return; };
+        let Some(entity) = grid.entities.get(&hex_pos).copied() else {
+            return;
+        };
+        if !buttons.just_pressed(MouseButton::Left) {
+            return;
+        }
+        let Ok(mut sprite) = tiles.get_mut(entity) else {
+            return;
+        };
         sprite.index = (sprite.index + 1) % (FILE_GRID_HEIGHT_IN_FILE * GRID_WEIGHT_IN_FILE);
     }
 }
@@ -113,8 +123,11 @@ fn handle_clicks(
     let (camera, cam_transform) = cameras.single();
     if let Some(pos) = window
         .cursor_position()
-        .and_then(|p| camera.viewport_to_world_2d(cam_transform, p)) {
-        if !buttons.just_pressed(MouseButton::Left) { return; }
+        .and_then(|p| camera.viewport_to_world_2d(cam_transform, p))
+    {
+        if !buttons.just_pressed(MouseButton::Left) {
+            return;
+        }
         println!("{}", pos)
     }
 }
@@ -137,9 +150,7 @@ fn cursor_click(mut events: EventReader<MouseButtonInput>) {
     }
 }
 
-fn cursor_position(
-    q_windows: Query<&Window, With<PrimaryWindow>>,
-) {
+fn cursor_position(q_windows: Query<&Window, With<PrimaryWindow>>) {
     // Games typically only have one window (the primary window)
     if let Some(position) = q_windows.single().cursor_position() {
         println!("Cursor is inside the primary window, at {:?}", position);

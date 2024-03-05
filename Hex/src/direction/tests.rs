@@ -1,15 +1,17 @@
 #![allow(
-clippy::enum_glob_use,
-clippy::cast_possible_truncation,
-clippy::cast_precision_loss
+    clippy::enum_glob_use,
+    clippy::cast_possible_truncation,
+    clippy::cast_precision_loss
 )]
 
 use crate::HexOrientation;
 
 use super::*;
+use std::f32::consts::PI;
+use std::f32::EPSILON;
 
 mod hex_directions {
-    use super::{*, Direction::*};
+    use super::{Direction::*, *};
 
     #[test]
     fn rotate_ccw_cw() {
@@ -189,7 +191,7 @@ mod hex_directions {
 }
 
 mod diagonal_direction {
-    use super::{*, DiagonalDirection::*};
+    use super::{DiagonalDirection::*, *};
 
     #[test]
     fn dir_neighbors() {

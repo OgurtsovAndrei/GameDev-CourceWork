@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::prelude::*;
-use bevy_mod_picking::PickableBundle;
 use bevy_mod_picking::prelude::*;
+use bevy_mod_picking::PickableBundle;
 
 #[derive(Component)]
 pub struct SpaceShip;
@@ -14,7 +14,11 @@ pub(crate) fn spawn_ship(
     let atlas = TextureAtlas::from_grid(
         asset_server.load("SpaceShips/Transport.png"),
         Vec2::new(400., 150.),
-        1, 1, None, None);
+        1,
+        1,
+        None,
+        None,
+    );
     commands.spawn((
         SpriteSheetBundle {
             texture_atlas: texture_atlas.add(atlas),
@@ -25,7 +29,9 @@ pub(crate) fn spawn_ship(
             },
             transform: Transform::from_xyz(-300., 300., 0.0),
             ..Default::default()
-        }, On::<Pointer<Click>>::run(move || info!("Spaceship pressed")), PickableBundle::default(), SpaceShip {}
-    )
-    );
+        },
+        On::<Pointer<Click>>::run(move || info!("Spaceship pressed")),
+        PickableBundle::default(),
+        SpaceShip {},
+    ));
 }
