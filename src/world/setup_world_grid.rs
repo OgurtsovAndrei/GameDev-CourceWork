@@ -1,12 +1,12 @@
-use bevy::asset::{Assets, AssetServer};
-use bevy::input::Input;
+use bevy::asset::{AssetServer, Assets};
 use bevy::input::mouse::MouseButtonInput;
+use bevy::input::Input;
 use bevy::prelude::*;
 use bevy::text::{BreakLineOn, Text2dBounds};
 use bevy::utils::HashMap;
 use bevy::window::PrimaryWindow;
 use glam::{vec2, Vec2};
-use hexx::{Hex, HexLayout, HexOrientation, shapes};
+use hexx::{shapes, Hex, HexLayout, HexOrientation};
 
 use crate::space_ships::SpaceShip;
 
@@ -76,34 +76,38 @@ pub(crate) fn setup_grid(
                     texture_atlas: atlas.clone(),
                     transform: Transform::from_xyz(pos.x, pos.y, -10.0),
                     ..default()
-                }).with_children(|parent| {
-                let font = asset_server.load("fonts/FiraSans-Bold.ttf");
+                })
+                .with_children(|parent| {
+                    let font = asset_server.load("fonts/FiraSans-Bold.ttf");
 
-                parent.spawn(create_resource_text_bundle(font.clone(), planet.resource));
-                parent.spawn(create_influence_text_bundle(font.clone(), planet.influence));
-            })
+                    parent.spawn(create_resource_text_bundle(font.clone(), planet.resource));
+                    parent.spawn(create_influence_text_bundle(font.clone(), planet.influence));
+                })
                 .id();
             planets.insert(i, planet);
             (coord, entity)
         })
         .collect();
-    commands.insert_resource(HexGrid { entities, layout, planets });
+    commands.insert_resource(HexGrid {
+        entities,
+        layout,
+        planets,
+    });
 }
 
-fn create_text_bundle(text: String, resource_text_style: TextStyle, resource_transform: Transform) -> Text2dBundle {
+fn create_text_bundle(
+    text: String,
+    resource_text_style: TextStyle,
+    resource_transform: Transform,
+) -> Text2dBundle {
     let box_size = Vec2::new(50.0, 25.0);
     return Text2dBundle {
         text: Text {
-            sections: vec![TextSection::new(
-                text,
-                resource_text_style.clone(),
-            )],
+            sections: vec![TextSection::new(text, resource_text_style.clone())],
             linebreak_behavior: BreakLineOn::NoWrap,
             alignment: Default::default(),
         },
-        text_2d_bounds: Text2dBounds {
-            size: box_size,
-        },
+        text_2d_bounds: Text2dBounds { size: box_size },
         transform: resource_transform,
         ..default()
     };
@@ -138,9 +142,12 @@ fn create_influence_text_bundle(font: Handle<Font>, value: u32) -> Text2dBundle 
         ..Default::default()
     };
 
-    create_text_bundle(format!("Influence {}", value), resource_text_style, resource_transform)
+    create_text_bundle(
+        format!("Influence {}", value),
+        resource_text_style,
+        resource_transform,
+    )
 }
-
 
 pub(crate) fn remove_grid(
     mut commands: Commands,

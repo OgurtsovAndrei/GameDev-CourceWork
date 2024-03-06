@@ -1,11 +1,16 @@
+use bevy::ecs::component::Component;
 use bevy::hierarchy::{BuildChildren, ChildBuilder};
-use bevy::prelude::{
-    default, AlignContent, AlignItems, AlignSelf, BackgroundColor, ButtonBundle, Color, Commands,
-    FlexDirection, JustifyContent, JustifySelf, NodeBundle, PositionType, TextBundle, TextStyle,
-    Transform, Val,
+use bevy::prelude::{AlignSelf, ButtonBundle, Color, Commands,
+    FlexDirection, JustifyContent, JustifySelf, NodeBundle, TextBundle, TextStyle, Val,
 };
-use bevy::ui::Val::{Percent, Px};
-use bevy::ui::{Direction, Style, UiRect};
+use bevy::ui::Val::Px;
+use bevy::ui::{Style, UiRect};
+
+#[derive(Component)]
+pub struct NextMoveButton;
+
+#[derive(Component)]
+pub struct PassButton;
 
 fn setup_next_move_button(parent: &mut ChildBuilder) {
     parent
@@ -20,6 +25,7 @@ fn setup_next_move_button(parent: &mut ChildBuilder) {
             },
             ..Default::default()
         })
+        .insert(NextMoveButton)
         .with_children(|parent| {
             parent.spawn(TextBundle::from_section(
                 "Next move",
@@ -44,6 +50,7 @@ fn setup_pass_move_button(parent: &mut ChildBuilder) {
             },
             ..Default::default()
         })
+        .insert(PassButton)
         .with_children(|parent| {
             parent.spawn(TextBundle::from_section(
                 "Pass",
@@ -62,8 +69,8 @@ pub(crate) fn setup_buttons(mut commands: Commands) {
             style: Style {
                 align_self: AlignSelf::End,
                 justify_self: JustifySelf::Center,
-                flex_direction: FlexDirection::Row, // Horizontal layout
-                justify_content: JustifyContent::SpaceBetween, // This will ensure the spacing
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::SpaceBetween,
                 ..Default::default()
             },
             ..Default::default()

@@ -3,8 +3,8 @@ use bevy::prelude::{Camera, KeyCode, OrthographicProjection, Query, Res, Time, T
 use glam::Vec3;
 
 pub(crate) fn zoom_system(
-    mut query: Query<&mut OrthographicProjection,
-        With<Camera>>, time: Res<Time>,
+    mut query: Query<&mut OrthographicProjection, With<Camera>>,
+    time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     for mut projection in query.iter_mut() {
@@ -22,7 +22,7 @@ pub(crate) fn move_system(
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
-    let translation_speed = 400.0;  // Adjust this value to your liking
+    let translation_speed = 400.0; // Adjust this value to your liking
     for (_camera, mut transform) in camera_query.iter_mut() {
         let mut direction = Vec3::ZERO;
         if keyboard_input.pressed(KeyCode::Left) {
