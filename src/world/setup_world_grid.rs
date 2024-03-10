@@ -14,6 +14,28 @@ const HEX_SIZE: Vec2 = Vec2::splat(75.0);
 const FILE_GRID_HEIGHT_IN_FILE: usize = 1;
 const GRID_WEIGHT_IN_FILE: usize = 6;
 
+const DEFAULT_COLOR: bevy::prelude::Color = Color::WHITE;
+const SELECTED_COLOR: bevy::prelude::Color = Color::RED;
+
+pub struct WorldPlugin;
+
+impl Plugin for WorldPlugin {
+    fn build(&self, app: &mut App) {
+        let mut hex = Hex { x: -1000, y: -1000 };
+        app.add_systems(Startup, (setup_camera, setup_grid))
+            .add_systems(
+                Update,
+                move |buttons: Res<Input<MouseButton>>,
+                      windows: Query<&Window, With<PrimaryWindow>>,
+                      cameras: Query<(&Camera, &GlobalTransform)>,
+                      grid: Res<HexGrid>,
+                      tiles: Query<&mut TextureAtlasSprite>| {
+                    handle_click_on_planet(buttons, windows, cameras, grid, tiles, &mut hex)
+                },
+            );
+    }
+}
+
 /// 3D Orthogrpahic camera setup
 pub(crate) fn setup_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
@@ -48,6 +70,7 @@ pub(crate) fn setup_grid(
         Some(vec2(2.0, 2.0)),
         None,
     );
+
     let atlas = atlases.add(atlas);
     let layout = HexLayout {
         orientation: HexOrientation::Pointy,
@@ -66,9 +89,11 @@ pub(crate) fn setup_grid(
                 resource: (index + 1) as u32,
                 influence: (5 - index) as u32,
             };
+
             let entity = commands
                 .spawn(SpriteSheetBundle {
                     sprite: TextureAtlasSprite {
+                        color: DEFAULT_COLOR,
                         index,
                         custom_size: Some(sprite_size),
                         ..default()
@@ -79,7 +104,6 @@ pub(crate) fn setup_grid(
                 })
                 .with_children(|parent| {
                     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
-
                     parent.spawn(create_resource_text_bundle(font.clone(), planet.resource));
                     parent.spawn(create_influence_text_bundle(font.clone(), planet.influence));
                 })
@@ -101,7 +125,7 @@ fn create_text_bundle(
     resource_transform: Transform,
 ) -> Text2dBundle {
     let box_size = Vec2::new(50.0, 25.0);
-    return Text2dBundle {
+    Text2dBundle {
         text: Text {
             sections: vec![TextSection::new(text, resource_text_style.clone())],
             linebreak_behavior: BreakLineOn::NoWrap,
@@ -110,7 +134,7 @@ fn create_text_bundle(
         text_2d_bounds: Text2dBounds { size: box_size },
         transform: resource_transform,
         ..default()
-    };
+    }
 }
 
 fn create_resource_text_bundle(font: Handle<Font>, value: u32) -> Text2dBundle {
@@ -126,7 +150,7 @@ fn create_resource_text_bundle(font: Handle<Font>, value: u32) -> Text2dBundle {
         ..Default::default()
     };
     let text: String = format!("Resource {}", value);
-    return create_text_bundle(text, resource_text_style, resource_transform);
+    create_text_bundle(text, resource_text_style, resource_transform)
 }
 
 fn create_influence_text_bundle(font: Handle<Font>, value: u32) -> Text2dBundle {
@@ -164,12 +188,13 @@ pub(crate) fn remove_grid(
 }
 
 /// Input interaction
-pub(crate) fn handle_input(
+pub(crate) fn handle_click_on_planet(
     buttons: Res<Input<MouseButton>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     cameras: Query<(&Camera, &GlobalTransform)>,
     grid: Res<HexGrid>,
     mut tiles: Query<&mut TextureAtlasSprite>,
+    prev_pos: &mut Hex,
 ) {
     let window = windows.single();
     let (camera, cam_transform) = cameras.single();
@@ -177,18 +202,40 @@ pub(crate) fn handle_input(
         .cursor_position()
         .and_then(|p| camera.viewport_to_world_2d(cam_transform, p))
     {
-        let hex_pos = grid.layout.world_pos_to_hex(pos);
-        let Some(entity) = grid.entities.get(&hex_pos).copied() else {
-            return;
-        };
+        let cur_pos = grid.layout.world_pos_to_hex(pos);
+
         if !buttons.just_pressed(MouseButton::Left) {
             return;
         }
-        let Ok(mut sprite) = tiles.get_mut(entity) else {
-            return;
-        };
-        sprite.index = (sprite.index + 1) % (FILE_GRID_HEIGHT_IN_FILE * GRID_WEIGHT_IN_FILE);
+
+        if *prev_pos == cur_pos {
+            set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR);
+        } else {
+            set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
+
+            let prv_pos_copy = prev_pos.clone();
+            *prev_pos = cur_pos;
+
+            set_color_to_hex(&grid, &mut tiles, &prv_pos_copy, &DEFAULT_COLOR)
+        }
     }
+}
+
+fn set_color_to_hex(
+    grid: &Res<HexGrid>,
+    tiles: &mut Query<&mut TextureAtlasSprite>,
+    pos: &Hex,
+    color: &Color,
+) {
+    let Some(cur_entity) = grid.entities.get(pos).copied() else {
+        return;
+    };
+
+    let Ok(mut cur_sprite) = tiles.get_mut(cur_entity) else {
+        return;
+    };
+
+    cur_sprite.color = *color;
 }
 
 fn handle_clicks(

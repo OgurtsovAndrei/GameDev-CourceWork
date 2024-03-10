@@ -1,9 +1,6 @@
-use std::default;
-
 use bevy::ecs::{
     bundle::Bundle,
     component::Component,
-    schedule::States,
     system::{Commands, Resource},
 };
 

@@ -7,6 +7,7 @@ use game_state::AppState;
 use ui::buttons::BottomPanelPlugin;
 use ui::stats::StatsPlugin;
 use world::player::{self, Turn};
+use world::setup_world_grid::WorldPlugin;
 
 use crate::game_state::{change_game_phase, toggle_game, GamePhaseState};
 
@@ -30,17 +31,13 @@ pub fn main() {
         .add_plugins(DefaultPickingPlugins)
         .add_plugins(StatsPlugin)
         .add_plugins(BottomPanelPlugin)
+        .add_plugins(WorldPlugin)
         .insert_resource(Turn::First)
-        .add_systems(
-            Startup,
-            (
-                world::setup_world_grid::setup_camera,
-                world::setup_world_grid::setup_grid,
+        .add_systems(Startup, (
                 player::spawn_players,
                 space_ships::spawn_ship,
-            ),
+            )
         )
-        .add_systems(Update, world::setup_world_grid::handle_input)
         .add_systems(Update, toggle_game)
         .add_systems(Update, change_game_phase)
         .add_systems(Update, world::setup_world_grid::remove_grid)
