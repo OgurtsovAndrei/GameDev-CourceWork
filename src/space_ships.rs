@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 use bevy_mod_picking::PickableBundle;
 

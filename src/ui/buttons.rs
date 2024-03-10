@@ -1,3 +1,4 @@
+use bevy::app::{Plugin, Startup};
 use bevy::ecs::component::Component;
 use bevy::hierarchy::{BuildChildren, ChildBuilder};
 use bevy::prelude::{AlignSelf, ButtonBundle, Color, Commands,
@@ -11,6 +12,15 @@ pub struct NextMoveButton;
 
 #[derive(Component)]
 pub struct PassButton;
+
+pub struct BottomPanelPlugin;
+
+impl Plugin for BottomPanelPlugin {
+    fn build(&self, app: &mut bevy::prelude::App) {
+        app.add_systems(Startup, setup_buttons);
+    }
+}
+
 
 fn setup_next_move_button(parent: &mut ChildBuilder) {
     parent
@@ -63,7 +73,7 @@ fn setup_pass_move_button(parent: &mut ChildBuilder) {
         });
 }
 
-pub(crate) fn setup_buttons(mut commands: Commands) {
+fn setup_buttons(mut commands: Commands) {
     commands
         .spawn(NodeBundle {
             style: Style {

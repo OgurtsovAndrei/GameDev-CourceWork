@@ -1,3 +1,4 @@
+use bevy::app::{Plugin, Startup, Update};
 use bevy::ecs::component::Component;
 use bevy::ecs::query::{Changed, With, Without};
 use bevy::ecs::system::{Query, ResMut};
@@ -19,6 +20,15 @@ pub struct TurnText;
 
 #[derive(Component)]
 pub struct MovesLeftText;
+
+pub struct StatsPlugin;
+
+impl Plugin for StatsPlugin {
+    fn build(&self, app: &mut bevy::prelude::App) {
+        app.add_systems(Startup, setup_stats);
+        app.add_systems(Update, pass_move_to_next_player);
+    }
+}
 
 fn spawn_player_move(parent: &mut ChildBuilder) {
     parent
@@ -43,7 +53,7 @@ fn spawn_player_move(parent: &mut ChildBuilder) {
         .insert(TurnText);
 }
 
-pub fn setup_stats(mut commands: Commands) {
+fn setup_stats(mut commands: Commands) {
     commands
         .spawn(NodeBundle {
             style: Style {
@@ -60,7 +70,7 @@ pub fn setup_stats(mut commands: Commands) {
         });
 }
 
-pub fn update_button(
+fn pass_move_to_next_player(
     interaction_query: Query<&Interaction, (Changed<Interaction>, With<Button>, With<NextMoveButton>)>,
     mut player_query: Query<(&Player, &mut Stats, &Turn)>,
     mut player_number_text_query: Query<&mut Text, (With<TurnText>, Without<MovesLeftText>)>,
