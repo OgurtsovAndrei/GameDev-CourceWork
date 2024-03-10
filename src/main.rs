@@ -4,7 +4,8 @@ use bevy::DefaultPlugins;
 use bevy_mod_picking::DefaultPickingPlugins;
 
 use game_state::AppState;
-use ui::buttons::BottomPanelPlugin;
+use ui::bottom_panel::BottomPanelPlugin;
+use ui::left_panel::LeftPanelPlugin;
 use ui::stats::StatsPlugin;
 use world::player::{self, Turn};
 use world::setup_world_grid::WorldPlugin;
@@ -31,6 +32,7 @@ pub fn main() {
         .add_plugins(DefaultPickingPlugins)
         .add_plugins(StatsPlugin)
         .add_plugins(BottomPanelPlugin)
+        .add_plugins(LeftPanelPlugin)
         .add_plugins(WorldPlugin)
         .insert_resource(Turn::First)
         .add_systems(Startup, (

@@ -13,7 +13,7 @@ use bevy::ui::Interaction;
 
 use crate::world::player::{Player, Stats, Turn, INITIAL_MOVES};
 
-use super::buttons::NextMoveButton;
+use super::bottom_panel::NextMoveButton;
 
 #[derive(Component)]
 pub struct TurnText;

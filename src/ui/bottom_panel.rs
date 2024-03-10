@@ -17,7 +17,7 @@ pub struct BottomPanelPlugin;
 
 impl Plugin for BottomPanelPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_systems(Startup, setup_buttons);
+        app.add_systems(Startup, setup_bottom_panel_buttons);
     }
 }
 
@@ -73,7 +73,7 @@ fn setup_pass_move_button(parent: &mut ChildBuilder) {
         });
 }
 
-fn setup_buttons(mut commands: Commands) {
+fn setup_bottom_panel_buttons(mut commands: Commands) {
     commands
         .spawn(NodeBundle {
             style: Style {
