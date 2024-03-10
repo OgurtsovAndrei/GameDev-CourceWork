@@ -1,3 +1,5 @@
+use std::default;
+
 use bevy::app::{Plugin, Startup, Update};
 use bevy::ecs::component::Component;
 use bevy::ecs::query::{Changed, With, Without};
@@ -31,16 +33,17 @@ impl Plugin for StatsPlugin {
 }
 
 fn spawn_player_move(parent: &mut ChildBuilder) {
-    parent
-        .spawn(TextBundle::from_section(
-            format!("Moves left {INITIAL_MOVES}"),
-            TextStyle {
-                font: Default::default(),
-                font_size: 40.0,
-                color: Color::rgb(0.9, 0.9, 0.9),
-            },
-        ))
-        .insert(MovesLeftText);
+    let mut moves_left_text = TextBundle::from_section(
+        String::new(),
+        TextStyle {
+            font: Default::default(),
+            font_size: 40.0,
+            color: Color::rgb(0.9, 0.9, 0.9),
+        },
+    );
+    updates_moves_left_text(&mut moves_left_text.text, INITIAL_MOVES);
+    parent.spawn(moves_left_text).insert(MovesLeftText);
+
     parent
         .spawn(TextBundle::from_section(
             Turn::First.to_string(),
@@ -70,8 +73,15 @@ fn setup_stats(mut commands: Commands) {
         });
 }
 
+pub fn updates_moves_left_text(text: &mut Text, value: i32) {
+    text.sections[0].value = format!("Moves left: {}", value.to_string());
+}
+
 fn pass_move_to_next_player(
-    interaction_query: Query<&Interaction, (Changed<Interaction>, With<Button>, With<NextMoveButton>)>,
+    interaction_query: Query<
+        &Interaction,
+        (Changed<Interaction>, With<Button>, With<NextMoveButton>),
+    >,
     mut player_query: Query<(&Player, &mut Stats, &Turn)>,
     mut player_number_text_query: Query<&mut Text, (With<TurnText>, Without<MovesLeftText>)>,
     mut moves_left_text_query: Query<&mut Text, (With<MovesLeftText>, Without<TurnText>)>,
@@ -89,7 +99,7 @@ fn pass_move_to_next_player(
             *current_turn = current_turn.flip();
             for (_, mut stats, turn) in player_query.iter_mut() {
                 if turn == current_turn {
-                    moves_left.sections[0].value = format!("Moves left: {}", stats.moves_left.to_string());
+                    updates_moves_left_text(&mut moves_left, stats.moves_left);
                     player_number.sections[0].value = current_turn.to_string();
                 } else {
                     stats.moves_left -= 1;
