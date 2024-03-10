@@ -13,7 +13,7 @@ use bevy::ui::{Interaction, Style, UiRect};
 
 use crate::world::player::{Player, Stats, Turn};
 
-use super::stats::{updates_moves_left_text, MovesLeftText, TurnText};
+use crate::ui::stats::{updates_moves_left_text, MovesLeftText, TurnText};
 
 #[derive(Component)]
 pub struct NextMoveButton;
@@ -26,12 +26,12 @@ pub struct BottomPanelPlugin;
 impl Plugin for BottomPanelPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_systems(Startup, setup_bottom_panel_buttons)
-            .add_systems(Update, handle_next_move_button_click);
+            .add_systems(Update, handle_finish_moves_in_round_button_click);
     }
 }
 
 
-fn setup_next_move_button(parent: &mut ChildBuilder) {
+fn setup_finish_moves_in_round_button(parent: &mut ChildBuilder) {
     parent
         .spawn(ButtonBundle {
             style: Style {
@@ -47,11 +47,11 @@ fn setup_next_move_button(parent: &mut ChildBuilder) {
         .insert(NextMoveButton)
         .with_children(|parent| {
             parent.spawn(TextBundle::from_section(
-                "Next move",
+                "Finish moves in round",
                 TextStyle {
                     font: Default::default(),
                     font_size: 40.0,
-                    color: Color::rgb(0.9, 0.9, 0.9),
+                    color: Color::BLACK,
                 },
             ));
         });
@@ -76,7 +76,7 @@ fn setup_pass_move_button(parent: &mut ChildBuilder) {
                 TextStyle {
                     font: Default::default(),
                     font_size: 40.0,
-                    color: Color::rgb(0.9, 0.9, 0.9),
+                    color: Color::BLACK,
                 },
             ));
         });
@@ -95,13 +95,14 @@ fn setup_bottom_panel_buttons(mut commands: Commands) {
             ..Default::default()
         })
         .with_children(|parent| {
-            setup_next_move_button(parent);
+            setup_finish_moves_in_round_button(parent);
             setup_pass_move_button(parent);
         });
 }
 
 
-fn handle_next_move_button_click(
+
+fn handle_finish_moves_in_round_button_click(
     interaction_query: Query<&Interaction, (Changed<Interaction>, With<Button>, With<NextMoveButton>)>,
     mut player_query: Query<(&Player, &mut Stats, &Turn)>,
     mut player_number_text_query: Query<&mut Text, (With<TurnText>, Without<MovesLeftText>)>,
@@ -123,7 +124,7 @@ fn handle_next_move_button_click(
                     updates_moves_left_text(&mut moves_left, stats.moves_left);
                     player_number.sections[0].value = current_turn.to_string();
                 } else {
-                    stats.moves_left -= 1;
+                    stats.moves_left = 0;
                 }
             }
         }

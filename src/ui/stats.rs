@@ -1,9 +1,6 @@
-use std::default;
 
-use bevy::app::{Plugin, Startup, Update};
+use bevy::app::{Plugin, Startup};
 use bevy::ecs::component::Component;
-use bevy::ecs::query::{Changed, With, Without};
-use bevy::ecs::system::{Query, ResMut};
 use bevy::hierarchy::{BuildChildren, ChildBuilder};
 use bevy::prelude::{
     AlignSelf, Color, Commands, FlexDirection, JustifyContent, JustifySelf, NodeBundle, Style,

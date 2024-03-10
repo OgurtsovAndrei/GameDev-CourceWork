@@ -17,7 +17,7 @@ use bevy::{
 
 use crate::world::player::{Player, Stats, Turn};
 
-use super::stats::{self, MovesLeftText};
+use crate::ui::stats::{self, MovesLeftText};
 
 pub struct LeftPanelPlugin;
 
@@ -43,7 +43,7 @@ fn add_debug_buttons(parent: &mut ChildBuilder) {
                 TextStyle {
                     font: Default::default(),
                     font_size: 40.0,
-                    color: Color::rgb(0.9, 0.9, 0.9),
+                    color: Color::BLACK,
                 },
             ));
         });
