@@ -1,11 +1,19 @@
-use bevy::app::{Plugin, Startup};
+use bevy::app::{Plugin, Startup, Update};
 use bevy::ecs::component::Component;
+use bevy::ecs::query::{Changed, With, Without};
+use bevy::ecs::system::{Query, ResMut};
 use bevy::hierarchy::{BuildChildren, ChildBuilder};
 use bevy::prelude::{AlignSelf, ButtonBundle, Color, Commands,
     FlexDirection, JustifyContent, JustifySelf, NodeBundle, TextBundle, TextStyle, Val,
 };
+use bevy::text::Text;
+use bevy::ui::widget::Button;
 use bevy::ui::Val::Px;
-use bevy::ui::{Style, UiRect};
+use bevy::ui::{Interaction, Style, UiRect};
+
+use crate::world::player::{Player, Stats, Turn};
+
+use super::stats::{updates_moves_left_text, MovesLeftText, TurnText};
 
 #[derive(Component)]
 pub struct NextMoveButton;
@@ -17,7 +25,8 @@ pub struct BottomPanelPlugin;
 
 impl Plugin for BottomPanelPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_systems(Startup, setup_bottom_panel_buttons);
+        app.add_systems(Startup, setup_bottom_panel_buttons)
+            .add_systems(Update, handle_next_move_button_click);
     }
 }
 
@@ -89,4 +98,35 @@ fn setup_bottom_panel_buttons(mut commands: Commands) {
             setup_next_move_button(parent);
             setup_pass_move_button(parent);
         });
+}
+
+
+fn handle_next_move_button_click(
+    interaction_query: Query<&Interaction, (Changed<Interaction>, With<Button>, With<NextMoveButton>)>,
+    mut player_query: Query<(&Player, &mut Stats, &Turn)>,
+    mut player_number_text_query: Query<&mut Text, (With<TurnText>, Without<MovesLeftText>)>,
+    mut moves_left_text_query: Query<&mut Text, (With<MovesLeftText>, Without<TurnText>)>,
+    mut turn_query: ResMut<Turn>,
+) {
+    if let Err(_) = interaction_query.get_single() {
+        return;
+    }
+    let interaction = interaction_query.single();
+    let mut player_number = player_number_text_query.single_mut();
+    let mut moves_left = moves_left_text_query.single_mut();
+    let current_turn = turn_query.as_mut();
+    match *interaction {
+        Interaction::Pressed => {
+            *current_turn = current_turn.flip();
+            for (_, mut stats, turn) in player_query.iter_mut() {
+                if turn == current_turn {
+                    updates_moves_left_text(&mut moves_left, stats.moves_left);
+                    player_number.sections[0].value = current_turn.to_string();
+                } else {
+                    stats.moves_left -= 1;
+                }
+            }
+        }
+        _ => {}
+    }
 }
