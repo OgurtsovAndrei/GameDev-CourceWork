@@ -1,19 +1,21 @@
 use bevy::app::{Plugin, Startup, Update};
 use bevy::ecs::component::Component;
+use bevy::ecs::entity::Entity;
 use bevy::ecs::query::{Changed, With, Without};
-use bevy::ecs::system::{Query, ResMut};
+use bevy::ecs::system::Query;
 use bevy::hierarchy::{BuildChildren, ChildBuilder};
-use bevy::prelude::{AlignSelf, ButtonBundle, Color, Commands,
-    FlexDirection, JustifyContent, JustifySelf, NodeBundle, TextBundle, TextStyle, Val,
+use bevy::prelude::{
+    AlignSelf, ButtonBundle, Color, Commands, FlexDirection, JustifyContent, JustifySelf,
+    NodeBundle, TextBundle, TextStyle, Val,
 };
 use bevy::text::Text;
 use bevy::ui::widget::Button;
 use bevy::ui::Val::Px;
 use bevy::ui::{Interaction, Style, UiRect};
 
-use crate::world::player::{Player, Stats, Turn};
+use crate::world::player::{Movable, Player, Stats};
 
-use crate::ui::stats::{updates_moves_left_text, MovesLeftText, TurnText};
+use crate::ui::stats::{MovesLeftText, TurnText};
 
 #[derive(Component)]
 pub struct NextMoveButton;
@@ -29,7 +31,6 @@ impl Plugin for BottomPanelPlugin {
             .add_systems(Update, handle_finish_moves_in_round_button_click);
     }
 }
-
 
 fn setup_finish_moves_in_round_button(parent: &mut ChildBuilder) {
     parent
@@ -100,33 +101,27 @@ fn setup_bottom_panel_buttons(mut commands: Commands) {
         });
 }
 
-
-
 fn handle_finish_moves_in_round_button_click(
-    interaction_query: Query<&Interaction, (Changed<Interaction>, With<Button>, With<NextMoveButton>)>,
-    mut player_query: Query<(&Player, &mut Stats, &Turn)>,
+    mut commands: Commands,
+    interaction_query: Query<
+        &Interaction,
+        (Changed<Interaction>, With<Button>, With<NextMoveButton>),
+    >,
+    mut current_player_query: Query<(Entity, &mut Stats), (With<Player>, With<Movable>)>,
+    mut opposite_player_query: Query<(Entity, &mut Stats), (With<Player>, Without<Movable>)>,
     mut player_number_text_query: Query<&mut Text, (With<TurnText>, Without<MovesLeftText>)>,
     mut moves_left_text_query: Query<&mut Text, (With<MovesLeftText>, Without<TurnText>)>,
-    mut turn_query: ResMut<Turn>,
 ) {
     if let Err(_) = interaction_query.get_single() {
         return;
     }
     let interaction = interaction_query.single();
-    let mut player_number = player_number_text_query.single_mut();
-    let mut moves_left = moves_left_text_query.single_mut();
-    let current_turn = turn_query.as_mut();
+    let (current_id, current_stats) = current_player_query.single_mut();
+    let (opposite_id, opposite_stats) = opposite_player_query.single();
     match *interaction {
         Interaction::Pressed => {
-            *current_turn = current_turn.flip();
-            for (_, mut stats, turn) in player_query.iter_mut() {
-                if turn == current_turn {
-                    updates_moves_left_text(&mut moves_left, stats.moves_left);
-                    player_number.sections[0].value = current_turn.to_string();
-                } else {
-                    stats.moves_left = 0;
-                }
-            }
+            commands.entity(current_id).remove::<Movable>();
+            commands.entity(opposite_id).insert(Movable);
         }
         _ => {}
     }

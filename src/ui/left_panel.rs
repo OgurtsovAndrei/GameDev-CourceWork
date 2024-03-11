@@ -1,30 +1,21 @@
 use bevy::{
-    app::{Plugin, Startup, Update},
-    ecs::{
-        component::Component,
-        query::{Changed, With},
-        system::{Commands, Query, Res},
-    },
-    hierarchy::{BuildChildren, ChildBuilder},
-    render::color::Color,
-    text::{Text, TextStyle},
-    ui::{
+    app::{Plugin, Startup, Update}, ecs::{
+        component::Component, entity::Entity, query::{Changed, With, Without}, schedule::IntoSystemConfigs, system::{Commands, Query}
+    }, hierarchy::{BuildChildren, ChildBuilder}, log::info, render::color::Color, text::{Text, TextStyle}, ui::{
         node_bundles::{ButtonBundle, NodeBundle, TextBundle},
         widget::Button,
         AlignSelf, Interaction, JustifySelf, Style,
-    },
+    }
 };
 
-use crate::world::player::{Player, Stats, Turn};
-
-use crate::ui::stats::{self, MovesLeftText};
+use crate::{game_state::UpdateUI, world::player::{Movable, Player, Stats}};
 
 pub struct LeftPanelPlugin;
 
 impl Plugin for LeftPanelPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_systems(Startup, setup_buttons)
-                .add_systems(Update, handle_dbg_button_click);
+            .add_systems(Update, (handle_dbg_button_click).in_set(UpdateUI::Click));
     }
 }
 
@@ -50,25 +41,26 @@ fn add_debug_buttons(parent: &mut ChildBuilder) {
 }
 
 fn handle_dbg_button_click(
+    mut commands: Commands,
     interaction_query: Query<&Interaction, (Changed<Interaction>, With<Button>, With<DebugButton>)>,
-    mut player_query: Query<(&Player, &mut Stats, &Turn)>,
-    mut moves_left_text_query: Query<&mut Text, With<MovesLeftText>>,
-    turn_query: Res<Turn>
+    mut current_player_query: Query<(Entity, &mut Stats), (With<Player>, With<Movable>)>,
+    opposite_player_query: Query<Entity, (With<Player>, Without<Movable>)>,
 ) {
     if let Err(_) = interaction_query.get_single() {
-        return;
-    }
-    if let Err(_) = moves_left_text_query.get_single_mut() {
         return;
     }
 
     match interaction_query.single() {
         Interaction::Pressed => {
-            let (_, mut stats, _) = player_query.iter_mut().find(|(_, _, turn)| **turn == *turn_query).unwrap();
-            stats.moves_left-=1;
-            let mut text = moves_left_text_query.single_mut();
-            stats::updates_moves_left_text(&mut text, stats.moves_left);
-        },
+            let (cur_id, mut cur_stats) = current_player_query.single_mut();
+            let op_id = opposite_player_query.single();
+            cur_stats.moves_left -= 1;
+
+            info!("{:?} {:?}", cur_id, op_id);
+
+            commands.entity(cur_id).remove::<Movable>();
+            commands.entity(op_id).insert(Movable);
+        }
         _ => {}
     }
 }

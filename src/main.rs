@@ -3,11 +3,11 @@ use bevy::prelude::*;
 use bevy::DefaultPlugins;
 use bevy_mod_picking::DefaultPickingPlugins;
 
-use game_state::AppState;
+use game_state::{AppState, GameStatePlugin};
 use ui::bottom_panel::BottomPanelPlugin;
 use ui::left_panel::LeftPanelPlugin;
 use ui::stats::StatsPlugin;
-use world::player::{self, Turn};
+use world::player;
 use world::setup_world_grid::WorldPlugin;
 
 use crate::game_state::{change_game_phase, toggle_game, GamePhaseState};
@@ -34,7 +34,7 @@ pub fn main() {
         .add_plugins(BottomPanelPlugin)
         .add_plugins(LeftPanelPlugin)
         .add_plugins(WorldPlugin)
-        .insert_resource(Turn::First)
+        .add_plugins(GameStatePlugin)
         .add_systems(Startup, (
                 player::spawn_players,
                 space_ships::spawn_ship,

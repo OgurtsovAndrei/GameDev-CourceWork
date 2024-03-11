@@ -1,3 +1,5 @@
+use bevy::app::{Plugin, Update};
+use bevy::ecs::schedule::{IntoSystemSetConfigs, SystemSet};
 use bevy::input::Input;
 use bevy::prelude::{Commands, KeyCode, NextState, Res, State, States};
 
@@ -16,6 +18,23 @@ pub enum AppState {
     GamePhaseState,
     GameOver,
 }
+
+
+pub struct GameStatePlugin;
+
+impl Plugin for GameStatePlugin {
+    fn build(&self, app: &mut bevy::prelude::App) {
+        app.configure_sets(Update, (UpdateUI::Render, UpdateUI::Click).chain());
+    }
+}
+
+
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum UpdateUI {
+    Render,
+    Click,
+}
+
 
 pub fn toggle_game(
     mut commands: Commands,
