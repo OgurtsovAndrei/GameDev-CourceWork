@@ -12,7 +12,7 @@ use bevy::prelude::{
 use bevy::text::Text;
 
 use crate::game_state::UpdateUI;
-use crate::world::player::{Movable, Player, Stats, INITIAL_MOVES};
+use crate::world::player::{INITIAL_MOVES, Movable, Player, Stats};
 
 #[derive(Resource)]
 pub struct Round {

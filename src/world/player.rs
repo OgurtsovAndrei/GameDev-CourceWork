@@ -1,12 +1,12 @@
 use bevy::ecs::{
     bundle::Bundle,
     component::Component,
-    system::{Commands, Resource},
+    system::Commands,
 };
 
 pub const INITIAL_MOVES: i32 = 10;
 
-#[derive(Component)]
+#[derive(Debug, Component, Clone, Eq, Hash, PartialEq)]
 pub struct Player {
     pub id: i32,
 }

@@ -1,14 +1,15 @@
-use bevy::asset::{AssetServer, Assets};
-use bevy::input::mouse::MouseButtonInput;
+use bevy::asset::{Assets, AssetServer};
 use bevy::input::Input;
+use bevy::input::mouse::MouseButtonInput;
 use bevy::prelude::*;
 use bevy::text::{BreakLineOn, Text2dBounds};
 use bevy::utils::HashMap;
 use bevy::window::PrimaryWindow;
 use glam::{vec2, Vec2};
-use hexx::{shapes, Hex, HexLayout, HexOrientation};
+use hexx::{Hex, HexLayout, HexOrientation, shapes};
 
 use crate::space_ships::SpaceShip;
+use crate::world::resources::setup_resources;
 
 const HEX_SIZE: Vec2 = Vec2::splat(75.0);
 const FILE_GRID_HEIGHT_IN_FILE: usize = 1;
@@ -17,31 +18,12 @@ const GRID_WEIGHT_IN_FILE: usize = 6;
 const DEFAULT_COLOR: bevy::prelude::Color = Color::WHITE;
 const SELECTED_COLOR: bevy::prelude::Color = Color::RED;
 
-pub struct WorldPlugin;
-
-impl Plugin for WorldPlugin {
-    fn build(&self, app: &mut App) {
-        let mut hex = Hex { x: -1000, y: -1000 };
-        app.add_systems(Startup, (setup_camera, setup_grid))
-            .add_systems(
-                Update,
-                move |buttons: Res<Input<MouseButton>>,
-                      windows: Query<&Window, With<PrimaryWindow>>,
-                      cameras: Query<(&Camera, &GlobalTransform)>,
-                      grid: Res<HexGrid>,
-                      tiles: Query<&mut TextureAtlasSprite>| {
-                    handle_click_on_planet(buttons, windows, cameras, grid, tiles, &mut hex)
-                },
-            );
-    }
-}
-
 /// 3D Orthogrpahic camera setup
 pub(crate) fn setup_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
 
-#[derive(Debug, Resource)]
+#[derive(Debug, Component, Clone)]
 pub struct Planet {
     pub index_in_grid: usize,
     pub resource: u32,
@@ -105,18 +87,17 @@ pub(crate) fn setup_grid(
                 .with_children(|parent| {
                     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
                     parent.spawn(create_resource_text_bundle(font.clone(), planet.resource));
-                    parent.spawn(create_influence_text_bundle(font.clone(), planet.influence));
+                    parent.spawn(create_influence_text_bundle(font.clone(), planet.index_in_grid as u32));
                 })
                 .id();
             planets.insert(i, planet);
             (coord, entity)
         })
         .collect();
-    commands.insert_resource(HexGrid {
-        entities,
-        layout,
-        planets,
-    });
+
+    let grid = HexGrid { entities, layout, planets };
+    setup_resources(&mut commands, &grid);
+    commands.insert_resource(grid);
 }
 
 fn create_text_bundle(

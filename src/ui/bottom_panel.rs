@@ -15,6 +15,7 @@ use bevy::ui::{Interaction, Style};
 use crate::game_state::UpdateUI;
 use crate::world::player::{Movable, Player, Stats};
 
+use crate::ui::stats::{MovesLeftText, TurnText};
 
 #[derive(Component)]
 pub struct NextMoveButton;

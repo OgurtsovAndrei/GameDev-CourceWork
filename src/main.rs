@@ -1,6 +1,6 @@
 use bevy::app::{App, PluginGroup, Startup};
-use bevy::prelude::*;
 use bevy::DefaultPlugins;
+use bevy::prelude::*;
 use bevy_mod_picking::DefaultPickingPlugins;
 
 use game_state::{AppState, GameStatePlugin};
@@ -8,9 +8,9 @@ use ui::bottom_panel::BottomPanelPlugin;
 use ui::left_panel::LeftPanelPlugin;
 use ui::stats::StatsPlugin;
 use world::player;
-use world::setup_world_grid::WorldPlugin;
+use world::WorldPlugin;
 
-use crate::game_state::{change_game_phase, toggle_game, GamePhaseState};
+use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
 
 mod game_state;
 mod space_ships;
@@ -36,9 +36,9 @@ pub fn main() {
         .add_plugins(WorldPlugin)
         .add_plugins(GameStatePlugin)
         .add_systems(Startup, (
-                player::spawn_players,
-                space_ships::spawn_ship,
-            )
+            player::spawn_players,
+            space_ships::spawn_ship,
+        ),
         )
         .add_systems(Update, toggle_game)
         .add_systems(Update, change_game_phase)
