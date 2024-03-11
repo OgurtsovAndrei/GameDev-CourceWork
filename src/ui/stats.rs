@@ -1,8 +1,9 @@
 use bevy::app::{Plugin, Startup, Update};
 use bevy::ecs::component::Component;
-use bevy::ecs::query::With;
+use bevy::ecs::entity::Entity;
+use bevy::ecs::query::{With, Without};
 use bevy::ecs::schedule::IntoSystemConfigs;
-use bevy::ecs::system::Query;
+use bevy::ecs::system::{Query, ResMut, Resource};
 use bevy::hierarchy::{BuildChildren, ChildBuilder};
 use bevy::prelude::{
     AlignSelf, Color, Commands, FlexDirection, JustifyContent, JustifySelf, NodeBundle, Style,
@@ -12,6 +13,17 @@ use bevy::text::Text;
 
 use crate::game_state::UpdateUI;
 use crate::world::player::{Movable, Player, Stats, INITIAL_MOVES};
+
+#[derive(Resource)]
+pub struct Round {
+    pub number: i32,
+}
+
+impl Default for Round {
+    fn default() -> Self {
+        Round { number: 1 }
+    }
+}
 
 #[derive(Component)]
 pub struct TurnText;
@@ -26,8 +38,16 @@ pub struct StatsPlugin;
 
 impl Plugin for StatsPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_systems(Startup, setup_stats)
-            .add_systems(Update, (update_turn_text, update_moves_left_text).in_set(UpdateUI::Render));
+        app.insert_resource(Round::default())
+            .add_systems(Startup, setup_stats).add_systems(
+            Update,
+            (
+                update_round_number_text,
+                update_turn_text,
+                update_moves_left_text,
+            )
+                .in_set(UpdateUI::RenderText),
+        );
     }
 }
 
@@ -40,7 +60,7 @@ fn spawn_round_number(parent: &mut ChildBuilder) {
             color: Color::rgb(0.9, 0.9, 0.9),
         },
     );
-    update_round_number_text(&mut round_text.text, 1);
+    set_round_number_text(&mut round_text.text, 1);
     parent.spawn(round_text).insert(RoundText);
 }
 
@@ -53,7 +73,7 @@ fn spawn_player_turn(parent: &mut ChildBuilder) {
             color: Color::rgb(0.9, 0.9, 0.9),
         },
     );
-    update_player_turn_text(&mut player_turn_text.text, 1);
+    set_player_turn_text(&mut player_turn_text.text, 1);
 
     parent.spawn(player_turn_text).insert(TurnText);
 }
@@ -67,7 +87,7 @@ fn spawn_player_moves(parent: &mut ChildBuilder) {
             color: Color::rgb(0.9, 0.9, 0.9),
         },
     );
-    updates_moves_left_text(&mut moves_left_text.text, INITIAL_MOVES);
+    set_moves_left_text(&mut moves_left_text.text, INITIAL_MOVES);
     parent.spawn(moves_left_text).insert(MovesLeftText);
 }
 
@@ -96,7 +116,7 @@ fn update_turn_text(
 ) {
     let player = current_player_query.single();
     let mut turn_text = turn_text_query.single_mut();
-    update_player_turn_text(&mut turn_text, player.id);
+    set_player_turn_text(&mut turn_text, player.id);
 }
 
 fn update_moves_left_text(
@@ -105,17 +125,43 @@ fn update_moves_left_text(
 ) {
     let stats = current_player_query.single();
     let mut moves_left_text = moves_left_text_query.single_mut();
-    updates_moves_left_text(&mut moves_left_text, stats.moves_left);
+    set_moves_left_text(&mut moves_left_text, stats.moves_left);
 }
 
-pub fn update_round_number_text(text: &mut Text, value: i32) {
+fn update_round_number_text(
+    mut commands: Commands,
+    mut round_text_query: Query<&mut Text, With<RoundText>>,
+    mut current_player: Query<(Entity, &Player, &mut Stats), With<Movable>>,
+    mut opposite_player: Query<(Entity, &mut Stats), Without<Movable>>,
+    mut round_res: ResMut<Round>,
+) {
+    let mut round_text = round_text_query.single_mut();
+    let (cur_id, cur_player, mut cur_stats) = current_player.single_mut();
+    let (op_id, mut op_stats) = opposite_player.single_mut();
+    if cur_stats.moves_left == 0 && op_stats.moves_left == 0 {
+        let round = round_res.as_mut();
+        round.number += 1;
+        set_round_number_text(&mut round_text, round.number);
+        cur_stats.moves_left = INITIAL_MOVES;
+        op_stats.moves_left = INITIAL_MOVES;
+        commands.entity(cur_id).remove::<Movable>();
+        commands.entity(op_id).remove::<Movable>();
+        if cur_player.id == 1 {
+            commands.entity(cur_id).insert(Movable);
+        } else {
+            commands.entity(op_id).insert(Movable);
+        }
+    }
+}
+
+pub fn set_round_number_text(text: &mut Text, value: i32) {
     text.sections[0].value = format!("Round: {}", value.to_string());
 }
 
-pub fn updates_moves_left_text(text: &mut Text, value: i32) {
+pub fn set_moves_left_text(text: &mut Text, value: i32) {
     text.sections[0].value = format!("Moves left: {}", value.to_string());
 }
 
-pub fn update_player_turn_text(text: &mut Text, value: i32) {
+pub fn set_player_turn_text(text: &mut Text, value: i32) {
     text.sections[0].value = format!("Player: {}", value.to_string());
 }

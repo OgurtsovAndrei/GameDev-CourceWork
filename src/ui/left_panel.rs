@@ -1,7 +1,7 @@
 use bevy::{
     app::{Plugin, Startup, Update}, ecs::{
         component::Component, entity::Entity, query::{Changed, With, Without}, schedule::IntoSystemConfigs, system::{Commands, Query}
-    }, hierarchy::{BuildChildren, ChildBuilder}, log::info, render::color::Color, text::{Text, TextStyle}, ui::{
+    }, hierarchy::{BuildChildren, ChildBuilder}, log::info, render::color::Color, text::TextStyle, ui::{
         node_bundles::{ButtonBundle, NodeBundle, TextBundle},
         widget::Button,
         AlignSelf, Interaction, JustifySelf, Style,
@@ -15,7 +15,7 @@ pub struct LeftPanelPlugin;
 impl Plugin for LeftPanelPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_systems(Startup, setup_buttons)
-            .add_systems(Update, (handle_dbg_button_click).in_set(UpdateUI::Click));
+            .add_systems(Update, (handle_dbg_button_click).in_set(UpdateUI::UserInput));
     }
 }
 
