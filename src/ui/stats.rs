@@ -1,4 +1,3 @@
-
 use bevy::app::{Plugin, Startup};
 use bevy::ecs::component::Component;
 use bevy::hierarchy::{BuildChildren, ChildBuilder};
@@ -10,12 +9,14 @@ use bevy::text::Text;
 
 use crate::world::player::{Turn, INITIAL_MOVES};
 
-
 #[derive(Component)]
 pub struct TurnText;
 
 #[derive(Component)]
 pub struct MovesLeftText;
+
+#[derive(Component)]
+pub struct RoundText;
 
 pub struct StatsPlugin;
 
@@ -23,6 +24,19 @@ impl Plugin for StatsPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_systems(Startup, setup_stats);
     }
+}
+
+fn spawn_round_number(parent: &mut ChildBuilder) {
+    let mut round_text = TextBundle::from_section(
+        String::new(),
+        TextStyle {
+            font: Default::default(),
+            font_size: 40.0,
+            color: Color::rgb(0.9, 0.9, 0.9),
+        },
+    );
+    update_round_number_text(&mut round_text.text, 1);
+    parent.spawn(round_text).insert(RoundText);
 }
 
 fn spawn_player_move(parent: &mut ChildBuilder) {
@@ -62,8 +76,13 @@ fn setup_stats(mut commands: Commands) {
             ..Default::default()
         })
         .with_children(|parent| {
+            spawn_round_number(parent);
             spawn_player_move(parent);
         });
+}
+
+pub fn update_round_number_text(text: &mut Text, value: i32) {
+    text.sections[0].value = format!("Round: {}", value.to_string());
 }
 
 pub fn updates_moves_left_text(text: &mut Text, value: i32) {
