@@ -46,8 +46,10 @@ impl Plugin for StatsPlugin {
                 update_turn_text,
                 update_moves_left_text,
             )
-                .in_set(UpdateUI::RenderText),
-        );
+                .in_set(UpdateUI::RenderStats),
+        )
+            .add_systems(Update,
+                update_round_number_text.in_set(UpdateUI::NewRound));
     }
 }
 
@@ -142,10 +144,8 @@ fn update_round_number_text(
         let round = round_res.as_mut();
         round.number += 1;
         set_round_number_text(&mut round_text, round.number);
-        cur_stats.moves_left = INITIAL_MOVES;
-        op_stats.moves_left = INITIAL_MOVES;
-        commands.entity(cur_id).remove::<Movable>();
-        commands.entity(op_id).remove::<Movable>();
+        reset_player(&mut commands, cur_id, &mut cur_stats);
+        reset_player(&mut commands, op_id, &mut op_stats);
         if cur_player.id == 1 {
             commands.entity(cur_id).insert(Movable);
         } else {
@@ -154,14 +154,19 @@ fn update_round_number_text(
     }
 }
 
-pub fn set_round_number_text(text: &mut Text, value: i32) {
+fn reset_player(commands : &mut Commands, id : Entity, stats : &mut Stats) {
+    stats.moves_left = INITIAL_MOVES;
+    commands.entity(id).remove::<Movable>();
+}
+
+fn set_round_number_text(text: &mut Text, value: i32) {
     text.sections[0].value = format!("Round: {}", value.to_string());
 }
 
-pub fn set_moves_left_text(text: &mut Text, value: i32) {
+fn set_moves_left_text(text: &mut Text, value: i32) {
     text.sections[0].value = format!("Moves left: {}", value.to_string());
 }
 
-pub fn set_player_turn_text(text: &mut Text, value: i32) {
+fn set_player_turn_text(text: &mut Text, value: i32) {
     text.sections[0].value = format!("Player: {}", value.to_string());
 }

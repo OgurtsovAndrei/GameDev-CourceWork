@@ -2,7 +2,7 @@ use bevy::app::{Plugin, Update};
 use bevy::ecs::schedule::{apply_deferred, IntoSystemConfigs, IntoSystemSetConfigs, SystemSet};
 use bevy::input::Input;
 use bevy::prelude::{Commands, KeyCode, NextState, Res, State, States};
-use bevy::render::Render;
+
 
 #[derive(States, Debug, Copy, Clone, Eq, PartialEq, Hash, Default)]
 pub enum GamePhaseState {
@@ -25,15 +25,15 @@ pub struct GameStatePlugin;
 
 impl Plugin for GameStatePlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.configure_sets(Update, (UpdateUI::RenderText, UpdateUI::UserInput).chain())
-            .add_systems(Update, apply_deferred.after(UpdateUI::RenderText).before(UpdateUI::UserInput));
+        app.configure_sets(Update, (UpdateUI::NewRound, UpdateUI::RenderStats, UpdateUI::UserInput).chain());
     }
 }
 
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum UpdateUI {
-    RenderText,
+    NewRound,
+    RenderStats,
     UserInput,
 }
 
