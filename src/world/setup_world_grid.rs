@@ -9,6 +9,7 @@ use glam::{vec2, Vec2};
 use hexx::{Hex, HexLayout, HexOrientation, shapes};
 
 use crate::space_ships::SpaceShip;
+use crate::world::player::Player;
 use crate::world::resources::setup_resources;
 
 const HEX_SIZE: Vec2 = Vec2::splat(75.0);
@@ -28,6 +29,38 @@ pub struct Planet {
     pub index_in_grid: usize,
     pub resource: u32,
     pub influence: u32,
+    pub owner: Player,
+    pub owner_army: Vec<SpaceShip>,
+}
+
+impl Planet {
+    pub(crate) fn new(
+        index_in_grid: usize,
+        resource: u32,
+        influence: u32,
+        owner: Player,
+        owner_army: Vec<SpaceShip>) -> Self {
+        Self {
+            index_in_grid,
+            resource,
+            influence,
+            owner,
+            owner_army,
+        }
+    }
+
+    pub(crate) fn default(
+        index_in_grid: usize,
+        resource: u32,
+        influence: u32) -> Self {
+        Self {
+            index_in_grid,
+            resource,
+            influence,
+            owner: Player { id: -1 },
+            owner_army: vec![],
+        }
+    }
 }
 
 #[derive(Debug, Resource)]
@@ -66,11 +99,7 @@ pub(crate) fn setup_grid(
         .map(|(i, coord)| {
             let pos = layout.hex_to_world_pos(coord);
             let index = i % (FILE_GRID_HEIGHT_IN_FILE * GRID_WEIGHT_IN_FILE);
-            let planet = Planet {
-                index_in_grid: i,
-                resource: (index + 1) as u32,
-                influence: (5 - index) as u32,
-            };
+            let planet = Planet::default(i, (index + 1) as u32, (5 - index) as u32);
 
             let entity = commands
                 .spawn(SpriteSheetBundle {

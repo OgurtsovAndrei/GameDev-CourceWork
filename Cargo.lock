@@ -11,6 +11,7 @@ dependencies = [
  "bevy_mod_picking",
  "glam",
  "hexx 0.14.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "once_cell",
  "rand",
  "serde",
 ]
