@@ -1,9 +1,8 @@
 use bevy::app::{Plugin, Startup, Update};
 use bevy::ecs::component::Component;
-use bevy::ecs::entity::Entity;
-use bevy::ecs::query::{Changed, With, Without};
+use bevy::ecs::query::{Changed, With};
 use bevy::ecs::schedule::IntoSystemConfigs;
-use bevy::ecs::system::Query;
+use bevy::ecs::system::{Query, ResMut};
 use bevy::hierarchy::{BuildChildren, ChildBuilder};
 use bevy::prelude::{
     AlignSelf, ButtonBundle, Color, Commands, FlexDirection, JustifyContent, JustifySelf,
@@ -14,8 +13,9 @@ use bevy::ui::{Interaction, Style};
 
 use crate::game_state::UpdateUI;
 use crate::world::player::{Movable, Player, Stats};
-
 use crate::ui::stats::{MovesLeftText, TurnText};
+use crate::world::turn::TurnDone;
+
 
 #[derive(Component)]
 pub struct NextMoveButton;
@@ -28,7 +28,10 @@ pub struct BottomPanelPlugin;
 impl Plugin for BottomPanelPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_systems(Startup, setup_bottom_panel_buttons)
-            .add_systems(Update, (handle_finish_moves_in_round_button_click).in_set(UpdateUI::UserInput));
+            .add_systems(
+                Update,
+                (handle_finish_moves_in_round_button_click).in_set(UpdateUI::UserInput),
+            );
     }
 }
 
@@ -71,25 +74,22 @@ fn setup_bottom_panel_buttons(mut commands: Commands) {
 }
 
 fn handle_finish_moves_in_round_button_click(
-    mut commands: Commands,
     interaction_query: Query<
         &Interaction,
         (Changed<Interaction>, With<Button>, With<NextMoveButton>),
     >,
-    mut current_player_query: Query<(Entity, &mut Stats), (With<Player>, With<Movable>)>,
-    opposite_player_query: Query<Entity, (With<Player>, Without<Movable>)>,
+    mut current_player_query: Query<&mut Stats, (With<Player>, With<Movable>)>,
+    mut turn_done_res: ResMut<TurnDone>,
 ) {
     if let Err(_) = interaction_query.get_single() {
         return;
     }
     let interaction = interaction_query.single();
-    let (current_id, mut current_stats) = current_player_query.single_mut();
-    let opposite_id = opposite_player_query.single();
+    let mut current_stats = current_player_query.single_mut();
     match *interaction {
         Interaction::Pressed => {
             current_stats.moves_left = 0;
-            commands.entity(current_id).remove::<Movable>();
-            commands.entity(opposite_id).insert(Movable);
+            turn_done_res.as_mut().value = true;
         }
         _ => {}
     }

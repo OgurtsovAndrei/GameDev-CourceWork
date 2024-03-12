@@ -1,6 +1,6 @@
 use bevy::{
     app::{Plugin, Startup, Update}, ecs::{
-        component::Component, entity::Entity, query::{Changed, With, Without}, schedule::IntoSystemConfigs, system::{Commands, Query}
+        component::Component, entity::Entity, query::{Changed, With, Without}, schedule::IntoSystemConfigs, system::{Commands, Query, ResMut}
     }, hierarchy::{BuildChildren, ChildBuilder}, log::info, render::color::Color, text::TextStyle, ui::{
         node_bundles::{ButtonBundle, NodeBundle, TextBundle},
         widget::Button,
@@ -8,7 +8,7 @@ use bevy::{
     }
 };
 
-use crate::{game_state::UpdateUI, world::player::{Movable, Player, Stats}};
+use crate::{game_state::UpdateUI, world::{player::{Movable, Player, Stats}, turn::TurnDone}};
 
 pub struct LeftPanelPlugin;
 
@@ -41,10 +41,9 @@ fn add_debug_buttons(parent: &mut ChildBuilder) {
 }
 
 fn handle_dbg_button_click(
-    mut commands: Commands,
     interaction_query: Query<&Interaction, (Changed<Interaction>, With<Button>, With<DebugButton>)>,
-    mut current_player_query: Query<(Entity, &mut Stats), (With<Player>, With<Movable>)>,
-    opposite_player_query: Query<Entity, (With<Player>, Without<Movable>)>,
+    mut current_player_query: Query<&mut Stats, (With<Player>, With<Movable>)>,
+    mut turn_done_res : ResMut<TurnDone>
 ) {
     if let Err(_) = interaction_query.get_single() {
         return;
@@ -52,14 +51,10 @@ fn handle_dbg_button_click(
 
     match interaction_query.single() {
         Interaction::Pressed => {
-            let (cur_id, mut cur_stats) = current_player_query.single_mut();
-            let op_id = opposite_player_query.single();
+            let mut cur_stats = current_player_query.single_mut();
             cur_stats.moves_left -= 1;
-
-            info!("{:?} {:?}", cur_id, op_id);
-
-            commands.entity(cur_id).remove::<Movable>();
-            commands.entity(op_id).insert(Movable);
+            let f = turn_done_res.as_mut();
+            f.value = true;
         }
         _ => {}
     }

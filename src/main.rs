@@ -9,6 +9,8 @@ use ui::left_panel::LeftPanelPlugin;
 use ui::stats::StatsPlugin;
 use world::player;
 use world::WorldPlugin;
+use world::setup_world_grid::WorldPlugin;
+use world::turn::TurnPlugin;
 
 use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
 
@@ -35,6 +37,7 @@ pub fn main() {
         .add_plugins(LeftPanelPlugin)
         .add_plugins(WorldPlugin)
         .add_plugins(GameStatePlugin)
+        .add_plugins(TurnPlugin)
         .add_systems(Startup, (
             player::spawn_players,
             space_ships::spawn_ship,

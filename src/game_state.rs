@@ -3,7 +3,6 @@ use bevy::ecs::schedule::{apply_deferred, IntoSystemConfigs, IntoSystemSetConfig
 use bevy::input::Input;
 use bevy::prelude::{Commands, KeyCode, NextState, Res, State, States};
 
-
 #[derive(States, Debug, Copy, Clone, Eq, PartialEq, Hash, Default)]
 pub enum GamePhaseState {
     #[default]
@@ -20,23 +19,36 @@ pub enum AppState {
     GameOver,
 }
 
-
 pub struct GameStatePlugin;
 
 impl Plugin for GameStatePlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.configure_sets(Update, (UpdateUI::NewRound, UpdateUI::RenderStats, UpdateUI::UserInput).chain());
+        app.configure_sets(
+            Update,
+            (
+                UpdateUI::NewRound,
+                UpdateUI::RenderStats,
+                UpdateUI::UserInput,
+                UpdateUI::FlipTurn,
+            )
+                .chain(),
+        )
+        .add_systems(
+            Update,
+            apply_deferred
+                .after(UpdateUI::NewRound)
+                .before(UpdateUI::RenderStats),
+        );
     }
 }
-
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum UpdateUI {
     NewRound,
     RenderStats,
     UserInput,
+    FlipTurn,
 }
-
 
 pub fn toggle_game(
     mut commands: Commands,

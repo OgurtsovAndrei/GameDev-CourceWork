@@ -10,6 +10,7 @@ pub mod navigations_systems;
 pub mod player;
 pub mod setup_world_grid;
 pub mod resources;
+pub mod turn;
 
 pub struct WorldPlugin;
 
@@ -30,4 +31,3 @@ impl Plugin for WorldPlugin {
             );
     }
 }
-

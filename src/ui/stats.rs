@@ -133,24 +133,21 @@ fn update_moves_left_text(
 fn update_round_number_text(
     mut commands: Commands,
     mut round_text_query: Query<&mut Text, With<RoundText>>,
-    mut current_player: Query<(Entity, &Player, &mut Stats), With<Movable>>,
-    mut opposite_player: Query<(Entity, &mut Stats), Without<Movable>>,
+    mut players: Query<(Entity, &Player, &mut Stats)>,
     mut round_res: ResMut<Round>,
 ) {
     let mut round_text = round_text_query.single_mut();
-    let (cur_id, cur_player, mut cur_stats) = current_player.single_mut();
-    let (op_id, mut op_stats) = opposite_player.single_mut();
-    if cur_stats.moves_left == 0 && op_stats.moves_left == 0 {
+
+    if players.iter().all(|(_, _, stats)| stats.moves_left == 0) {
         let round = round_res.as_mut();
         round.number += 1;
         set_round_number_text(&mut round_text, round.number);
-        reset_player(&mut commands, cur_id, &mut cur_stats);
-        reset_player(&mut commands, op_id, &mut op_stats);
-        if cur_player.id == 1 {
-            commands.entity(cur_id).insert(Movable);
-        } else {
-            commands.entity(op_id).insert(Movable);
-        }
+        players.iter_mut().for_each(|(entity, player, mut stats)| {
+            reset_player(&mut commands, entity, &mut stats);
+            if player.id == 1 {
+                commands.entity(entity).insert(Movable);
+            }
+        })
     }
 }
 
