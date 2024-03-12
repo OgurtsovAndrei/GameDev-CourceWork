@@ -9,7 +9,6 @@ use ui::left_panel::LeftPanelPlugin;
 use ui::stats::StatsPlugin;
 use world::player;
 use world::WorldPlugin;
-use world::setup_world_grid::WorldPlugin;
 use world::turn::TurnPlugin;
 
 use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
