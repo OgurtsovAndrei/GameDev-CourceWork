@@ -6,7 +6,7 @@ use bevy::ecs::{
 
 pub const INITIAL_MOVES: i32 = 10;
 
-#[derive(Debug, Component, Clone, Eq, Hash, PartialEq)]
+#[derive(Debug, Component, Copy, Clone, Eq, Hash, PartialEq)]
 pub struct Player {
     pub id: i32,
 }
