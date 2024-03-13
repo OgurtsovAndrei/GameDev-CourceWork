@@ -19,10 +19,12 @@ struct GameResources {
 
 pub fn update_planet_owners(grid: Res<HexGrid>, mut game_resources: ResMut<GameResources>) {
     let res = &mut game_resources.resources;
-    for (player, player_res) in res { player_res.planets.clear() }
+    for (player, player_res) in res.iter_mut() { player_res.planets.clear() }
     let planets = &grid.planets;
     for (id_in_grid, planet) in planets {
-        res[planet.owner]
+        let current_owner = planet.owner.clone();
+        let player_resource = res.get_mut(&current_owner).unwrap();
+        player_resource.planets.insert(id_in_grid.clone(), planet.clone());
     }
 }
 
