@@ -8,10 +8,11 @@ use ui::bottom_panel::BottomPanelPlugin;
 use ui::left_panel::LeftPanelPlugin;
 use ui::stats::StatsPlugin;
 use world::player;
-use world::WorldPlugin;
 use world::turn::TurnPlugin;
+use world::WorldPlugin;
 
 use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
+use crate::ui::hud::HudPlugin;
 
 mod game_state;
 mod space_ships;
@@ -33,6 +34,7 @@ pub fn main() {
         .add_plugins(DefaultPickingPlugins)
         .add_plugins(StatsPlugin)
         .add_plugins(BottomPanelPlugin)
+        .add_plugins(HudPlugin)
         .add_plugins(LeftPanelPlugin)
         .add_plugins(WorldPlugin)
         .add_plugins(GameStatePlugin)

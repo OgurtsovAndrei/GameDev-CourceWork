@@ -1,7 +1,7 @@
 use bevy::app::{Plugin, Startup, Update};
 use bevy::ecs::component::Component;
 use bevy::ecs::entity::Entity;
-use bevy::ecs::query::{With, Without};
+use bevy::ecs::query::With;
 use bevy::ecs::schedule::IntoSystemConfigs;
 use bevy::ecs::system::{Query, ResMut, Resource};
 use bevy::hierarchy::{BuildChildren, ChildBuilder};
@@ -13,6 +13,7 @@ use bevy::text::Text;
 
 use crate::game_state::UpdateUI;
 use crate::world::player::{INITIAL_MOVES, Movable, Player, Stats};
+use crate::world::resources::{GameResources, update_resources};
 
 #[derive(Resource)]
 pub struct Round {
@@ -49,7 +50,7 @@ impl Plugin for StatsPlugin {
                 .in_set(UpdateUI::RenderStats),
         )
             .add_systems(Update,
-                update_round_number_text.in_set(UpdateUI::NewRound));
+                         update_round_number_text.in_set(UpdateUI::NewRound));
     }
 }
 
@@ -135,6 +136,7 @@ fn update_round_number_text(
     mut round_text_query: Query<&mut Text, With<RoundText>>,
     mut players: Query<(Entity, &Player, &mut Stats)>,
     mut round_res: ResMut<Round>,
+    game_resources: ResMut<GameResources>,
 ) {
     let mut round_text = round_text_query.single_mut();
 
@@ -147,11 +149,12 @@ fn update_round_number_text(
             if player.id == 1 {
                 commands.entity(entity).insert(Movable);
             }
-        })
+        });
+        update_resources(game_resources);
     }
 }
 
-fn reset_player(commands : &mut Commands, id : Entity, stats : &mut Stats) {
+fn reset_player(commands: &mut Commands, id: Entity, stats: &mut Stats) {
     stats.moves_left = INITIAL_MOVES;
     commands.entity(id).remove::<Movable>();
 }
