@@ -203,6 +203,8 @@ pub(crate) struct SelectedHex {
     is_selected: bool,
 }
 
+pub fn clear_selected(mut prev_pos: ResMut<SelectedHex>) { prev_pos.is_selected = false }
+
 pub(crate) fn register_selected_hex(mut commands: Commands) {
     let hex = SelectedHex { hex: Hex::ZERO, is_selected: false };
     commands.insert_resource(hex);

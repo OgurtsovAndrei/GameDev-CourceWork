@@ -1,21 +1,31 @@
 use bevy::{
     app::{Plugin, Startup, Update}, ecs::{
-        component::Component, entity::Entity, query::{Changed, With, Without}, schedule::IntoSystemConfigs, system::{Commands, Query, ResMut}
+        component::Component, entity::Entity, query::{Changed, With, Without}, schedule::IntoSystemConfigs, system::{Commands, Query, ResMut},
     }, hierarchy::{BuildChildren, ChildBuilder}, log::info, render::color::Color, text::TextStyle, ui::{
-        node_bundles::{ButtonBundle, NodeBundle, TextBundle},
-        widget::Button,
-        AlignSelf, Interaction, JustifySelf, Style,
-    }
+        AlignSelf,
+        Interaction,
+        JustifySelf, node_bundles::{ButtonBundle, NodeBundle, TextBundle}, Style, widget::Button,
+    },
 };
+use bevy::prelude::{NextState, OnEnter, Res, State, States};
 
 use crate::{game_state::UpdateUI, world::{player::{Movable, Player, Stats}, turn::TurnDone}};
+use crate::ui::left_panel::TurnSwitchedState::{OnDefaultState, OnTurnSwitched};
+use crate::world::setup_world_grid::clear_selected;
 
 pub struct LeftPanelPlugin;
 
 impl Plugin for LeftPanelPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_systems(Startup, setup_buttons)
-            .add_systems(Update, (handle_dbg_button_click).in_set(UpdateUI::UserInput));
+            .add_systems(Update, (handle_dbg_button_click).in_set(UpdateUI::UserInput))
+            .add_state::<TurnSwitchedState>()
+            .add_systems(Update, (reset_turn_switched))
+            .add_systems(OnEnter(TurnSwitchedState::OnTurnSwitched), (
+                clear_selected,
+                crate::world::actions::clear_action_state,
+            ))
+        ;
     }
 }
 
@@ -40,10 +50,27 @@ fn add_debug_buttons(parent: &mut ChildBuilder) {
         });
 }
 
+#[derive(States, Debug, Clone, Copy, Eq, PartialEq, Hash, Default)]
+pub(crate) enum TurnSwitchedState {
+    #[default]
+    OnDefaultState,
+    OnTurnSwitched,
+}
+
+pub fn reset_turn_switched(current_state: Res<State<TurnSwitchedState>>, mut commands: Commands) {
+    match current_state.get() {
+        OnTurnSwitched => {
+            commands.insert_resource(NextState(Some(OnDefaultState)))
+        }
+        _OnDefaultState => {}
+    }
+}
+
 fn handle_dbg_button_click(
     interaction_query: Query<&Interaction, (Changed<Interaction>, With<Button>, With<DebugButton>)>,
     mut current_player_query: Query<&mut Stats, (With<Player>, With<Movable>)>,
-    mut turn_done_res : ResMut<TurnDone>
+    mut turn_done_res: ResMut<TurnDone>,
+    mut commands: Commands,
 ) {
     if let Err(_) = interaction_query.get_single() {
         return;
@@ -55,6 +82,7 @@ fn handle_dbg_button_click(
             cur_stats.moves_left -= 1;
             let f = turn_done_res.as_mut();
             f.value = true;
+            commands.insert_resource(NextState(Some(OnTurnSwitched)))
         }
         _ => {}
     }

@@ -1,5 +1,5 @@
 use bevy::{
-    app::{Plugin, Startup, Update},
+    app::{Plugin, Update},
     ecs::{
         entity::Entity,
         query::{With, Without},
@@ -49,11 +49,10 @@ fn determine_turn(
         if op_stats.moves_left > 0 {
             commands.entity(cur_id).remove::<Movable>();
             commands.entity(op_id).insert(Movable);
-        } else if op_stats.moves_left == 0 && cur_stats.moves_left > 0 {
-        } else if cur_stats.moves_left == 0 && cur_stats.moves_left == 0 {
+        } else if op_stats.moves_left == 0 && cur_stats.moves_left > 0 {} else if cur_stats.moves_left == 0 && cur_stats.moves_left == 0 {
             commands.entity(cur_id).remove::<Movable>();
         } else {
             panic!("Should never happen");
         }
-     }
+    }
 }
