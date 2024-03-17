@@ -219,17 +219,18 @@ pub(crate) fn handle_click_on_planet(
         }
 
         if *prev_pos == cur_pos {
-            set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR);
+            let Some(cur_entity) = grid.entities.get(&cur_pos).copied() else { return; };
+            let Ok(mut cur_sprite) = tiles.get_mut(cur_entity) else { return; };
+            if cur_sprite.color == DEFAULT_COLOR { cur_sprite.color = SELECTED_COLOR } else { set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR); }
         } else {
-            set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
-
             let prv_pos_copy = prev_pos.clone();
             *prev_pos = cur_pos;
-
-            set_color_to_hex(&grid, &mut tiles, &prv_pos_copy, &DEFAULT_COLOR)
+            set_color_to_hex(&grid, &mut tiles, &prv_pos_copy, &DEFAULT_COLOR);
+            set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
         }
     }
 }
+
 
 fn set_color_to_hex(
     grid: &Res<HexGrid>,
