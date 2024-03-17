@@ -4,17 +4,13 @@ use bevy::ecs::query::{Changed, With};
 use bevy::ecs::schedule::IntoSystemConfigs;
 use bevy::ecs::system::{Query, ResMut};
 use bevy::hierarchy::{BuildChildren, ChildBuilder};
-use bevy::prelude::{
-    AlignSelf, ButtonBundle, Color, Commands, FlexDirection, JustifyContent, JustifySelf,
-    NodeBundle, TextBundle, TextStyle,
-};
+use bevy::prelude::{AlignSelf, ButtonBundle, Color, Commands, FlexDirection, JustifyContent, JustifySelf, NextState, NodeBundle, TextBundle, TextStyle};
 use bevy::ui::widget::Button;
 use bevy::ui::{Interaction, Style};
 
 use crate::game_state::UpdateUI;
+use crate::ui::left_panel::TurnSwitchedState;
 use crate::world::player::{Movable, Player, Stats};
-use crate::ui::stats::{MovesLeftText, TurnText};
-use crate::world::turn::TurnDone;
 
 
 #[derive(Component)]
@@ -79,7 +75,7 @@ fn handle_finish_moves_in_round_button_click(
         (Changed<Interaction>, With<Button>, With<NextMoveButton>),
     >,
     mut current_player_query: Query<&mut Stats, (With<Player>, With<Movable>)>,
-    mut turn_done_res: ResMut<TurnDone>,
+    mut move_done_state: ResMut<NextState<TurnSwitchedState>>
 ) {
     if let Err(_) = interaction_query.get_single() {
         return;
@@ -89,7 +85,7 @@ fn handle_finish_moves_in_round_button_click(
     match *interaction {
         Interaction::Pressed => {
             current_stats.moves_left = 0;
-            turn_done_res.as_mut().value = true;
+            move_done_state.set(TurnSwitchedState::OnTurnSwitched)
         }
         _ => {}
     }

@@ -1,7 +1,8 @@
 use bevy::app::{Plugin, Update};
 use bevy::ecs::schedule::{apply_deferred, IntoSystemConfigs, IntoSystemSetConfigs, SystemSet};
 use bevy::input::Input;
-use bevy::prelude::{Commands, KeyCode, NextState, Res, State, States};
+use bevy::prelude::{apply_state_transition, Commands, KeyCode, NextState, Res, State, States};
+use crate::ui::left_panel::TurnSwitchedState;
 
 #[derive(States, Debug, Copy, Clone, Eq, PartialEq, Hash, Default)]
 pub enum GamePhaseState {
@@ -33,12 +34,18 @@ impl Plugin for GameStatePlugin {
             )
                 .chain(),
         )
-        .add_systems(
-            Update,
-            apply_deferred
-                .after(UpdateUI::NewRound)
-                .before(UpdateUI::RenderStats),
-        );
+            .add_systems(
+                Update,
+                apply_deferred
+                    .after(UpdateUI::NewRound)
+                    .before(UpdateUI::RenderStats),
+            )
+            .add_systems(
+                Update,
+                (apply_state_transition::<TurnSwitchedState>)
+                    .after(UpdateUI::UserInput)
+                    .before(UpdateUI::FlipTurn)
+            );
     }
 }
 
