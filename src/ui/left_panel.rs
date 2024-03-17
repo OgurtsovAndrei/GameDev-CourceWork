@@ -8,7 +8,9 @@ use bevy::{
     },
 };
 use bevy::prelude::{NextState, OnEnter, Res, State, States};
-use bevy::utils::info;
+use bevy::ui::{AlignContent, UiRect};
+use bevy::ui::Val::Px;
+use bevy::utils::{default, info};
 
 use crate::{game_state::UpdateUI, world::{player::{Movable, Player, Stats}}};
 use crate::game_state::UpdateUI::FlipTurn;
@@ -23,8 +25,8 @@ impl Plugin for LeftPanelPlugin {
             .add_state::<TurnSwitchedState>()
             .add_systems(Update, handle_dbg_button_click.in_set(UpdateUI::UserInput))
             .add_systems(OnEnter(OnTurnSwitched),
-                (clear_selected,
-                crate::world::actions::clear_action_state).in_set(FlipTurn)
+                         (clear_selected,
+                          crate::world::actions::clear_action_state).in_set(FlipTurn),
             )
         ;
     }
@@ -33,9 +35,41 @@ impl Plugin for LeftPanelPlugin {
 #[derive(Component)]
 struct DebugButton;
 
-fn add_debug_buttons(parent: &mut ChildBuilder) {
+#[derive(Component)]
+struct MoveButton;
+
+fn add_debug_button(parent: &mut ChildBuilder) {
     parent
         .spawn(ButtonBundle {
+            style: Style {
+                margin: UiRect {
+                    bottom: Px(30.0),
+                    ..default()
+                },
+                ..default()
+            },
+            ..Default::default()
+        })
+        .insert(MoveButton)
+        .with_children(|parent| {
+            parent.spawn(TextBundle::from_section(
+                "Move army to planet",
+                TextStyle {
+                    font: Default::default(),
+                    font_size: 40.0,
+                    color: Color::BLACK,
+                },
+            ));
+        });
+}
+
+fn add_move_button(parent: &mut ChildBuilder) {
+    parent
+        .spawn(ButtonBundle {
+            style: Style {
+                align_self: AlignSelf::Center,
+                ..default()
+            },
             ..Default::default()
         })
         .insert(DebugButton)
@@ -70,7 +104,7 @@ pub fn reset_turn_switched(current_state: Res<State<TurnSwitchedState>>, mut com
 fn handle_dbg_button_click(
     interaction_query: Query<&Interaction, (Changed<Interaction>, With<Button>, With<DebugButton>)>,
     mut current_player_query: Query<&mut Stats, (With<Player>, With<Movable>)>,
-    mut turn_switched_state: ResMut<NextState<TurnSwitchedState>>
+    mut turn_switched_state: ResMut<NextState<TurnSwitchedState>>,
 ) {
     if let Err(_) = interaction_query.get_single() {
         return;
@@ -99,7 +133,8 @@ fn setup_buttons(mut commands: Commands) {
         })
         .with_children(|parent| {
             if cfg!(debug_assertions) {
-                add_debug_buttons(parent);
+                add_debug_button(parent);
+                add_move_button(parent)
             }
         });
 }
