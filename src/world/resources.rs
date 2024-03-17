@@ -2,14 +2,16 @@ use std::fmt::Write;
 
 use bevy::prelude::*;
 use bevy::utils::HashMap;
+use hexx::Hex;
 
+use crate::space_ships::SpaceShip;
 use crate::world::player::Player;
 use crate::world::setup_world_grid::{HexGrid, Planet};
 
 #[derive(Debug, Clone)]
 struct PlayerResources {
     pub player: Player,
-    pub planets: HashMap<usize, Planet>,
+    pub planets: HashMap<Hex, Planet>,
     pub influence: u32,
     pub resources: u32,
 }
@@ -31,7 +33,7 @@ impl GameResources {
 
 pub fn update_planet_owners(grid: Res<HexGrid>, mut game_resources: ResMut<GameResources>) {
     let res = &mut game_resources.resources;
-    for (player, player_res) in res.iter_mut() { player_res.planets.clear() }
+    for (_player, player_res) in res.iter_mut() { player_res.planets.clear() }
     let planets = &grid.planets;
     for (id_in_grid, planet) in planets {
         let current_owner = planet.owner.clone();
@@ -42,9 +44,9 @@ pub fn update_planet_owners(grid: Res<HexGrid>, mut game_resources: ResMut<GameR
 
 pub fn update_resources(mut game_resources: ResMut<GameResources>) {
     let res = &mut game_resources.resources;
-    for (id, x) in res.iter_mut() {
+    for (_id, x) in res.iter_mut() {
         let planets = &x.planets;
-        for (ind, planet) in planets {
+        for (_ind, planet) in planets {
             x.resources += planet.resource;
             x.influence += planet.influence;
         }
@@ -54,12 +56,18 @@ pub fn update_resources(mut game_resources: ResMut<GameResources>) {
 const INITIAL_RESOURCES: u32 = 10;
 const INITIAL_INFLUENCE: u32 = 5;
 
-pub fn setup_resources(mut commands: &mut Commands, grid: &HexGrid) {
-    let planets = &grid.planets;
+pub fn setup_resources(mut commands: &mut Commands, grid: &mut HexGrid) {
+    let planets = &mut grid.planets;
     let player1 = Player { id: 1 };
-    let player1_planets: HashMap<usize, Planet> = HashMap::from([(0usize, planets[&0usize].clone())]);
+    let player1_home_hex = Hex { x: -2, y: 2 };
+    let player2_home_hex = Hex { x: 2, y: -2 };
+    let mut planet = planets.remove(&player1_home_hex).unwrap();
+    planet.owner_army.push(SpaceShip);
+    planets.insert(player1_home_hex.clone(), planet);
+
+    let player1_planets: HashMap<Hex, Planet> = HashMap::from([(player1_home_hex.clone(), planets[&player1_home_hex].clone())]);
     let player2 = Player { id: 2 };
-    let player2_planets: HashMap<usize, Planet> = HashMap::from([(20usize, planets[&18usize].clone())]);
+    let player2_planets: HashMap<Hex, Planet> = HashMap::from([(player2_home_hex.clone(), planets[&player2_home_hex].clone())]);
     let player1_res = PlayerResources { player: player1.clone(), planets: player1_planets, influence: INITIAL_INFLUENCE, resources: INITIAL_RESOURCES };
     let player2_res = PlayerResources { player: player2.clone(), planets: player2_planets, influence: INITIAL_INFLUENCE, resources: INITIAL_RESOURCES };
     let mut resources = HashMap::new();

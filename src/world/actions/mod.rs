@@ -1,5 +1,9 @@
 use bevy::prelude::*;
 
+use crate::world::actions::spawn_menu::systems::interactions::interact_with_end_spawn_button;
+
+pub(crate) mod spawn_menu;
+
 pub(crate) struct ActionsPlugin;
 
 impl Plugin for ActionsPlugin {
@@ -7,8 +11,11 @@ impl Plugin for ActionsPlugin {
         app
             .add_state::<ActionsState>()
             .add_systems(Update, (change_action_state))
-            .add_systems(OnEnter(ActionsState::SpawningSpaceShips), spawn_spawning_space_ships_window)
-            .add_systems(OnExit(ActionsState::SpawningSpaceShips), despawn_spawning_space_ships_window)
+            .add_systems(OnEnter(ActionsState::SpawningSpaceShips), spawn_menu::spawn_spawning_space_ships_window)
+            .add_systems(Update, (
+                interact_with_end_spawn_button,
+            ).run_if(in_state(ActionsState::SpawningSpaceShips)))
+            .add_systems(OnExit(ActionsState::SpawningSpaceShips), spawn_menu::despawn_spawning_space_ships_window)
         ;
     }
 }
@@ -22,17 +29,8 @@ pub(crate) enum ActionsState {
     MovingSpaceShips,
 }
 
-
 pub fn clear_action_state(mut commands: Commands) {
     commands.insert_resource(NextState(Some(ActionsState::NoActionRunning)))
-}
-
-pub fn spawn_spawning_space_ships_window() {
-    println!("SPAWN")
-}
-
-pub fn despawn_spawning_space_ships_window() {
-    println!("DESPAWN")
 }
 
 pub fn change_action_state(

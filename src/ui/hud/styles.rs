@@ -12,6 +12,20 @@ pub fn get_hud_style() -> Style {
     }
 }
 
+pub fn get_rhs_hud_style() -> Style {
+    Style {
+        display: Display::Flex,
+        flex_direction: FlexDirection::Row,
+        justify_self: JustifySelf::End,
+        align_self: AlignSelf::Start,
+        width: Val::Percent(35.),
+        justify_content: JustifyContent::SpaceBetween,
+        align_items: AlignItems::Center,
+        ..Style::DEFAULT
+    }
+}
+
+
 pub fn get_lhs_style() -> Style {
     Style {
         display: Display::Flex,
@@ -29,6 +43,7 @@ pub fn get_rhs_style() -> Style {
         flex_direction: FlexDirection::Row,
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
+        width: Val::Percent(100.),
         margin: UiRect::new(Val::Px(0.0), Val::Px(32.0), Val::Px(0.0), Val::Px(0.0)),
         ..Style::DEFAULT
     }

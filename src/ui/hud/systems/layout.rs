@@ -4,10 +4,11 @@ use crate::ui::hud::components::*;
 use crate::ui::hud::styles::*;
 
 pub fn spawn_hud(mut commands: Commands, asset_server: Res<AssetServer>) {
-    build_hud(&mut commands, &asset_server);
+    build_resource_hud(&mut commands, &asset_server);
+    build_space_ship_hud(&mut commands, &asset_server);
 }
 
-pub fn build_hud(commands: &mut Commands, asset_server: &Res<AssetServer>) -> Entity {
+pub fn build_resource_hud(commands: &mut Commands, asset_server: &Res<AssetServer>) -> Entity {
     let hud_entity = commands
         .spawn((
             NodeBundle {
@@ -55,7 +56,54 @@ pub fn build_hud(commands: &mut Commands, asset_server: &Res<AssetServer>) -> En
                 });
         })
         .id();
+    hud_entity
+}
 
+pub fn build_space_ship_hud(commands: &mut Commands, asset_server: &Res<AssetServer>) -> Entity {
+    let hud_entity = commands
+        .spawn((
+            NodeBundle {
+                style: get_rhs_hud_style(),
+                ..default()
+            },
+            HUD {},
+        ))
+        .with_children(|parent| {
+            // RHS
+            parent
+                .spawn(NodeBundle {
+                    style: get_rhs_style(),
+                    background_color: BACKGROUND_COLOR.into(),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent.spawn((
+                        TextBundle {
+                            style: Style {
+                                justify_self: JustifySelf::End,
+                                align_self: AlignSelf::End,
+                                ..default()
+                            },
+                            text: Text {
+                                sections: vec![
+                                    TextSection::new(
+                                        "Spaceships in Hex:\n",
+                                        get_text_style(&asset_server),
+                                    ),
+                                    TextSection::new(
+                                        "",
+                                        get_text_style(&asset_server),
+                                    )],
+                                alignment: TextAlignment::Center,
+                                ..default()
+                            },
+                            ..default()
+                        },
+                        SpaceShipsText {},
+                    ));
+                });
+        })
+        .id();
     hud_entity
 }
 

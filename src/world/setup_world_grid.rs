@@ -68,7 +68,7 @@ pub struct HexGrid {
     // pub resources: HashMap<>
     pub entities: HashMap<Hex, Entity>,
     pub layout: HexLayout,
-    pub planets: HashMap<usize, Planet>,
+    pub planets: HashMap<Hex, Planet>,
 }
 
 pub(crate) fn setup_grid(
@@ -93,7 +93,7 @@ pub(crate) fn setup_grid(
         ..default()
     };
     let sprite_size = layout.rect_size();
-    let mut planets: HashMap<usize, Planet> = HashMap::new();
+    let mut planets: HashMap<Hex, Planet> = HashMap::new();
     let entities = shapes::hexagon(Hex::ZERO, 2)
         .enumerate()
         .map(|(i, coord)| {
@@ -119,13 +119,13 @@ pub(crate) fn setup_grid(
                     parent.spawn(create_influence_text_bundle(font.clone(), planet.index_in_grid as u32));
                 })
                 .id();
-            planets.insert(i, planet);
+            planets.insert(coord, planet);
             (coord, entity)
         })
         .collect();
 
-    let grid = HexGrid { entities, layout, planets };
-    setup_resources(&mut commands, &grid);
+    let mut grid = HexGrid { entities, layout, planets };
+    setup_resources(&mut commands, &mut grid);
     commands.insert_resource(grid);
 }
 
@@ -197,10 +197,10 @@ pub(crate) fn remove_grid(
     }
 }
 
-#[derive(Debug, Resource)]
+#[derive(Debug, Resource, Clone)]
 pub(crate) struct SelectedHex {
-    hex: Hex,
-    is_selected: bool,
+    pub hex: Hex,
+    pub is_selected: bool,
 }
 
 pub fn clear_selected(mut prev_pos: ResMut<SelectedHex>) { prev_pos.is_selected = false }

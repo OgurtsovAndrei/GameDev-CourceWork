@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 
-use crate::ui::hud::components::{EnemyText, ScoreText};
+use crate::ui::hud::components::{ScoreText, SpaceShipsText};
 use crate::world::resources::GameResources;
+use crate::world::setup_world_grid::{HexGrid, SelectedHex};
 
 pub fn update_score_text(mut text_query: Query<&mut Text, With<ScoreText>>, game_resources: Res<GameResources>) {
     if game_resources.is_changed() {
@@ -14,12 +15,21 @@ pub fn update_score_text(mut text_query: Query<&mut Text, With<ScoreText>>, game
 }
 
 pub fn update_enemy_text(
-    mut text_query: Query<&mut Text, With<EnemyText>>,
-    // enemy_query: Query<Entity, With<Enemy>>,
+    mut text_query: Query<&mut Text, With<SpaceShipsText>>,
+    selected_hex: Res<SelectedHex>,
+    game_resources: Res<HexGrid>,
 ) {
-    // let count = enemy_query.iter().count();
-    // for mut text in text_query.iter_mut() {
-    //     text.sections[0].value = format!("{}", count.to_string());
-    // }
-    return;
+    if selected_hex.is_changed() {
+        let hex = &selected_hex.hex;
+        let is_selected = &selected_hex.is_selected;
+
+        for mut text in text_query.iter_mut() {
+            if !is_selected {
+                text.sections[1].value = "Nothing to show, hex not selected".to_string();
+            } else {
+                let planet = game_resources.planets.get(hex).unwrap();
+                text.sections[1].value = format!("{:?}", planet.owner_army);
+            }
+        }
+    }
 }
