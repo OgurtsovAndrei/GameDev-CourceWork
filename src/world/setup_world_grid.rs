@@ -197,6 +197,17 @@ pub(crate) fn remove_grid(
     }
 }
 
+#[derive(Debug, Resource)]
+pub(crate) struct SelectedHex {
+    hex: Hex,
+    is_selected: bool,
+}
+
+pub(crate) fn register_selected_hex(mut commands: Commands) {
+    let hex = SelectedHex { hex: Hex::ZERO, is_selected: false };
+    commands.insert_resource(hex);
+}
+
 /// Input interaction
 pub(crate) fn handle_click_on_planet(
     buttons: Res<Input<MouseButton>>,
@@ -204,7 +215,7 @@ pub(crate) fn handle_click_on_planet(
     cameras: Query<(&Camera, &GlobalTransform)>,
     grid: Res<HexGrid>,
     mut tiles: Query<&mut TextureAtlasSprite>,
-    prev_pos: &mut Hex,
+    mut prev_pos: ResMut<SelectedHex>,
 ) {
     let window = windows.single();
     let (camera, cam_transform) = cameras.single();
@@ -212,19 +223,28 @@ pub(crate) fn handle_click_on_planet(
         .cursor_position()
         .and_then(|p| camera.viewport_to_world_2d(cam_transform, p))
     {
-        let cur_pos = grid.layout.world_pos_to_hex(pos);
+        let cur_pos: Hex = grid.layout.world_pos_to_hex(pos);
 
-        if !buttons.just_pressed(MouseButton::Left) {
+        if !buttons.just_pressed(MouseButton::Left) { return; }
+
+        if grid.entities.get(&cur_pos).is_none() {
+            prev_pos.is_selected = false;
+            set_color_to_hex(&grid, &mut tiles, &prev_pos.hex, &DEFAULT_COLOR);
             return;
         }
 
-        if *prev_pos == cur_pos {
-            let Some(cur_entity) = grid.entities.get(&cur_pos).copied() else { return; };
-            let Ok(mut cur_sprite) = tiles.get_mut(cur_entity) else { return; };
-            if cur_sprite.color == DEFAULT_COLOR { cur_sprite.color = SELECTED_COLOR } else { set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR); }
+        if prev_pos.hex == cur_pos {
+            if prev_pos.is_selected {
+                set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR);
+                prev_pos.is_selected = false;
+            } else {
+                set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
+                prev_pos.is_selected = true;
+            }
         } else {
-            let prv_pos_copy = prev_pos.clone();
-            *prev_pos = cur_pos;
+            let prv_pos_copy = prev_pos.hex.clone();
+            prev_pos.hex = cur_pos;
+            prev_pos.is_selected = true;
             set_color_to_hex(&grid, &mut tiles, &prv_pos_copy, &DEFAULT_COLOR);
             set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
         }
