@@ -26,7 +26,7 @@ pub(crate) fn setup_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
 
-#[derive(Debug, Component, Clone)]
+#[derive(Debug, Clone)]
 pub struct Planet {
     pub index_in_grid: usize,
     pub resource: u32,
