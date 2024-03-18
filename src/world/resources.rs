@@ -9,7 +9,7 @@ use crate::world::player::Player;
 use crate::world::setup_world_grid::{HexGrid, Planet};
 
 #[derive(Debug, Clone)]
-struct PlayerResources {
+pub(crate) struct PlayerResources {
     pub player: Player,
     pub planets: HashMap<Hex, Planet>,
     pub influence: u32,

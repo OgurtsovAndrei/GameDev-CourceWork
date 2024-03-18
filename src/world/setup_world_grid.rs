@@ -203,7 +203,13 @@ pub(crate) struct SelectedHex {
     pub is_selected: bool,
 }
 
-pub fn clear_selected(mut prev_pos: ResMut<SelectedHex>) { prev_pos.is_selected = false }
+pub fn clear_selected(
+    mut prev_pos: ResMut<SelectedHex>,
+    grid: Res<HexGrid>,
+    mut tiles: Query<&mut TextureAtlasSprite>) {
+    prev_pos.is_selected = false;
+    set_color_to_hex(&grid, &mut tiles, &prev_pos.hex, &DEFAULT_COLOR);
+}
 
 pub(crate) fn register_selected_hex(mut commands: Commands) {
     let hex = SelectedHex { hex: Hex::ZERO, is_selected: false };
@@ -230,8 +236,8 @@ pub(crate) fn handle_click_on_planet(
         if !buttons.just_pressed(MouseButton::Left) { return; }
 
         if grid.entities.get(&cur_pos).is_none() {
-            prev_pos.is_selected = false;
-            set_color_to_hex(&grid, &mut tiles, &prev_pos.hex, &DEFAULT_COLOR);
+            // prev_pos.is_selected = false;
+            // set_color_to_hex(&grid, &mut tiles, &prev_pos.hex, &DEFAULT_COLOR);
             return;
         }
 

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::world::actions::spawn_menu::systems::interactions::interact_with_end_spawn_button;
+use crate::world::actions::spawn_menu::systems::interactions::{interact_with_end_spawn_button, interact_with_main_menu_button};
 
 pub(crate) mod spawn_menu;
 
@@ -14,6 +14,7 @@ impl Plugin for ActionsPlugin {
             .add_systems(OnEnter(ActionsState::SpawningSpaceShips), spawn_menu::spawn_spawning_space_ships_window)
             .add_systems(Update, (
                 interact_with_end_spawn_button,
+                interact_with_main_menu_button,
             ).run_if(in_state(ActionsState::SpawningSpaceShips)))
             .add_systems(OnExit(ActionsState::SpawningSpaceShips), spawn_menu::despawn_spawning_space_ships_window)
         ;
