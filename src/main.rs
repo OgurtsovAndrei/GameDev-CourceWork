@@ -11,15 +11,13 @@ use world::turn::TurnPlugin;
 use world::WorldPlugin;
 
 use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
-use crate::ui::hud::HudPlugin;
 use crate::ui::action_panel::plugin::ActionPanelPlugin;
+use crate::ui::hud::HudPlugin;
 
 mod game_state;
 mod space_ships;
 mod ui;
 mod world;
-mod colors;
-mod fonts;
 
 pub fn main() {
     App::new()

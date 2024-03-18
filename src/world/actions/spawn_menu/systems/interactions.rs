@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
-use crate::colors::{HOVERED_BUTTON, NORMAL_BUTTON, PRESSED_BUTTON};
 use crate::space_ships::SpaceShip;
 use crate::world::actions::ActionsState;
 use crate::world::actions::spawn_menu::components::{EndSpawnButton, SpawnShip1Button};
+use crate::world::fonts_and_styles::colors::*;
 use crate::world::player::{Movable, Player};
 use crate::world::resources::GameResources;
 use crate::world::setup_world_grid::{HexGrid, SelectedHex};

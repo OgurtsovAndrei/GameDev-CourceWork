@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-use crate::colors::{HOVERED_BUTTON, NORMAL_BUTTON, PRESSED_BUTTON};
 use crate::world::actions::ActionsState;
 use crate::world::actions::move_menu::components::{EndMoveButton, MoveShip1Button};
+use crate::world::fonts_and_styles::colors::*;
 
 pub fn interact_with_end_move_button(
     mut button_query: Query<

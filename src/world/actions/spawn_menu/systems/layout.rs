@@ -1,10 +1,10 @@
 use bevy::prelude::*;
-use crate::colors::{BACKGROUND_COLOR, NORMAL_BUTTON};
-use crate::fonts::{get_button_text_style, get_title_text_style};
 
 use crate::world::actions::spawn_menu::components::*;
 use crate::world::actions::spawn_menu::components::SpawnMenu;
 use crate::world::actions::spawn_menu::styles::*;
+use crate::world::fonts_and_styles::colors::*;
+use crate::world::fonts_and_styles::fonts::*;
 
 pub fn spawn_pause_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     println!("Spawning Pause Menu");

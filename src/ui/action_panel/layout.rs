@@ -3,13 +3,12 @@ use bevy::hierarchy::ChildBuilder;
 use bevy::prelude::{AlignSelf, BuildChildren, ButtonBundle, Color, Commands, default, JustifySelf, NodeBundle, Res, Style, TextBundle, TextStyle, UiRect};
 use bevy::prelude::Val::Px;
 use bevy::utils::tracing::field::DebugValue;
-use crate::colors::{BACKGROUND_COLOR, NORMAL_BUTTON};
-use crate::fonts::{get_button_text_style, get_title_text_style};
+
 use crate::ui::action_panel::components::{ActionPanel, DebugButton, MoveButton};
 use crate::ui::action_panel::styles;
 use crate::ui::action_panel::styles::{get_actions_menu_container_style, get_actions_menu_style, get_button_style};
-
-
+use crate::world::fonts_and_styles::colors::*;
+use crate::world::fonts_and_styles::fonts::*;
 
 fn add_debug_button(parent: &mut ChildBuilder, asset_server: &Res<AssetServer>) {
     parent
@@ -46,7 +45,7 @@ fn add_move_button(parent: &mut ChildBuilder, asset_server: &Res<AssetServer>) {
 fn add_title(parent: &mut ChildBuilder, asset_server: &Res<AssetServer>) {
     parent.spawn(TextBundle::from_section(
         "Actions",
-        get_title_text_style(asset_server)
+        get_title_text_style(asset_server),
     ));
 }
 
