@@ -1,12 +1,10 @@
-use bevy::{
-    app::{Plugin, Startup, Update}
-};
+use bevy::app::{Plugin, Startup, Update};
 use bevy::prelude::{IntoSystemConfigs, OnEnter, States};
-use bevy::utils::{default};
+use bevy::utils::default;
 
-use crate::{game_state::UpdateUI};
+use crate::game_state::UpdateUI;
 use crate::game_state::UpdateUI::FlipTurn;
-use crate::ui::action_panel::{interaction, layout};
+use crate::ui::action_panel::systems::{interaction, layout};
 use crate::world::setup_world_grid::clear_selected;
 
 pub struct ActionPanelPlugin;
