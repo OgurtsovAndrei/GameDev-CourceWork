@@ -9,7 +9,7 @@ use bevy::ui::widget::Button;
 use bevy::ui::{Interaction, Style};
 
 use crate::game_state::UpdateUI;
-use crate::ui::left_panel::TurnSwitchedState;
+use crate::ui::actions_panel::plugin::TurnSwitchedState;
 use crate::world::player::{Movable, Player, Stats};
 
 

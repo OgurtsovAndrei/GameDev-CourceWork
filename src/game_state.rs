@@ -2,7 +2,7 @@ use bevy::app::{Plugin, Update};
 use bevy::ecs::schedule::{apply_deferred, IntoSystemConfigs, IntoSystemSetConfigs, SystemSet};
 use bevy::input::Input;
 use bevy::prelude::{apply_state_transition, Commands, KeyCode, NextState, Res, State, States};
-use crate::ui::left_panel::TurnSwitchedState;
+use crate::ui::actions_panel::plugin::TurnSwitchedState;
 
 #[derive(States, Debug, Copy, Clone, Eq, PartialEq, Hash, Default)]
 pub enum GamePhaseState {

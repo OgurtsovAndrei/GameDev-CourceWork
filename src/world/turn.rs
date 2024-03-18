@@ -10,7 +10,7 @@ use bevy::{
 use bevy::prelude::{NextState, Res, ResMut, State};
 
 use crate::game_state::UpdateUI;
-use crate::ui::left_panel::TurnSwitchedState;
+use crate::ui::actions_panel::plugin::TurnSwitchedState;
 
 use super::player::{Movable, Player, Stats};
 

@@ -5,7 +5,6 @@ use bevy_mod_picking::DefaultPickingPlugins;
 
 use game_state::{AppState, GameStatePlugin};
 use ui::bottom_panel::BottomPanelPlugin;
-use ui::left_panel::LeftPanelPlugin;
 use ui::stats::StatsPlugin;
 use world::player;
 use world::turn::TurnPlugin;
@@ -13,6 +12,7 @@ use world::WorldPlugin;
 
 use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
 use crate::ui::hud::HudPlugin;
+use crate::ui::actions_panel::plugin::LeftPanelPlugin;
 
 mod game_state;
 mod space_ships;
