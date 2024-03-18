@@ -5,7 +5,8 @@ use crate::world::actions::spawn_menu::systems::interactions::{interact_with_end
 use crate::world::setup_world_grid::clear_move_selected;
 
 pub(crate) mod spawn_menu;
-mod move_menu;
+
+pub(crate) mod move_menu;
 
 pub(crate) struct ActionsPlugin;
 

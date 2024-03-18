@@ -4,7 +4,10 @@ use bevy::prelude::Component;
 pub struct DebugButton;
 
 #[derive(Component)]
-pub struct MoveButton;
+pub struct HireArmyButton;
+
+#[derive(Component)]
+pub struct OpenMovePanelButton;
 
 #[derive(Component)]
 pub struct ActionPanel;
