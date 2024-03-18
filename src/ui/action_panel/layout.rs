@@ -1,71 +1,73 @@
+use bevy::asset::AssetServer;
 use bevy::hierarchy::ChildBuilder;
-use bevy::prelude::{AlignSelf, BuildChildren, ButtonBundle, Color, Commands, default, JustifySelf, NodeBundle, Style, TextBundle, TextStyle, UiRect};
+use bevy::prelude::{AlignSelf, BuildChildren, ButtonBundle, Color, Commands, default, JustifySelf, NodeBundle, Res, Style, TextBundle, TextStyle, UiRect};
 use bevy::prelude::Val::Px;
-use crate::ui::action_panel::components::{DebugButton, MoveButton};
+use bevy::utils::tracing::field::DebugValue;
+use crate::colors::{BACKGROUND_COLOR, NORMAL_BUTTON};
+use crate::fonts::{get_button_text_style, get_title_text_style};
+use crate::ui::action_panel::components::{ActionPanel, DebugButton, MoveButton};
+use crate::ui::action_panel::styles;
+use crate::ui::action_panel::styles::{get_actions_menu_container_style, get_actions_menu_style, get_button_style};
 
 
-fn add_debug_button(parent: &mut ChildBuilder) {
+
+fn add_debug_button(parent: &mut ChildBuilder, asset_server: &Res<AssetServer>) {
     parent
         .spawn(ButtonBundle {
-            style: Style {
-                margin: UiRect {
-                    bottom: Px(30.0),
-                    ..default()
-                },
-                ..default()
-            },
+            style: get_button_style(),
+            background_color: NORMAL_BUTTON.into(),
             ..Default::default()
         })
         .insert(MoveButton)
         .with_children(|parent| {
             parent.spawn(TextBundle::from_section(
-                "Move army to planet",
-                TextStyle {
-                    font: Default::default(),
-                    font_size: 40.0,
-                    color: Color::BLACK,
-                },
+                "Capture army",
+                get_button_text_style(asset_server),
             ));
         });
 }
 
-fn add_move_button(parent: &mut ChildBuilder) {
+fn add_move_button(parent: &mut ChildBuilder, asset_server: &Res<AssetServer>) {
     parent
         .spawn(ButtonBundle {
-            style: Style {
-                align_self: AlignSelf::Center,
-                ..default()
-            },
+            style: get_button_style(),
+            background_color: NORMAL_BUTTON.into(),
             ..Default::default()
         })
         .insert(DebugButton)
         .with_children(|parent| {
             parent.spawn(TextBundle::from_section(
                 "Debug move",
-                TextStyle {
-                    font: Default::default(),
-                    font_size: 40.0,
-                    color: Color::BLACK,
-                },
+                get_button_text_style(asset_server),
             ));
         });
 }
 
-pub fn setup_buttons(mut commands: Commands) {
+fn add_title(parent: &mut ChildBuilder, asset_server: &Res<AssetServer>) {
+    parent.spawn(TextBundle::from_section(
+        "Actions",
+        get_title_text_style(asset_server)
+    ));
+}
+
+pub fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
-        .spawn(NodeBundle {
-            style: Style {
-                flex_direction: bevy::ui::FlexDirection::Column,
-                align_self: AlignSelf::Center,
-                justify_self: JustifySelf::Start,
-                ..Default::default()
-            },
+        .spawn((NodeBundle {
+            style: get_actions_menu_style(),
             ..Default::default()
-        })
+        },
+                ActionPanel))
         .with_children(|parent| {
-            if cfg!(debug_assertions) {
-                add_debug_button(parent);
-                add_move_button(parent)
-            }
+            parent.spawn(NodeBundle {
+                style: get_actions_menu_container_style(),
+                background_color: BACKGROUND_COLOR.into(),
+                ..default()
+            }).with_children(|parent| {
+                add_title(parent, &asset_server);
+                add_move_button(parent, &asset_server);
+                if cfg!(debug_assertions) {
+                    add_debug_button(parent, &asset_server);
+                }
+            });
         });
 }

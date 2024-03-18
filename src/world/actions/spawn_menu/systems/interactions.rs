@@ -1,8 +1,8 @@
 use bevy::prelude::*;
+use crate::colors::{HOVERED_BUTTON, NORMAL_BUTTON, PRESSED_BUTTON};
 
 use crate::world::actions::ActionsState;
 use crate::world::actions::spawn_menu::components::EndSpawnButton;
-use crate::world::actions::spawn_menu::styles::{HOVERED_BUTTON, NORMAL_BUTTON, PRESSED_BUTTON};
 
 pub fn interact_with_end_spawn_button(
     mut button_query: Query<

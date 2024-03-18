@@ -18,6 +18,8 @@ mod game_state;
 mod space_ships;
 mod ui;
 mod world;
+mod colors;
+mod fonts;
 
 pub fn main() {
     App::new()
