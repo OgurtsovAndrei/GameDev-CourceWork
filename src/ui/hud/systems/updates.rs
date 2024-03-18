@@ -28,7 +28,9 @@ pub fn update_enemy_text(
                 text.sections[1].value = "Nothing to show, hex not selected".to_string();
             } else {
                 let planet = game_resources.planets.get(hex).unwrap();
-                text.sections[1].value = format!("{:?}", planet.owner_army);
+                let mut vec_for_show = vec![];
+                for ship in planet.owner_army.iter() { if !ship.is_selected_for_move { vec_for_show.push(ship.clone()) } }
+                text.sections[1].value = format!("{:?}", vec_for_show);
             }
         }
     }

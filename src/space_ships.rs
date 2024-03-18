@@ -1,14 +1,19 @@
 use std::collections::HashMap;
+use std::fmt;
 use std::sync::Mutex;
 
 use bevy::prelude::*;
 use bevy_mod_picking::PickableBundle;
 use bevy_mod_picking::prelude::*;
 use glam::vec2;
+use hexx::Hex;
 use once_cell::unsync::Lazy;
 use rand::Rng;
 
-#[derive(Eq, PartialEq, Hash, Copy, Clone, Component, Debug)]
+use crate::world::player::Player;
+use crate::world::setup_world_grid::HEX_NOWHERE;
+
+#[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub(crate) enum SpaceShipType {
     Carrier,
     Destroyer,
@@ -26,6 +31,37 @@ pub fn get_random_spaceship() -> SpaceShipType {
 pub struct SpaceShipCharacteristics {
     id: usize,
     power: u32,
+}
+
+#[derive(Eq, PartialEq, Hash, Copy, Clone, Component)]
+pub(crate) struct SpaceShip {
+    pub ship_type: SpaceShipType,
+    pub ship_owner: Player,
+    pub ship_hex: Hex,
+    pub is_selected_for_move: bool,
+}
+
+impl SpaceShip {
+    fn new(ship_type: SpaceShipType) -> Self {
+        Self {
+            ship_type,
+            ship_owner: Player { id: -1 },
+            ship_hex: HEX_NOWHERE,
+            is_selected_for_move: false,
+        }
+    }
+}
+
+impl SpaceShip {
+    fn format(&self) -> String {
+        format!("{:?}", self.ship_type)
+    }
+}
+
+impl fmt::Debug for SpaceShip {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.format())
+    }
 }
 
 impl SpaceShipCharacteristics {
@@ -57,7 +93,7 @@ pub(crate) fn spawn_ship(
         },
         On::<Pointer<Click>>::run(move || info!("Spaceship pressed")),
         PickableBundle::default(),
-        ship_type,
+        SpaceShip::new(ship_type),
     ));
 }
 

@@ -7,6 +7,7 @@ use crate::world::actions::move_menu::systems::layout::{build_move_menu, despawn
 pub(crate) mod components;
 mod styles;
 pub(crate) mod systems;
+pub(crate) mod resources;
 
 /*
 use systems::interactions::*;

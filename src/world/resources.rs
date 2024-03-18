@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy::utils::HashMap;
 use hexx::Hex;
 
-use crate::space_ships::SpaceShipType;
+use crate::space_ships::{SpaceShip, SpaceShipType};
 use crate::world::player::Player;
 use crate::world::setup_world_grid::{HexGrid, Planet};
 
@@ -62,7 +62,13 @@ pub fn setup_resources(mut commands: &mut Commands, grid: &mut HexGrid) {
     let player1_home_hex = Hex { x: -2, y: 2 };
     let player2_home_hex = Hex { x: 2, y: -2 };
     let mut planet = planets.remove(&player1_home_hex).unwrap();
-    planet.owner_army.push(SpaceShipType::Battleship);
+    planet.owner = player1;
+    planet.owner_army.push(SpaceShip {
+        ship_type: SpaceShipType::Battleship,
+        ship_owner: Player { id: 1 },
+        ship_hex: player1_home_hex.clone(),
+        is_selected_for_move: false,
+    });
     planets.insert(player1_home_hex.clone(), planet);
 
     let player1_planets: HashMap<Hex, Planet> = HashMap::from([(player1_home_hex.clone(), planets[&player1_home_hex].clone())]);
