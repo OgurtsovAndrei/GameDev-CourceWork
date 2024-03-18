@@ -9,6 +9,7 @@ use glam::{vec2, Vec2};
 use hexx::{Hex, HexLayout, HexOrientation, shapes};
 
 use crate::space_ships::SpaceShip;
+use crate::world::actions::ActionsState;
 use crate::world::player::Player;
 use crate::world::resources::setup_resources;
 
@@ -17,6 +18,7 @@ const FILE_GRID_HEIGHT_IN_FILE: usize = 1;
 const GRID_WEIGHT_IN_FILE: usize = 6;
 
 const DEFAULT_COLOR: bevy::prelude::Color = Color::WHITE;
+const SELECTED_FOR_MOVE_COLOR: bevy::prelude::Color = Color::GREEN;
 const SELECTED_COLOR: bevy::prelude::Color = Color::RED;
 
 /// 3D Orthogrpahic camera setup
@@ -201,19 +203,37 @@ pub(crate) fn remove_grid(
 pub(crate) struct SelectedHex {
     pub hex: Hex,
     pub is_selected: bool,
+    pub hex_selected_for_move: Hex,
+    pub is_selected_for_move: bool,
 }
 
 pub fn clear_selected(
-    mut prev_pos: ResMut<SelectedHex>,
+    mut selecred_hex: ResMut<SelectedHex>,
     grid: Res<HexGrid>,
     mut tiles: Query<&mut TextureAtlasSprite>) {
-    prev_pos.is_selected = false;
-    set_color_to_hex(&grid, &mut tiles, &prev_pos.hex, &DEFAULT_COLOR);
+    selecred_hex.is_selected = false;
+    selecred_hex.is_selected_for_move = false;
+    set_color_to_hex(&grid, &mut tiles, &selecred_hex.hex, &DEFAULT_COLOR);
+    set_color_to_hex(&grid, &mut tiles, &selecred_hex.hex_selected_for_move, &DEFAULT_COLOR);
+    selecred_hex.hex = HEX_NOWHERE;
+    selecred_hex.hex_selected_for_move = HEX_NOWHERE;
 }
 
 pub(crate) fn register_selected_hex(mut commands: Commands) {
-    let hex = SelectedHex { hex: Hex::ZERO, is_selected: false };
+    let hex = SelectedHex { hex: HEX_NOWHERE, is_selected: false, hex_selected_for_move: HEX_NOWHERE, is_selected_for_move: false };
     commands.insert_resource(hex);
+}
+
+const HEX_NOWHERE: Hex = Hex::new(i32::MAX, i32::MAX);
+
+pub(crate) fn clear_move_selected(
+    mut selecred_hex: ResMut<SelectedHex>,
+    grid: Res<HexGrid>,
+    mut tiles: Query<&mut TextureAtlasSprite>)
+{
+    selecred_hex.is_selected_for_move = false;
+    set_color_to_hex(&grid, &mut tiles, &selecred_hex.hex_selected_for_move, &DEFAULT_COLOR);
+    selecred_hex.hex_selected_for_move = HEX_NOWHERE;
 }
 
 /// Input interaction
@@ -223,7 +243,8 @@ pub(crate) fn handle_click_on_planet(
     cameras: Query<(&Camera, &GlobalTransform)>,
     grid: Res<HexGrid>,
     mut tiles: Query<&mut TextureAtlasSprite>,
-    mut prev_pos: ResMut<SelectedHex>,
+    mut selected_hex: ResMut<SelectedHex>,
+    current_state: Res<State<ActionsState>>,
 ) {
     let window = windows.single();
     let (camera, cam_transform) = cameras.single();
@@ -232,8 +253,36 @@ pub(crate) fn handle_click_on_planet(
         .and_then(|p| camera.viewport_to_world_2d(cam_transform, p))
     {
         let cur_pos: Hex = grid.layout.world_pos_to_hex(pos);
-
         if !buttons.just_pressed(MouseButton::Left) { return; }
+
+        if let ActionsState::MovingSpaceShips = current_state.get() {
+            if !selected_hex.is_selected || selected_hex.hex == cur_pos { return; }
+
+            if grid.entities.get(&cur_pos).is_none() {
+                // prev_pos.is_selected = false;
+                // set_color_to_hex(&grid, &mut tiles, &prev_pos.hex, &DEFAULT_COLOR);
+                return;
+            }
+
+            if selected_hex.hex_selected_for_move == cur_pos {
+                if selected_hex.is_selected_for_move {
+                    set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR);
+                    selected_hex.is_selected_for_move = false;
+                    selected_hex.hex_selected_for_move = HEX_NOWHERE;
+                } else {
+                    set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_FOR_MOVE_COLOR);
+                    selected_hex.is_selected_for_move = true;
+                }
+            } else {
+                let prv_pos_copy = selected_hex.hex_selected_for_move.clone();
+                selected_hex.hex_selected_for_move = cur_pos;
+                selected_hex.is_selected_for_move = true;
+                set_color_to_hex(&grid, &mut tiles, &prv_pos_copy, &DEFAULT_COLOR);
+                set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_FOR_MOVE_COLOR);
+            }
+
+            return;
+        }
 
         if grid.entities.get(&cur_pos).is_none() {
             // prev_pos.is_selected = false;
@@ -241,18 +290,19 @@ pub(crate) fn handle_click_on_planet(
             return;
         }
 
-        if prev_pos.hex == cur_pos {
-            if prev_pos.is_selected {
+        if selected_hex.hex == cur_pos {
+            if selected_hex.is_selected {
                 set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR);
-                prev_pos.is_selected = false;
+                selected_hex.is_selected = false;
+                selected_hex.hex = HEX_NOWHERE;
             } else {
                 set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
-                prev_pos.is_selected = true;
+                selected_hex.is_selected = true;
             }
         } else {
-            let prv_pos_copy = prev_pos.hex.clone();
-            prev_pos.hex = cur_pos;
-            prev_pos.is_selected = true;
+            let prv_pos_copy = selected_hex.hex.clone();
+            selected_hex.hex = cur_pos;
+            selected_hex.is_selected = true;
             set_color_to_hex(&grid, &mut tiles, &prv_pos_copy, &DEFAULT_COLOR);
             set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
         }

@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::world::actions::move_menu::systems::interactions::{interact_with_end_move_button, interact_with_move_ship1_button};
 use crate::world::actions::spawn_menu::systems::interactions::{interact_with_end_spawn_button, interact_with_spawn_ship1_button};
+use crate::world::setup_world_grid::clear_move_selected;
 
 pub(crate) mod spawn_menu;
 mod move_menu;
@@ -25,7 +26,7 @@ impl Plugin for ActionsPlugin {
                 interact_with_end_move_button,
                 interact_with_move_ship1_button,
             ).run_if(in_state(ActionsState::MovingSpaceShips)))
-            .add_systems(OnExit(ActionsState::MovingSpaceShips), move_menu::despawn_move_space_ships_window)
+            .add_systems(OnExit(ActionsState::MovingSpaceShips), (move_menu::despawn_move_space_ships_window, clear_move_selected))
 
         ;
     }
