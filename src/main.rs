@@ -12,6 +12,7 @@ use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
 use crate::ui::action_panel::plugin::ActionPanelPlugin;
 use crate::ui::bottom_panel::plugin::BottomPanelPlugin;
 use crate::ui::hud::HudPlugin;
+use crate::world::player::TurnPlugin;
 
 mod game_state;
 mod space_ships;
