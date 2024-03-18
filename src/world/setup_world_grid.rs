@@ -8,7 +8,7 @@ use bevy::window::PrimaryWindow;
 use glam::{vec2, Vec2};
 use hexx::{Hex, HexLayout, HexOrientation, shapes};
 
-use crate::space_ships::SpaceShip;
+use crate::space_ships::SpaceShipType;
 use crate::world::actions::ActionsState;
 use crate::world::player::Player;
 use crate::world::resources::setup_resources;
@@ -32,7 +32,7 @@ pub struct Planet {
     pub resource: u32,
     pub influence: u32,
     pub owner: Player,
-    pub owner_army: Vec<SpaceShip>,
+    pub owner_army: Vec<SpaceShipType>,
 }
 
 impl Planet {
@@ -41,7 +41,7 @@ impl Planet {
         resource: u32,
         influence: u32,
         owner: Player,
-        owner_army: Vec<SpaceShip>) -> Self {
+        owner_army: Vec<SpaceShipType>) -> Self {
         Self {
             index_in_grid,
             resource,
@@ -187,7 +187,7 @@ fn create_influence_text_bundle(font: Handle<Font>, value: u32) -> Text2dBundle 
 
 pub(crate) fn remove_grid(
     mut commands: Commands,
-    mut entities: Query<Entity, With<SpaceShip>>,
+    mut entities: Query<Entity, With<SpaceShipType>>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {

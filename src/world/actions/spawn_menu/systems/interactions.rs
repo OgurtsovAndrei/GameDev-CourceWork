@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::space_ships::SpaceShip;
+use crate::space_ships::SpaceShipType;
 use crate::world::actions::ActionsState;
 use crate::world::actions::spawn_menu::components::{EndSpawnButton, SpawnShip1Button};
 use crate::world::fonts_and_styles::colors::*;
@@ -54,7 +54,7 @@ pub fn interact_with_spawn_ship1_button(
                 player_resources.resources -= space_ship_cost;
                 resources.resources.insert(player.clone(), player_resources);
                 let mut planet = grid.planets.remove(&selected_hex.hex).unwrap();
-                planet.owner_army.push(SpaceShip);
+                planet.owner_army.push(SpaceShipType::Destroyer);
                 grid.planets.insert(selected_hex.hex.clone(), planet);
                 resources.set_changed();
                 grid.set_changed();

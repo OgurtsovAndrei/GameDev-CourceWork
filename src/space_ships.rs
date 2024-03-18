@@ -8,12 +8,8 @@ use glam::vec2;
 use once_cell::unsync::Lazy;
 use rand::Rng;
 
-#[derive(Component, Debug, Clone)]
-pub struct SpaceShip;
-
-
-#[derive(Eq, PartialEq, Hash, Copy, Clone)]
-pub enum SpaceShipType {
+#[derive(Eq, PartialEq, Hash, Copy, Clone, Component, Debug)]
+pub(crate) enum SpaceShipType {
     Carrier,
     Destroyer,
     Frigate,
@@ -51,16 +47,17 @@ pub(crate) fn spawn_ship(
     asset_server: Res<AssetServer>,
 ) {
     let atlas = get_spaceship_atlas(&asset_server);
+    let (ship_type, sprite) = get_random_sprite();
     commands.spawn((
         SpriteSheetBundle {
             texture_atlas: texture_atlas.add(atlas),
-            sprite: get_random_sprite(),
+            sprite,
             transform: Transform::from_xyz(-300., 300., 0.0),
             ..Default::default()
         },
         On::<Pointer<Click>>::run(move || info!("Spaceship pressed")),
         PickableBundle::default(),
-        SpaceShip,
+        ship_type,
     ));
 }
 
@@ -68,14 +65,15 @@ const SHIP_SIZE: Vec2 = Vec2::splat(35.0);
 const COLUMNS_IN_TEXTURE_FILE: usize = 8;
 const ROWS_IN_TEXTURE_FILE: usize = 6;
 
-pub fn get_random_sprite() -> TextureAtlasSprite {
-    let id = SpaceShipCharacteristics::get_by_spaceship_type(get_random_spaceship()).id;
+pub fn get_random_sprite() -> (SpaceShipType, TextureAtlasSprite) {
+    let ship_type = get_random_spaceship();
+    let id = SpaceShipCharacteristics::get_by_spaceship_type(ship_type).id;
     let sprite = TextureAtlasSprite {
         index: id,
         custom_size: Option::from(SHIP_SIZE),
         ..Default::default()
     };
-    return sprite;
+    return (ship_type, sprite);
 }
 
 pub fn get_spaceship_atlas(asset_server: &Res<AssetServer>) -> TextureAtlas {
