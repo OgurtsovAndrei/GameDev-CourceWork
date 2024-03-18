@@ -20,7 +20,7 @@ fn add_hire_army_button(parent: &mut ChildBuilder, asset_server: &Res<AssetServe
         .insert(HireArmyButton)
         .with_children(|parent| {
             parent.spawn(TextBundle::from_section(
-                "Capture army",
+                "Spawn army",
                 get_button_text_style(asset_server),
             ));
         });
