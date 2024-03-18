@@ -1,6 +1,6 @@
 use bevy::prelude::{Button, Changed, Interaction, NextState, Query, ResMut, With};
-use crate::ui::actions_panel::components::DebugButton;
-use crate::ui::actions_panel::plugin::TurnSwitchedState;
+use crate::ui::action_panel::components::DebugButton;
+use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::world::player::{Movable, Player, Stats};
 
 pub fn handle_dbg_button_click(

@@ -12,7 +12,7 @@ use world::WorldPlugin;
 
 use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
 use crate::ui::hud::HudPlugin;
-use crate::ui::actions_panel::plugin::LeftPanelPlugin;
+use crate::ui::action_panel::plugin::ActionPanelPlugin;
 
 mod game_state;
 mod space_ships;
@@ -35,7 +35,7 @@ pub fn main() {
         .add_plugins(StatsPlugin)
         .add_plugins(BottomPanelPlugin)
         .add_plugins(HudPlugin)
-        .add_plugins(LeftPanelPlugin)
+        .add_plugins(ActionPanelPlugin)
         .add_plugins(WorldPlugin)
         .add_plugins(GameStatePlugin)
         .add_plugins(TurnPlugin)

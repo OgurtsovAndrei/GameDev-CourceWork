@@ -6,12 +6,12 @@ use bevy::utils::{default};
 
 use crate::{game_state::UpdateUI};
 use crate::game_state::UpdateUI::FlipTurn;
-use crate::ui::actions_panel::{interaction, layout};
+use crate::ui::action_panel::{interaction, layout};
 use crate::world::setup_world_grid::clear_selected;
 
-pub struct LeftPanelPlugin;
+pub struct ActionPanelPlugin;
 
-impl Plugin for LeftPanelPlugin {
+impl Plugin for ActionPanelPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_systems(Startup, layout::setup_buttons)
             .add_state::<TurnSwitchedState>()

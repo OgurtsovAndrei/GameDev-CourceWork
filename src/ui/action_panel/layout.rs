@@ -1,7 +1,7 @@
 use bevy::hierarchy::ChildBuilder;
 use bevy::prelude::{AlignSelf, BuildChildren, ButtonBundle, Color, Commands, default, JustifySelf, NodeBundle, Style, TextBundle, TextStyle, UiRect};
 use bevy::prelude::Val::Px;
-use crate::ui::actions_panel::components::{DebugButton, MoveButton};
+use crate::ui::action_panel::components::{DebugButton, MoveButton};
 
 
 fn add_debug_button(parent: &mut ChildBuilder) {
