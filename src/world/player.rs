@@ -1,8 +1,13 @@
+use bevy::app::{Plugin, Update};
 use bevy::ecs::{
     bundle::Bundle,
     component::Component,
     system::Commands,
 };
+use bevy::prelude::{Entity, IntoSystemConfigs, NextState, Query, Res, ResMut, State, With, Without};
+
+use crate::game_state::UpdateUI;
+use crate::ui::action_panel::plugin::TurnSwitchedState;
 
 pub const INITIAL_MOVES: i32 = 10;
 
@@ -49,4 +54,37 @@ pub fn spawn_players(mut commands: Commands) {
         player: Player { id: 2 },
         ..Default::default()
     });
+}
+
+pub struct TurnPlugin;
+
+impl Plugin for TurnPlugin {
+    fn build(&self, app: &mut bevy::prelude::App) {
+        app.add_systems(Update, determine_turn.in_set(UpdateUI::FlipTurn));
+    }
+}
+
+fn determine_turn(
+    mut commands: Commands,
+    current_player_query: Query<(Entity, &Stats), (With<Player>, With<Movable>)>,
+    opposite_player_query: Query<(Entity, &Stats), (With<Player>, Without<Movable>)>,
+    turn_switch_state: Res<State<TurnSwitchedState>>,
+    mut turn_switch_state_mutable: ResMut<NextState<TurnSwitchedState>>,
+) {
+    match turn_switch_state.get() {
+        TurnSwitchedState::OnTurnSwitched => {
+            let (cur_id, cur_stats) = current_player_query.single();
+            let (op_id, op_stats) = opposite_player_query.single();
+            if op_stats.moves_left > 0 {
+                commands.entity(cur_id).remove::<Movable>();
+                commands.entity(op_id).insert(Movable);
+            } else if op_stats.moves_left == 0 && cur_stats.moves_left > 0 {} else if cur_stats.moves_left == 0 && cur_stats.moves_left == 0 {
+                commands.entity(cur_id).remove::<Movable>();
+            } else {
+                panic!("Should never happen");
+            }
+            turn_switch_state_mutable.set(TurnSwitchedState::OnDefaultState);
+        }
+        _ => {}
+    }
 }
