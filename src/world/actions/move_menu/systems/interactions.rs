@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::space_ships::SpaceShip;
 use crate::ui::action_panel::plugin::TurnSwitchedState;
-use crate::world::actions::{ActionsState, reset_selected_ships};
+use crate::world::actions::{ActionsState, reset_selected_for_move_ships};
 use crate::world::actions::move_menu::components::{CancelButton, EndMoveButton, MoveShip1Button};
 use crate::world::fonts_and_styles::colors::*;
 use crate::world::player::{Movable, Player};
@@ -130,7 +130,7 @@ pub(in crate::world::actions::move_menu) fn interact_with_move_ship1_button(
 pub(in crate::world::actions::move_menu) fn interact_with_cancel_button(
     mut button_query: Query<(&Interaction, &mut BackgroundColor), (Changed<Interaction>, With<CancelButton>)>,
     mut simulation_state_next_state: ResMut<NextState<ActionsState>>,
-    hex_grid: ResMut<HexGrid>
+    mut hex_grid: ResMut<HexGrid>
 ) {
     if let Err(_) = button_query.get_single() {
         return;
@@ -139,7 +139,7 @@ pub(in crate::world::actions::move_menu) fn interact_with_cancel_button(
     match interaction {
         Interaction::Pressed => {
             *color = PRESSED_BUTTON.into();
-            reset_selected_ships(hex_grid);
+            reset_selected_for_move_ships(&mut hex_grid);
             simulation_state_next_state.set(ActionsState::NoActionRunning);
         }
         Interaction::Hovered => {

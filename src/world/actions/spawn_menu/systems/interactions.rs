@@ -1,8 +1,9 @@
 use bevy::prelude::*;
+use hexx::hex;
 
 use crate::space_ships::{SpaceShip, SpaceShipType};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
-use crate::world::actions::ActionsState;
+use crate::world::actions::{ActionsState, reset_selected_for_buy_ships};
 use crate::world::actions::spawn_menu::components::{CancelButton, EndSpawnButton, SpawnShip1Button};
 use crate::world::fonts_and_styles::colors::*;
 use crate::world::player::{Movable, Player};
@@ -14,6 +15,7 @@ pub(in crate::world::actions::spawn_menu) fn interact_with_end_spawn_button(
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<EndSpawnButton>),
     >,
+    mut hex_grid: ResMut<HexGrid>,
     mut simulation_state_next_state: ResMut<NextState<ActionsState>>,
     mut switched_turn: ResMut<NextState<TurnSwitchedState>>,
 ) {
@@ -21,6 +23,9 @@ pub(in crate::world::actions::spawn_menu) fn interact_with_end_spawn_button(
         match *interaction {
             Interaction::Pressed => {
                 *color = PRESSED_BUTTON.into();
+                for (_, mut planet) in hex_grid.planets.iter_mut() {
+                    planet.owner_army.iter_mut().for_each(|unit| unit.is_selected_for_buy = false)
+                }
                 simulation_state_next_state.set(ActionsState::NoActionRunning);
                 switched_turn.set(TurnSwitchedState::OnTurnSwitched)
             }
@@ -47,22 +52,27 @@ pub(in crate::world::actions::spawn_menu) fn interact_with_spawn_ship1_button(
     for (interaction, mut color) in button_query.iter_mut() {
         let player = current_player_query.single();
         let mut player_resources = &resources.resources[player];
-        let space_ship_cost: u32 = 5;
         match *interaction {
             Interaction::Pressed => {
                 *color = PRESSED_BUTTON.into();
                 if !selected_hex.is_selected { return; }
-                if player_resources.resources < space_ship_cost { return; }
-                let mut player_resources = resources.resources.remove(player).unwrap();
-                player_resources.resources -= space_ship_cost;
-                resources.resources.insert(player.clone(), player_resources);
-                let mut planet = grid.planets.remove(&selected_hex.hex).unwrap();
-                planet.owner_army.push(SpaceShip {
+
+                let spaceship = SpaceShip {
                     ship_type: SpaceShipType::Destroyer,
                     ship_owner: player.clone(),
                     ship_hex: selected_hex.hex.clone(),
                     is_selected_for_move: false,
-                });
+                    is_selected_for_buy: true,
+                };
+                let price = spaceship.get_price();
+
+                if player_resources < &price { return; }
+                let mut player_resources = resources.resources.remove(player).unwrap();
+                player_resources -= price;
+
+                resources.resources.insert(player.clone(), player_resources);
+                let mut planet = grid.planets.remove(&selected_hex.hex).unwrap();
+                planet.owner_army.push(spaceship);
                 grid.planets.insert(selected_hex.hex.clone(), planet);
                 resources.set_changed();
                 grid.set_changed();
@@ -80,7 +90,9 @@ pub(in crate::world::actions::spawn_menu) fn interact_with_spawn_ship1_button(
 
 pub(in crate::world::actions::spawn_menu) fn interact_cancel_button_click(
     mut button_query: Query<(&Interaction, &mut BackgroundColor), (Changed<Interaction>, With<CancelButton>)>,
-    mut action_state: ResMut<NextState<ActionsState>>
+    mut action_state: ResMut<NextState<ActionsState>>,
+    mut hex_grid: ResMut<HexGrid>,
+    mut game_resources: ResMut<GameResources>
 ) {
     if let Err(_) = button_query.get_single() {
         return;
@@ -90,6 +102,7 @@ pub(in crate::world::actions::spawn_menu) fn interact_cancel_button_click(
     match interaction {
         Interaction::Pressed => {
             *color = PRESSED_BUTTON.into();
+            reset_selected_for_buy_ships(&mut hex_grid, &mut game_resources);
             action_state.set(ActionsState::NoActionRunning);
         }
         Interaction::Hovered => {

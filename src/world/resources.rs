@@ -1,4 +1,5 @@
 use std::fmt::Write;
+use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 use bevy::prelude::*;
 use bevy::utils::HashMap;
@@ -8,10 +9,46 @@ use crate::space_ships::{SpaceShip, SpaceShipType};
 use crate::world::player::Player;
 use crate::world::setup_world_grid::{HexGrid, Planet};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialOrd, Copy, PartialEq)]
 pub(crate) struct PlayerResources {
     pub influence: u32,
     pub resources: u32,
+}
+
+impl Add for PlayerResources {
+    type Output = PlayerResources;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        PlayerResources {
+            influence: self.influence + rhs.influence,
+            resources: self.resources + rhs.resources,
+        }
+    }
+}
+
+impl AddAssign for PlayerResources {
+    fn add_assign(&mut self, rhs: Self) {
+        self.influence += rhs.influence;
+        self.resources += rhs.resources;
+    }
+}
+
+impl Sub for PlayerResources {
+    type Output = PlayerResources;
+    fn sub(self, rhs: Self) -> Self::Output {
+        PlayerResources {
+            influence: self.influence - rhs.influence,
+            resources: self.resources - rhs.resources,
+        }
+    }
+}
+
+impl SubAssign for PlayerResources {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.influence -= rhs.influence;
+        self.resources -= rhs.resources;
+
+    }
 }
 
 
@@ -45,7 +82,7 @@ impl GameResources {
             [(Player { id: -1 }, PlayerResources::default()), (Player { id: 1 }, PlayerResources::default()), (Player { id: 2 }, PlayerResources::default())]
         );
 
-        for (_ , planet) in &value.planets {
+        for (_, planet) in &value.planets {
             let mut player_map = players_stats_map.remove(&planet.owner).unwrap();
             player_map.resources += planet.resource;
             player_map.influence += planet.influence;
@@ -86,6 +123,7 @@ pub fn setup_resources(mut commands: &mut Commands, grid: &mut HexGrid) {
         ship_owner: player1,
         ship_hex: player1_home_hex,
         is_selected_for_move: false,
+        is_selected_for_buy: false,
     });
     planets.insert(player1_home_hex, planet1);
 

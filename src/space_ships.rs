@@ -9,8 +9,10 @@ use glam::vec2;
 use hexx::Hex;
 use once_cell::unsync::Lazy;
 use rand::Rng;
+use crate::space_ships::SpaceShipType::{Battleship, Carrier, Destroyer, Fighter, Frigate};
 
 use crate::world::player::Player;
+use crate::world::resources::{GameResources, PlayerResources};
 use crate::world::setup_world_grid::HEX_NOWHERE;
 
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
@@ -39,6 +41,7 @@ pub(crate) struct SpaceShip {
     pub ship_owner: Player,
     pub ship_hex: Hex,
     pub is_selected_for_move: bool,
+    pub is_selected_for_buy: bool,
 }
 
 impl SpaceShip {
@@ -48,6 +51,17 @@ impl SpaceShip {
             ship_owner: Player { id: -1 },
             ship_hex: HEX_NOWHERE,
             is_selected_for_move: false,
+            is_selected_for_buy: false,
+        }
+    }
+
+    pub(crate) fn get_price(&self) -> PlayerResources {
+        match self.ship_type {
+            Carrier => PlayerResources { influence: 1, resources: 5 },
+            Destroyer => PlayerResources { influence: 1, resources: 5 },
+            Frigate => PlayerResources { influence: 1, resources: 5 },
+            Battleship => PlayerResources { influence: 1, resources: 5 },
+            Fighter => PlayerResources { influence: 1, resources: 5 },
         }
     }
 }
