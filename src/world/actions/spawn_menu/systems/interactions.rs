@@ -3,19 +3,19 @@ use bevy::prelude::*;
 use crate::space_ships::{SpaceShip, SpaceShipType};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::world::actions::ActionsState;
-use crate::world::actions::spawn_menu::components::{EndSpawnButton, SpawnShip1Button};
+use crate::world::actions::spawn_menu::components::{CancelButton, EndSpawnButton, SpawnShip1Button};
 use crate::world::fonts_and_styles::colors::*;
 use crate::world::player::{Movable, Player};
 use crate::world::resources::GameResources;
 use crate::world::setup_world_grid::{HexGrid, SelectedHex};
 
-pub fn interact_with_end_spawn_button(
+pub(in crate::world::actions::spawn_menu) fn interact_with_end_spawn_button(
     mut button_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<EndSpawnButton>),
     >,
     mut simulation_state_next_state: ResMut<NextState<ActionsState>>,
-    mut switched_turn: ResMut<NextState<TurnSwitchedState>>
+    mut switched_turn: ResMut<NextState<TurnSwitchedState>>,
 ) {
     for (interaction, mut color) in button_query.iter_mut() {
         match *interaction {
@@ -34,7 +34,7 @@ pub fn interact_with_end_spawn_button(
     }
 }
 
-pub fn interact_with_spawn_ship1_button(
+pub(in crate::world::actions::spawn_menu) fn interact_with_spawn_ship1_button(
     mut button_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<SpawnShip1Button>),
@@ -77,6 +77,30 @@ pub fn interact_with_spawn_ship1_button(
         }
     }
 }
+
+pub(in crate::world::actions::spawn_menu) fn interact_cancel_button_click(
+    mut button_query: Query<(&Interaction, &mut BackgroundColor), (Changed<Interaction>, With<CancelButton>)>,
+    mut action_state: ResMut<NextState<ActionsState>>
+) {
+    if let Err(_) = button_query.get_single() {
+        return;
+    }
+    let (interaction, mut color) = button_query.single_mut();
+
+    match interaction {
+        Interaction::Pressed => {
+            *color = PRESSED_BUTTON.into();
+            action_state.set(ActionsState::NoActionRunning);
+        }
+        Interaction::Hovered => {
+            *color = HOVERED_BUTTON.into();
+        }
+        Interaction::None => {
+            *color = NORMAL_BUTTON.into();
+        }
+    }
+}
+
 /*
 pub fn interact_with_quit_button(
     mut app_exit_event_writer: EventWriter<AppExit>,

@@ -7,6 +7,7 @@ use crate::world::actions::spawn_menu::systems::layout::{build_pause_menu, despa
 pub(crate) mod components;
 mod styles;
 pub(crate) mod systems;
+pub(super) mod plugin;
 
 /*
 use systems::interactions::*;

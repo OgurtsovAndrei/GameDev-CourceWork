@@ -1,7 +1,8 @@
-use bevy::app::{App, Update};
+use bevy::app::{App, Startup, Update};
 use bevy::prelude::{in_state, IntoSystemConfigs, OnEnter, OnExit, Plugin};
 use crate::world::actions::{ActionsState, move_menu};
 use crate::world::actions::move_menu::despawn_move_space_ships_window;
+use crate::world::actions::move_menu::resources::setup_selected_for_move_army;
 use crate::world::actions::move_menu::systems::interactions::{clear_spaceships_selection, interact_with_cancel_button, interact_with_end_move_button, interact_with_move_ship1_button};
 use crate::world::setup_world_grid::clear_move_selected;
 
@@ -20,6 +21,7 @@ impl Plugin for MoveMenuPlugin {
                 despawn_move_space_ships_window,
                 clear_move_selected,
                 clear_spaceships_selection,
-            ));
+            ))
+            .add_systems(Startup, setup_selected_for_move_army);
     }
 }

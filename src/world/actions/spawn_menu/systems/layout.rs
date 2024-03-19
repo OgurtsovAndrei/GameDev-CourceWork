@@ -29,7 +29,7 @@ pub(crate) fn build_pause_menu(commands: &mut Commands, asset_server: &Res<Asset
                 z_index: ZIndex::Local(1), // See Ref. 1
                 ..default()
             },
-            SpawnMenu {},
+            SpawnMenu,
         ))
         .with_children(|parent| {
             parent
@@ -59,7 +59,7 @@ pub(crate) fn build_pause_menu(commands: &mut Commands, asset_server: &Res<Asset
                                 background_color: NORMAL_BUTTON.into(),
                                 ..default()
                             },
-                            EndSpawnButton {},
+                            EndSpawnButton,
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle {
@@ -83,7 +83,7 @@ pub(crate) fn build_pause_menu(commands: &mut Commands, asset_server: &Res<Asset
                                 background_color: NORMAL_BUTTON.into(),
                                 ..default()
                             },
-                            SpawnShip1Button {},
+                            SpawnShip1Button,
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle {
@@ -99,7 +99,7 @@ pub(crate) fn build_pause_menu(commands: &mut Commands, asset_server: &Res<Asset
                                 ..default()
                             });
                         });
-                    // Quit Button
+                    // Spawn second type button
                     parent
                         .spawn((
                             ButtonBundle {
@@ -107,7 +107,7 @@ pub(crate) fn build_pause_menu(commands: &mut Commands, asset_server: &Res<Asset
                                 background_color: NORMAL_BUTTON.into(),
                                 ..default()
                             },
-                            SpawnShip2Button {},
+                            SpawnShip2Button,
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle {
@@ -115,6 +115,29 @@ pub(crate) fn build_pause_menu(commands: &mut Commands, asset_server: &Res<Asset
                                 text: Text {
                                     sections: vec![TextSection::new(
                                         "Spawn Ship2",
+                                        get_button_text_style(&asset_server),
+                                    )],
+                                    alignment: TextAlignment::Center,
+                                    ..default()
+                                },
+                                ..default()
+                            });
+                        });
+                    parent
+                        .spawn((
+                            ButtonBundle {
+                                style: get_button_style(),
+                                background_color: NORMAL_BUTTON.into(),
+                                ..default()
+                            },
+                            CancelButton,
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn(TextBundle {
+                                style: Style { ..default() },
+                                text: Text {
+                                    sections: vec![TextSection::new(
+                                        "Cancel",
                                         get_button_text_style(&asset_server),
                                     )],
                                     alignment: TextAlignment::Center,

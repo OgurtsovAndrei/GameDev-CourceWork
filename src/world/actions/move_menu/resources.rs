@@ -11,6 +11,6 @@ impl Default for SelectedForMoveArmy {
     fn default() -> Self { Self { selected_ships: vec![] } }
 }
 
-pub(crate) fn setup_selected_for_move_army(mut commands: Commands) {
+pub(super) fn setup_selected_for_move_army(mut commands: Commands) {
     commands.insert_resource(SelectedForMoveArmy::default())
 }

@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 
 use crate::world::actions::move_menu::plugin::MoveMenuPlugin;
-use crate::world::actions::move_menu::resources::setup_selected_for_move_army;
-use crate::world::actions::spawn_menu::systems::interactions::{interact_with_end_spawn_button, interact_with_spawn_ship1_button};
+use crate::world::actions::spawn_menu::plugin::SpawnMenuPlugin;
 use crate::world::setup_world_grid::{HexGrid};
 
 pub(crate) mod spawn_menu;
@@ -16,15 +15,8 @@ impl Plugin for ActionsPlugin {
         app
             .add_state::<ActionsState>()
             .add_plugins(MoveMenuPlugin)
-            .add_systems(Update, (change_action_state))
-            .add_systems(OnEnter(ActionsState::SpawningSpaceShips), spawn_menu::spawn_spawning_space_ships_window)
-            .add_systems(Update, (
-                interact_with_end_spawn_button,
-                interact_with_spawn_ship1_button,
-            ).run_if(in_state(ActionsState::SpawningSpaceShips)))
-            .add_systems(OnExit(ActionsState::SpawningSpaceShips), spawn_menu::despawn_spawning_space_ships_window)
-            .add_systems(Startup, (setup_selected_for_move_army))
-        ;
+            .add_plugins(SpawnMenuPlugin)
+            .add_systems(Update, change_action_state);
     }
 }
 
@@ -45,16 +37,18 @@ fn change_action_state(
     mut commands: Commands,
     keyboard_input: Res<Input<KeyCode>>,
     current_state: Res<State<ActionsState>>,
-    hex_grid: ResMut<HexGrid>
+    hex_grid: ResMut<HexGrid>,
 ) {
     match current_state.get() {
         ActionsState::NoActionRunning => {
             if keyboard_input.just_pressed(KeyCode::S) { commands.insert_resource(NextState(Some(ActionsState::SpawningSpaceShips))) } else if keyboard_input.just_pressed(KeyCode::M) { commands.insert_resource(NextState(Some(ActionsState::MovingSpaceShips))) }
         }
-        _ => { if keyboard_input.just_pressed(KeyCode::C) {
-            reset_selected_ships(hex_grid);
-            commands.insert_resource(NextState(Some(ActionsState::NoActionRunning)))
-        } }
+        _ => {
+            if keyboard_input.just_pressed(KeyCode::C) {
+                reset_selected_ships(hex_grid);
+                commands.insert_resource(NextState(Some(ActionsState::NoActionRunning)))
+            }
+        }
     }
 }
 
