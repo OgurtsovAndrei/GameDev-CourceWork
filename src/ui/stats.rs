@@ -5,15 +5,13 @@ use bevy::ecs::query::With;
 use bevy::ecs::schedule::IntoSystemConfigs;
 use bevy::ecs::system::{Query, ResMut, Resource};
 use bevy::hierarchy::{BuildChildren, ChildBuilder};
-use bevy::prelude::{
-    AlignSelf, Color, Commands, FlexDirection, JustifyContent, JustifySelf, NodeBundle, Style,
-    TextBundle, TextStyle,
-};
+use bevy::prelude::{AlignSelf, Color, Commands, FlexDirection, JustifyContent, JustifySelf, NodeBundle, Res, Style, TextBundle, TextStyle};
 use bevy::text::Text;
 
 use crate::game_state::UpdateUI;
 use crate::world::player::{INITIAL_MOVES, Movable, Player, Stats};
-use crate::world::resources::{GameResources, update_resources};
+use crate::world::resources::GameResources;
+use crate::world::setup_world_grid::HexGrid;
 
 #[derive(Resource)]
 pub struct Round {
@@ -136,7 +134,8 @@ fn update_round_number_text(
     mut round_text_query: Query<&mut Text, With<RoundText>>,
     mut players: Query<(Entity, &Player, &mut Stats)>,
     mut round_res: ResMut<Round>,
-    game_resources: ResMut<GameResources>,
+    grid: Res<HexGrid>,
+    mut game_resources: ResMut<GameResources>,
 ) {
     let mut round_text = round_text_query.single_mut();
 
@@ -150,7 +149,7 @@ fn update_round_number_text(
                 commands.entity(entity).insert(Movable);
             }
         });
-        update_resources(game_resources);
+        game_resources.update(&grid);
     }
 }
 

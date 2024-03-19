@@ -10,10 +10,18 @@ use crate::world::setup_world_grid::{HexGrid, Planet};
 
 #[derive(Debug, Clone)]
 pub(crate) struct PlayerResources {
-    pub player: Player,
-    pub planets: HashMap<Hex, Planet>,
     pub influence: u32,
     pub resources: u32,
+}
+
+
+impl Default for PlayerResources {
+    fn default() -> Self {
+        PlayerResources {
+            influence: 0,
+            resources: 0,
+        }
+    }
 }
 
 #[derive(Debug, Resource, Clone)]
@@ -31,27 +39,35 @@ impl GameResources {
     }
 }
 
-pub fn update_planet_owners(grid: Res<HexGrid>, mut game_resources: ResMut<GameResources>) {
-    let res = &mut game_resources.resources;
-    for (_player, player_res) in res.iter_mut() { player_res.planets.clear() }
-    let planets = &grid.planets;
-    for (id_in_grid, planet) in planets {
-        let current_owner = planet.owner.clone();
-        let player_resource = res.get_mut(&current_owner).unwrap();
-        player_resource.planets.insert(id_in_grid.clone(), planet.clone());
-    }
-}
+impl GameResources {
+    pub fn update(&mut self, value: &HexGrid) {
+        let mut players_stats_map: HashMap<Player, PlayerResources> = HashMap::from(
+            [(Player { id: -1 }, PlayerResources::default()), (Player { id: 1 }, PlayerResources::default()), (Player { id: 2 }, PlayerResources::default())]
+        );
 
-pub fn update_resources(mut game_resources: ResMut<GameResources>) {
-    let res = &mut game_resources.resources;
-    for (_id, x) in res.iter_mut() {
-        let planets = &x.planets;
-        for (_ind, planet) in planets {
-            x.resources += planet.resource;
-            x.influence += planet.influence;
+        for (_ , planet) in &value.planets {
+            let mut player_map = players_stats_map.remove(&planet.owner).unwrap();
+            player_map.resources += planet.resource;
+            player_map.influence += planet.influence;
+            players_stats_map.insert(planet.owner, player_map);
+        }
+
+
+        for (player, stats) in players_stats_map {
+            if let None = self.resources.get(&player) {
+                continue;
+            }
+            let mut current_resources = self.resources.remove(&player).unwrap();
+
+            info!("{:?}, {:?}, {:?}", player, stats.influence, stats.resources);
+            current_resources.influence += stats.influence;
+            current_resources.resources += stats.resources;
+
+            self.resources.insert(player, current_resources);
         }
     }
 }
+
 
 const INITIAL_RESOURCES: u32 = 10;
 const INITIAL_INFLUENCE: u32 = 5;
@@ -78,10 +94,8 @@ pub fn setup_resources(mut commands: &mut Commands, grid: &mut HexGrid) {
     planet2.owner = player2;
     planets.insert(player2_home_hex, planet2);
 
-    let player1_planets: HashMap<Hex, Planet> = HashMap::from([(player1_home_hex, planets[&player1_home_hex].clone())]);
-    let player2_planets: HashMap<Hex, Planet> = HashMap::from([(player2_home_hex, planets[&player2_home_hex].clone())]);
-    let player1_res = PlayerResources { player: player1, planets: player1_planets, influence: INITIAL_INFLUENCE, resources: INITIAL_RESOURCES };
-    let player2_res = PlayerResources { player: player2, planets: player2_planets, influence: INITIAL_INFLUENCE, resources: INITIAL_RESOURCES };
+    let player1_res = PlayerResources { influence: INITIAL_INFLUENCE, resources: INITIAL_RESOURCES };
+    let player2_res = PlayerResources { influence: INITIAL_INFLUENCE, resources: INITIAL_RESOURCES };
     let mut resources = HashMap::new();
     resources.insert(player1, player1_res);
     resources.insert(player2, player2_res);

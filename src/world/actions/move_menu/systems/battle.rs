@@ -1,5 +1,4 @@
-use bevy::prelude::{Mut, Res, ResMut};
-use hexx::Hex;
+use bevy::prelude::{ Res, ResMut};
 use crate::world::setup_world_grid::{HexGrid, SelectedHex};
 
 pub(crate) fn determine_winner(selected_hexes: Res<SelectedHex>,

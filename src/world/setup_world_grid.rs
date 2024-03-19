@@ -7,7 +7,6 @@ use bevy::utils::HashMap;
 use bevy::window::PrimaryWindow;
 use glam::{vec2, Vec2};
 use hexx::{Hex, HexLayout, HexOrientation, shapes};
-use rand::Rng;
 
 use crate::space_ships::SpaceShip;
 use crate::world::actions::ActionsState;
