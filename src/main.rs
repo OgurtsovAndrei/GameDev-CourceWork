@@ -12,6 +12,7 @@ use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
 use crate::ui::action_panel::plugin::ActionPanelPlugin;
 use crate::ui::bottom_panel::plugin::BottomPanelPlugin;
 use crate::ui::hud::HudPlugin;
+use crate::world::ownership::OwnershipPlugin;
 use crate::world::player::TurnPlugin;
 
 mod game_state;
@@ -31,6 +32,7 @@ pub fn main() {
         .add_state::<AppState>()
         .add_state::<GamePhaseState>()
         // .add_plugins(bevy_editor_pls::EditorPlugin::default())
+        .add_plugins(OwnershipPlugin)
         .add_plugins(DefaultPickingPlugins)
         .add_plugins(StatsPlugin)
         .add_plugins(BottomPanelPlugin)

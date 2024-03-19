@@ -8,6 +8,7 @@ pub mod setup_world_grid;
 pub mod resources;
 pub(crate) mod actions;
 pub(crate) mod fonts_and_styles;
+pub mod ownership;
 
 pub struct WorldPlugin;
 

@@ -3,7 +3,10 @@ use hexx::Hex;
 use crate::world::setup_world_grid::{HexGrid, SelectedHex};
 
 pub(crate) fn determine_winner(selected_hexes: Res<SelectedHex>,
-hex_grid: ResMut<HexGrid>) {
+mut hex_grid: ResMut<HexGrid>) {
     let enemy_hex = selected_hexes.hex;
-    // hex_grid.planets
+    let mut planet = hex_grid.planets.get_mut(&enemy_hex);
+    if let None = planet {
+        return;
+    }
 }

@@ -7,9 +7,11 @@ use bevy::utils::HashMap;
 use bevy::window::PrimaryWindow;
 use glam::{vec2, Vec2};
 use hexx::{Hex, HexLayout, HexOrientation, shapes};
+use rand::Rng;
 
 use crate::space_ships::SpaceShip;
 use crate::world::actions::ActionsState;
+use crate::world::ownership::OwnershipText;
 use crate::world::player::Player;
 use crate::world::resources::setup_resources;
 
@@ -26,9 +28,10 @@ pub(crate) fn setup_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
 
+
 #[derive(Debug, Clone)]
 pub struct Planet {
-    pub index_in_grid: usize,
+    pub hex: Hex,
     pub resource: u32,
     pub influence: u32,
     pub owner: Player,
@@ -37,13 +40,13 @@ pub struct Planet {
 
 impl Planet {
     pub(crate) fn new(
-        index_in_grid: usize,
+        hex: Hex,
         resource: u32,
         influence: u32,
         owner: Player,
         owner_army: Vec<SpaceShip>) -> Self {
         Self {
-            index_in_grid,
+            hex,
             resource,
             influence,
             owner,
@@ -52,11 +55,11 @@ impl Planet {
     }
 
     pub(crate) fn default(
-        index_in_grid: usize,
+        hex: Hex,
         resource: u32,
         influence: u32) -> Self {
         Self {
-            index_in_grid,
+            hex,
             resource,
             influence,
             owner: Player { id: -1 },
@@ -101,7 +104,7 @@ pub(crate) fn setup_grid(
         .map(|(i, coord)| {
             let pos = layout.hex_to_world_pos(coord);
             let index = i % (FILE_GRID_HEIGHT_IN_FILE * GRID_WEIGHT_IN_FILE);
-            let planet = Planet::default(i, (index + 1) as u32, (5 - index) as u32);
+            let planet = Planet::default(coord, (index + 1) as u32, (5 - index) as u32);
 
             let entity = commands
                 .spawn(SpriteSheetBundle {
@@ -118,7 +121,10 @@ pub(crate) fn setup_grid(
                 .with_children(|parent| {
                     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
                     parent.spawn(create_resource_text_bundle(font.clone(), planet.resource));
-                    parent.spawn(create_influence_text_bundle(font.clone(), planet.index_in_grid as u32));
+                    parent.spawn(create_influence_text_bundle(font.clone(), planet.influence));
+                    parent.spawn((create_ownership_text_bundle(font.clone()), OwnershipText {
+                        hex: coord
+                    }));
                 })
                 .id();
             planets.insert(coord, planet);
@@ -182,6 +188,24 @@ fn create_influence_text_bundle(font: Handle<Font>, value: u32) -> Text2dBundle 
         format!("Influence {}", value),
         resource_text_style,
         resource_transform,
+    )
+}
+
+fn create_ownership_text_bundle(font: Handle<Font>) -> Text2dBundle {
+    let resource_text_style: TextStyle = TextStyle {
+        font,
+        font_size: 42.0,
+        color: Color::GREEN,
+    };
+    let transform = Transform {
+        translation: Vec3::new(0., 0., 0.5),
+        scale: Vec3::splat(0.35),
+        ..Default::default()
+    };
+    create_text_bundle(
+        format!("Owner: {}", "None"),
+        resource_text_style,
+        transform,
     )
 }
 

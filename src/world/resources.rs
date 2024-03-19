@@ -59,23 +59,29 @@ const INITIAL_INFLUENCE: u32 = 5;
 pub fn setup_resources(mut commands: &mut Commands, grid: &mut HexGrid) {
     let planets = &mut grid.planets;
     let player1 = Player { id: 1 };
+    let player2 = Player { id: 2 };
     let player1_home_hex = Hex { x: -2, y: 2 };
     let player2_home_hex = Hex { x: 2, y: -2 };
-    let mut planet = planets.remove(&player1_home_hex).unwrap();
-    planet.owner = player1;
-    planet.owner_army.push(SpaceShip {
+
+    let mut planet1 = planets.remove(&player1_home_hex).unwrap();
+    planet1.owner = player1;
+    planet1.owner_army.push(SpaceShip {
         ship_type: SpaceShipType::Battleship,
-        ship_owner: Player { id: 1 },
-        ship_hex: player1_home_hex.clone(),
+        ship_owner: player1,
+        ship_hex: player1_home_hex,
         is_selected_for_move: false,
     });
-    planets.insert(player1_home_hex.clone(), planet);
+    planets.insert(player1_home_hex, planet1);
 
-    let player1_planets: HashMap<Hex, Planet> = HashMap::from([(player1_home_hex.clone(), planets[&player1_home_hex].clone())]);
-    let player2 = Player { id: 2 };
-    let player2_planets: HashMap<Hex, Planet> = HashMap::from([(player2_home_hex.clone(), planets[&player2_home_hex].clone())]);
-    let player1_res = PlayerResources { player: player1.clone(), planets: player1_planets, influence: INITIAL_INFLUENCE, resources: INITIAL_RESOURCES };
-    let player2_res = PlayerResources { player: player2.clone(), planets: player2_planets, influence: INITIAL_INFLUENCE, resources: INITIAL_RESOURCES };
+
+    let mut planet2 = planets.remove(&player2_home_hex).unwrap();
+    planet2.owner = player2;
+    planets.insert(player2_home_hex, planet2);
+
+    let player1_planets: HashMap<Hex, Planet> = HashMap::from([(player1_home_hex, planets[&player1_home_hex].clone())]);
+    let player2_planets: HashMap<Hex, Planet> = HashMap::from([(player2_home_hex, planets[&player2_home_hex].clone())]);
+    let player1_res = PlayerResources { player: player1, planets: player1_planets, influence: INITIAL_INFLUENCE, resources: INITIAL_RESOURCES };
+    let player2_res = PlayerResources { player: player2, planets: player2_planets, influence: INITIAL_INFLUENCE, resources: INITIAL_RESOURCES };
     let mut resources = HashMap::new();
     resources.insert(player1, player1_res);
     resources.insert(player2, player2_res);
