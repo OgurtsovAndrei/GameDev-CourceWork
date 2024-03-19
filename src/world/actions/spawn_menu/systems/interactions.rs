@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::space_ships::{SpaceShip, SpaceShipType};
+use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::world::actions::ActionsState;
 use crate::world::actions::spawn_menu::components::{EndSpawnButton, SpawnShip1Button};
 use crate::world::fonts_and_styles::colors::*;
@@ -14,12 +15,14 @@ pub fn interact_with_end_spawn_button(
         (Changed<Interaction>, With<EndSpawnButton>),
     >,
     mut simulation_state_next_state: ResMut<NextState<ActionsState>>,
+    mut switched_turn: ResMut<NextState<TurnSwitchedState>>
 ) {
     for (interaction, mut color) in button_query.iter_mut() {
         match *interaction {
             Interaction::Pressed => {
                 *color = PRESSED_BUTTON.into();
                 simulation_state_next_state.set(ActionsState::NoActionRunning);
+                switched_turn.set(TurnSwitchedState::OnTurnSwitched)
             }
             Interaction::Hovered => {
                 *color = HOVERED_BUTTON.into();

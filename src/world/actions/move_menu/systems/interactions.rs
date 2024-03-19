@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::space_ships::SpaceShip;
+use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::world::actions::ActionsState;
 use crate::world::actions::move_menu::components::{EndMoveButton, MoveShip1Button};
 use crate::world::fonts_and_styles::colors::*;
@@ -18,6 +19,7 @@ pub fn interact_with_end_move_button(
     current_player2_query: Query<&Player, (With<Player>, Without<Movable>)>,
     mut selected_hex: ResMut<SelectedHex>,
     mut grid: ResMut<HexGrid>,
+    mut switched_turn: ResMut<NextState<TurnSwitchedState>>
 ) {
     let player = current_player_query.single();
     let hex_under_fight = selected_hex.hex.clone();
@@ -36,6 +38,7 @@ pub fn interact_with_end_move_button(
                 planet_under_fight.owner_army = winner_army;
                 grid.planets.insert(selected_hex.hex, planet_under_fight);
                 simulation_state_next_state.set(ActionsState::NoActionRunning);
+                switched_turn.set(TurnSwitchedState::OnTurnSwitched)
             }
             Interaction::Hovered => {
                 *color = HOVERED_BUTTON.into();
