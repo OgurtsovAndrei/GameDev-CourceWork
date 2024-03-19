@@ -70,7 +70,7 @@ pub(crate) fn build_move_menu(commands: &mut Commands, asset_server: &Res<AssetS
                                 background_color: NORMAL_BUTTON.into(),
                                 ..default()
                             },
-                            EndMoveButton {},
+                            EndMoveButton,
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle {
@@ -94,7 +94,7 @@ pub(crate) fn build_move_menu(commands: &mut Commands, asset_server: &Res<AssetS
                                 background_color: NORMAL_BUTTON.into(),
                                 ..default()
                             },
-                            MoveShip1Button {},
+                            MoveShip1Button,
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle {
@@ -110,7 +110,7 @@ pub(crate) fn build_move_menu(commands: &mut Commands, asset_server: &Res<AssetS
                                 ..default()
                             });
                         });
-                    // Quit Button
+                    // Spawn second ship type button
                     parent
                         .spawn((
                             ButtonBundle {
@@ -118,7 +118,7 @@ pub(crate) fn build_move_menu(commands: &mut Commands, asset_server: &Res<AssetS
                                 background_color: NORMAL_BUTTON.into(),
                                 ..default()
                             },
-                            MoveShip2Button {},
+                            MoveShip2Button,
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle {
@@ -126,6 +126,30 @@ pub(crate) fn build_move_menu(commands: &mut Commands, asset_server: &Res<AssetS
                                 text: Text {
                                     sections: vec![TextSection::new(
                                         "Move Ship2",
+                                        get_button_text_style(&asset_server),
+                                    )],
+                                    alignment: TextAlignment::Center,
+                                    ..default()
+                                },
+                                ..default()
+                            });
+                        });
+
+                    parent
+                        .spawn((
+                            CancelButton,
+                            ButtonBundle {
+                                style: get_button_style(),
+                                background_color: NORMAL_BUTTON.into(),
+                                ..default()
+                            },
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn(TextBundle {
+                                style: Style { ..default() },
+                                text: Text {
+                                    sections: vec![TextSection::new(
+                                        "Cancel",
                                         get_button_text_style(&asset_server),
                                     )],
                                     alignment: TextAlignment::Center,

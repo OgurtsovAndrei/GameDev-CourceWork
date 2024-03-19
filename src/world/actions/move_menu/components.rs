@@ -1,13 +1,16 @@
 use bevy::prelude::Component;
 
 #[derive(Component)]
-pub struct MoveMenu {}
+pub(super) struct MoveMenu;
 
 #[derive(Component)]
-pub struct EndMoveButton {}
+pub(super) struct EndMoveButton;
 
 #[derive(Component)]
-pub struct MoveShip1Button {}
+pub(super) struct MoveShip1Button;
 
 #[derive(Component)]
-pub struct MoveShip2Button {}
+pub(super) struct MoveShip2Button;
+
+#[derive(Component)]
+pub(super) struct CancelButton;

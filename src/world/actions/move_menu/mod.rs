@@ -8,6 +8,7 @@ pub(crate) mod components;
 mod styles;
 pub(crate) mod systems;
 pub(crate) mod resources;
+pub(crate) mod plugin;
 
 /*
 use systems::interactions::*;
