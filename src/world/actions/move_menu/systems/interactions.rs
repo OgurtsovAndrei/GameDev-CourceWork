@@ -1,8 +1,9 @@
 use bevy::prelude::*;
-use crate::space_ships::SpaceShip;
+
+use crate::space_ships::{get_count_spaceship_dict, SpaceShip, SpaceShipType};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::world::actions::{ActionsState, reset_selected_for_move_ships};
-use crate::world::actions::move_menu::components::{CancelButton, EndMoveButton, MoveShip1Button};
+use crate::world::actions::move_menu::components::{CancelButton, EndMoveButton, MoveShip1Button, SelectedSpaceshipsText};
 use crate::world::fonts_and_styles::colors::*;
 use crate::world::player::{Movable, Player};
 use crate::world::resources::GameResources;
@@ -27,7 +28,7 @@ pub(in crate::world::actions::move_menu) fn interact_with_end_move_button(
         match *interaction {
             Interaction::Pressed => {
                 *color = PRESSED_BUTTON.into();
-                let army = get_all_selected_ships(&mut grid);
+                let army = reset_selected_ships(&mut grid);
                 for ship in army.iter() {
                     assert_eq!(ship.ship_owner, player.clone())
                 }
@@ -62,7 +63,7 @@ pub(crate) fn clear_spaceships_selection(mut grid: ResMut<HexGrid>) {
     }
 }
 
-pub(self) fn get_all_selected_ships(grid: &mut ResMut<HexGrid>) -> Vec<SpaceShip> {
+pub(self) fn reset_selected_ships(grid: &mut ResMut<HexGrid>) -> Vec<SpaceShip> {
     let mut ships = vec![];
     for (_, planet) in grid.planets.iter_mut() {
         let mut ships_left = vec![];
@@ -76,6 +77,19 @@ pub(self) fn get_all_selected_ships(grid: &mut ResMut<HexGrid>) -> Vec<SpaceShip
             spaceship.is_selected_for_move = false
         }
         planet.owner_army = ships_left;
+    }
+    return ships;
+}
+
+pub(self) fn get_all_selected_ships(grid: &Res<HexGrid>) -> Vec<SpaceShip> {
+    let mut ships = vec![];
+    for (_, planet) in grid.planets.iter() {
+        let army = planet.owner_army.clone();
+        for mut spaceship in army.iter() {
+            if spaceship.is_selected_for_move {
+                ships.push(spaceship.clone())
+            }
+        }
     }
     return ships;
 }
@@ -112,6 +126,7 @@ pub(in crate::world::actions::move_menu) fn interact_with_move_ship1_button(
                 if !flag {
                     planet.owner_army[id].is_selected_for_move = true;
                 }
+
                 grid.planets.insert(*current_hex, planet);
                 resources.set_changed();
                 grid.set_changed();
@@ -130,7 +145,7 @@ pub(in crate::world::actions::move_menu) fn interact_with_move_ship1_button(
 pub(in crate::world::actions::move_menu) fn interact_with_cancel_button(
     mut button_query: Query<(&Interaction, &mut BackgroundColor), (Changed<Interaction>, With<CancelButton>)>,
     mut simulation_state_next_state: ResMut<NextState<ActionsState>>,
-    mut hex_grid: ResMut<HexGrid>
+    mut hex_grid: ResMut<HexGrid>,
 ) {
     if let Err(_) = button_query.get_single() {
         return;
@@ -148,6 +163,33 @@ pub(in crate::world::actions::move_menu) fn interact_with_cancel_button(
         Interaction::None => {
             *color = NORMAL_BUTTON.into();
         }
+    }
+}
+
+pub(in crate::world::actions::move_menu) fn update_selected_spaceships_text(
+    grid: Res<HexGrid>,
+    mut text_query: Query<(&mut Text), (With<SelectedSpaceshipsText>)>,
+) {
+    if let Err(_) = text_query.get_single_mut() {
+        return;
+    }
+    let all_ships = get_all_selected_ships(&grid);
+    let dict = get_count_spaceship_dict(all_ships);
+    let mut text = text_query.single_mut();
+
+    for (t, count) in dict {
+        let index = get_spaceship_index_by_type(t);
+        text.sections.get_mut(index).unwrap().value = format!("{count}\n");
+    }
+}
+
+pub(self) fn get_spaceship_index_by_type(space_ship_type: SpaceShipType) -> usize {
+    match space_ship_type {
+        SpaceShipType::Carrier => { 1 }
+        SpaceShipType::Destroyer => { 3 }
+        SpaceShipType::Frigate => { 5 }
+        SpaceShipType::Battleship => { 7 }
+        SpaceShipType::Fighter => { 9 }
     }
 }
 

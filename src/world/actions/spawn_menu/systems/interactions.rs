@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use hexx::hex;
 
 use crate::space_ships::{SpaceShip, SpaceShipType};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
@@ -66,7 +65,7 @@ pub(in crate::world::actions::spawn_menu) fn interact_with_spawn_ship1_button(
                 };
                 let price = spaceship.get_price();
 
-                if player_resources < &price { return; }
+                if player_resources.influence < price.influence || player_resources.resources < price.resources { return; }
                 let mut player_resources = resources.resources.remove(player).unwrap();
                 player_resources -= price;
 
@@ -92,7 +91,7 @@ pub(in crate::world::actions::spawn_menu) fn interact_cancel_button_click(
     mut button_query: Query<(&Interaction, &mut BackgroundColor), (Changed<Interaction>, With<CancelButton>)>,
     mut action_state: ResMut<NextState<ActionsState>>,
     mut hex_grid: ResMut<HexGrid>,
-    mut game_resources: ResMut<GameResources>
+    mut game_resources: ResMut<GameResources>,
 ) {
     if let Err(_) = button_query.get_single() {
         return;

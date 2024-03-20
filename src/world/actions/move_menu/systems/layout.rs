@@ -51,17 +51,56 @@ pub(crate) fn build_move_menu(commands: &mut Commands, asset_server: &Res<AssetS
                         },
                         ..default()
                     });
-                    parent.spawn(TextBundle {
+                    parent.spawn((TextBundle {
                         text: Text {
-                            sections: vec![TextSection::new(
-                                "Info \nabout \nspaceships \non selected \nplanet",
-                                get_info_text_style(&asset_server),
-                            )],
+                            sections: vec![
+                                TextSection::new(
+                                    "Carrier: ",
+                                    get_info_text_style(&asset_server),
+                                ),
+                                TextSection::new(
+                                    "0\n",
+                                    get_info_text_style(&asset_server),
+                                ),
+                                TextSection::new(
+                                    "Destroyer: ",
+                                    get_info_text_style(&asset_server),
+                                ),
+                                TextSection::new(
+                                    "0\n",
+                                    get_info_text_style(&asset_server),
+                                ),
+                                TextSection::new(
+                                    "Frigate: ",
+                                    get_info_text_style(&asset_server),
+                                ),
+                                TextSection::new(
+                                    "0\n",
+                                    get_info_text_style(&asset_server),
+                                ),
+                                TextSection::new(
+                                    "Battleship: ",
+                                    get_info_text_style(&asset_server),
+                                ),
+                                TextSection::new(
+                                    "0\n",
+                                    get_info_text_style(&asset_server),
+                                ),
+                                TextSection::new(
+                                    "Fighter: ",
+                                    get_info_text_style(&asset_server),
+                                ),
+                                TextSection::new(
+                                    "0\n",
+                                    get_info_text_style(&asset_server),
+                                ),
+                            ],
                             alignment: TextAlignment::Center,
                             ..default()
                         },
                         ..default()
-                    });
+                    },
+                                  SelectedSpaceshipsText));
                     // End spawn actions Button
                     parent
                         .spawn((

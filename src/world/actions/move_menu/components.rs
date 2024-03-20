@@ -14,3 +14,7 @@ pub(super) struct MoveShip2Button;
 
 #[derive(Component)]
 pub(super) struct CancelButton;
+
+
+#[derive(Component)]
+pub(super) struct SelectedSpaceshipsText;

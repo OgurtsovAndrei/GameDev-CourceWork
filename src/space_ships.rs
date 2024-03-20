@@ -24,10 +24,30 @@ pub(crate) enum SpaceShipType {
     Fighter,
 }
 
-pub fn get_random_spaceship() -> SpaceShipType {
+pub(crate) fn get_random_spaceship() -> SpaceShipType {
     let n = rand::thread_rng().gen_range(0..5);
-    let spaceship_vec: Vec<SpaceShipType> = vec![SpaceShipType::Carrier, SpaceShipType::Destroyer, SpaceShipType::Frigate, SpaceShipType::Battleship, SpaceShipType::Fighter];
+    let spaceship_vec: Vec<SpaceShipType> = vec![Carrier, Destroyer, Frigate, Battleship, Fighter];
     return spaceship_vec[n];
+}
+
+pub(crate) fn get_count_spaceship_dict(spaceship_list : Vec<SpaceShip>) -> HashMap<SpaceShipType, usize> {
+    let mut dict = HashMap::from(
+        [
+            (Carrier, 0),
+            (Destroyer, 0),
+            (Frigate, 0),
+            (Battleship, 0),
+            (Fighter, 0)
+        ]);
+
+    spaceship_list.iter().for_each(|spaceship| {
+        let t = spaceship.ship_type;
+        let value = dict[&t];
+        dict.insert(t, value + 1);
+    });
+
+    dict
+
 }
 
 pub struct SpaceShipCharacteristics {

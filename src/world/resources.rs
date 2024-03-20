@@ -9,7 +9,7 @@ use crate::space_ships::{SpaceShip, SpaceShipType};
 use crate::world::player::Player;
 use crate::world::setup_world_grid::{HexGrid, Planet};
 
-#[derive(Debug, Clone, PartialOrd, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy)]
 pub(crate) struct PlayerResources {
     pub influence: u32,
     pub resources: u32,
