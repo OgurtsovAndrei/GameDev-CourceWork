@@ -1,16 +1,22 @@
+use std::fmt::Debug;
+
 use bevy::prelude::{BackgroundColor, Button, Changed, Interaction, NextState, Query, Res, ResMut, State, With};
+
 use crate::ui::action_panel::components::{DebugButton, HireArmyButton, NextMoveButton, OpenMovePanelButton};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::world::actions::ActionsState;
 use crate::world::actions::ActionsState::{MovingSpaceShips, NoActionRunning, SpawningSpaceShips};
-use crate::world::fonts_and_styles::colors::{HOVERED_BUTTON, NORMAL_BUTTON, PRESSED_BUTTON};
+use crate::world::fonts_and_styles::colors::{DISABLED_BUTTON, HOVERED_BUTTON, NORMAL_BUTTON, PRESSED_BUTTON};
 use crate::world::player::{Movable, Player, Stats};
-
+use crate::world::setup_world_grid::{HexGrid, SelectedHex};
 
 pub fn hire_army_button_click(
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor), (Changed<Interaction>, With<Button>, With<HireArmyButton>)>,
     current_state: Res<State<ActionsState>>,
     mut mut_current_state: ResMut<NextState<ActionsState>>,
+    selected_hex: Res<SelectedHex>,
+    grid: Res<HexGrid>,
+    current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
 ) {
     if let Err(_) = interaction_query.get_single() {
         return;
@@ -22,17 +28,59 @@ pub fn hire_army_button_click(
         return;
     }
 
+    let current_player = current_player_query.single();
+    if !selected_hex.is_selected || grid.planets.get(&selected_hex.hex).unwrap().owner != *current_player {
+        return;
+    }
+
+    let new_color;
     match interaction {
         Interaction::Pressed => {
-            *color = PRESSED_BUTTON.into();
+            new_color = PRESSED_BUTTON.into();
             mut_current_state.set(SpawningSpaceShips);
         }
         Interaction::Hovered => {
-            *color = HOVERED_BUTTON.into();
+            new_color = HOVERED_BUTTON.into();
         }
         Interaction::None => {
-            *color = NORMAL_BUTTON.into()
+            new_color = NORMAL_BUTTON.into()
         }
+    }
+    *color = new_color;
+}
+
+pub fn update_spawn_button_disabled(
+    mut interaction_query: Query<&mut BackgroundColor, (With<Button>, With<HireArmyButton>, )>,
+    selected_hex: Res<SelectedHex>,
+    grid: Res<HexGrid>,
+    current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
+) {
+    let mut binding = interaction_query.get_single_mut().unwrap();
+    let mut color = binding.as_mut();
+    let current_player = current_player_query.single();
+    if color.clone().0 == HOVERED_BUTTON || color.clone().0 == PRESSED_BUTTON { return; }
+    if !selected_hex.is_selected || grid.planets.get(&selected_hex.hex).unwrap().owner != *current_player {
+        color.0 = DISABLED_BUTTON.into();
+        return;
+    } else {
+        color.0 = NORMAL_BUTTON.into();
+        return;
+    }
+}
+
+pub fn update_move_button_disabled(
+    mut interaction_query: Query<&mut BackgroundColor, (With<Button>, With<OpenMovePanelButton>, )>,
+    selected_hex: Res<SelectedHex>,
+) {
+    let mut binding = interaction_query.get_single_mut().unwrap();
+    let mut color = binding.as_mut();
+    if color.clone().0 == HOVERED_BUTTON || color.clone().0 == PRESSED_BUTTON { return; }
+    if !selected_hex.is_selected {
+        color.0 = DISABLED_BUTTON.into();
+        return;
+    } else {
+        color.0 = NORMAL_BUTTON.into();
+        return;
     }
 }
 
@@ -66,7 +114,7 @@ pub fn handle_move_button_click(
 pub fn handle_dbg_button_click(
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor), (Changed<Interaction>, With<Button>, With<DebugButton>)>,
     mut turn_switched_state: ResMut<NextState<TurnSwitchedState>>,
-    current_state: Res<State<ActionsState>>
+    current_state: Res<State<ActionsState>>,
 ) {
     if let Err(_) = interaction_query.get_single() {
         return;
@@ -98,7 +146,7 @@ pub fn handle_finish_moves_in_round_button_click(
         (Changed<Interaction>, With<Button>, With<NextMoveButton>),
     >,
     mut current_player_query: Query<&mut Stats, (With<Player>, With<Movable>)>,
-    mut move_done_state: ResMut<NextState<TurnSwitchedState>>
+    mut move_done_state: ResMut<NextState<TurnSwitchedState>>,
 ) {
     if let Err(_) = interaction_query.get_single() {
         return;
