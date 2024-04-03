@@ -7,10 +7,10 @@ pub(super) struct SpawnMenu;
 pub(super) struct EndSpawnButton;
 
 #[derive(Component)]
-pub(super) struct SpawnShip1Button;
+pub(super) struct SpawnDestroyerButton;
 
 #[derive(Component)]
-pub(super) struct SpawnShip2Button;
+pub(super) struct SpawnBattleshipButton;
 
 #[derive(Component)]
 pub(super) struct CancelButton;

@@ -66,7 +66,7 @@ pub(crate) fn build_pause_menu(commands: &mut Commands, asset_server: &Res<Asset
                                 style: Style { ..default() },
                                 text: Text {
                                     sections: vec![TextSection::new(
-                                        "Resume",
+                                        "Perform buy",
                                         get_button_text_style(&asset_server),
                                     )],
                                     alignment: TextAlignment::Center,
@@ -83,14 +83,14 @@ pub(crate) fn build_pause_menu(commands: &mut Commands, asset_server: &Res<Asset
                                 background_color: NORMAL_BUTTON.into(),
                                 ..default()
                             },
-                            SpawnShip1Button,
+                            SpawnDestroyerButton,
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle {
                                 style: Style { ..default() },
                                 text: Text {
                                     sections: vec![TextSection::new(
-                                        "Spawn Ship1",
+                                        "Spawn Destroyer",
                                         get_button_text_style(&asset_server),
                                     )],
                                     alignment: TextAlignment::Center,
@@ -107,14 +107,14 @@ pub(crate) fn build_pause_menu(commands: &mut Commands, asset_server: &Res<Asset
                                 background_color: NORMAL_BUTTON.into(),
                                 ..default()
                             },
-                            SpawnShip2Button,
+                            SpawnBattleshipButton,
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle {
                                 style: Style { ..default() },
                                 text: Text {
                                     sections: vec![TextSection::new(
-                                        "Spawn Ship2",
+                                        "Spawn Battleship",
                                         get_button_text_style(&asset_server),
                                     )],
                                     alignment: TextAlignment::Center,
