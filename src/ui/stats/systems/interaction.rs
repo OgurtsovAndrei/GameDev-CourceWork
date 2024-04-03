@@ -1,9 +1,17 @@
-use bevy::prelude::{Commands, Entity, Query, Res, ResMut, Text, With};
+use bevy::log::info;
+use bevy::prelude::{Commands, DetectChangesMut, Entity, NextState, Query, Res, ResMut, Text, With};
+use bevy::prelude::shape::Plane;
+use bevy::utils::tracing::field::debug;
+use hexx::Hex;
+use crate::game_state::{AppState, GamePhaseState};
 use crate::ui::stats::components::{MovesLeftText, RoundText, TurnText};
 use crate::ui::stats::resources::Round;
 use crate::world::player::{INITIAL_MOVES, Movable, Player, Stats};
 use crate::world::resources::GameResources;
-use crate::world::setup_world_grid::HexGrid;
+use crate::world::setup_world_grid::{HexGrid, Planet};
+
+static CENTRAL_HEX: Hex = Hex { x: 0, y: 0 };
+pub(crate) const MAX_WIN_POINTS: i32 = 1;
 
 pub(in crate::ui::stats) fn reset_player(commands: &mut Commands, id: Entity, stats: &mut Stats) {
     stats.moves_left = INITIAL_MOVES;
@@ -39,6 +47,26 @@ pub(in crate::ui::stats) fn update_moves_left_text(
     let stats = current_player_query.single();
     let mut moves_left_text = moves_left_text_query.single_mut();
     set_moves_left_text(&mut moves_left_text, stats.moves_left);
+}
+
+pub fn update_win_points_number(
+    grid: Res<HexGrid>,
+    mut players: Query<(&Player, &mut Stats)>,
+    mut game_phase: ResMut<NextState<AppState>>
+) {
+    if players.iter().all(|(_, stats)| stats.moves_left == 0) {
+        let planet: &Planet = grid.planets.get(&CENTRAL_HEX).unwrap();
+        players.iter_mut().for_each(|(player, mut stats)| {
+            info!("Before Player: {:?} win_points: {:?}", player.id, stats.win_points);
+            if (planet.owner.id == player.id) {
+                stats.win_points += 1;
+                if (stats.win_points == MAX_WIN_POINTS) {
+                    game_phase.set(AppState::GameOver)
+                }
+            }
+            info!("After Player: {:?} win_points: {:?}", player.id, stats.win_points);
+        })
+    }
 }
 
 pub fn update_round_number_text(

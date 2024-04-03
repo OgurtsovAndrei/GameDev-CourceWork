@@ -16,14 +16,14 @@ pub(in crate::world::actions::move_menu) fn interact_with_end_move_button(
     >,
     mut simulation_state_next_state: ResMut<NextState<ActionsState>>,
     current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
-    current_player2_query: Query<&Player, (With<Player>, Without<Movable>)>,
     mut selected_hex: ResMut<SelectedHex>,
     mut grid: ResMut<HexGrid>,
     mut switched_turn: ResMut<NextState<TurnSwitchedState>>,
 ) {
-    let player = current_player_query.single();
+    let player = current_player_query.single().clone();
     let hex_under_fight = selected_hex.hex.clone();
-    let player2 = current_player2_query.single();
+    let player2 = grid.planets.get(&hex_under_fight).unwrap().owner;
+
     for (interaction, mut color) in button_query.iter_mut() {
         match *interaction {
             Interaction::Pressed => {
@@ -33,7 +33,7 @@ pub(in crate::world::actions::move_menu) fn interact_with_end_move_button(
                     assert_eq!(ship.ship_owner, player.clone())
                 }
                 let mut planet_under_fight: Planet = grid.planets.remove(&hex_under_fight).unwrap();
-                let (winner, winner_army) = perform_fight(*player, *player2, army, planet_under_fight.owner_army);
+                let (winner, winner_army) = perform_fight(player, player2, army, planet_under_fight.owner_army);
                 planet_under_fight.owner = winner;
                 planet_under_fight.owner_army = winner_army;
                 grid.planets.insert(selected_hex.hex, planet_under_fight);

@@ -1,7 +1,6 @@
 use bevy::app::{Plugin, Update};
 use bevy::ecs::schedule::{apply_deferred, IntoSystemConfigs, IntoSystemSetConfigs, SystemSet};
-use bevy::input::Input;
-use bevy::prelude::{apply_state_transition, Commands, KeyCode, NextState, Res, State, States};
+use bevy::prelude::{apply_state_transition, Commands, NextState, Res, State, States};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
 
 #[derive(States, Debug, Copy, Clone, Eq, PartialEq, Hash, Default)]
@@ -44,7 +43,7 @@ impl Plugin for GameStatePlugin {
                 Update,
                 (apply_state_transition::<TurnSwitchedState>)
                     .after(UpdateUI::UserInput)
-                    .before(UpdateUI::FlipTurn)
+                    .before(UpdateUI::FlipTurn),
             );
     }
 }
@@ -58,21 +57,15 @@ pub enum UpdateUI {
 }
 
 pub fn toggle_game(
-    mut commands: Commands,
-    keyboard_input: Res<Input<KeyCode>>,
     current_state: Res<State<AppState>>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::Space) {
-        match current_state.get() {
-            AppState::MainMenuState => {
-                commands.insert_resource(NextState(Some(AppState::GamePhaseState)))
-            }
-            AppState::GamePhaseState => {
-                commands.insert_resource(NextState(Some(AppState::MainMenuState)))
-            }
-            AppState::GameOver => {
-                commands.insert_resource(NextState(Some(AppState::MainMenuState)))
-            }
+    match current_state.get() {
+        AppState::MainMenuState => {
+        }
+        AppState::GamePhaseState => {
+        }
+        AppState::GameOver => {
+
         }
     }
 }

@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use bevy::app::{Plugin, Update};
 use bevy::ecs::{
     bundle::Bundle,
@@ -16,9 +17,16 @@ pub struct Player {
     pub id: i32,
 }
 
+impl Display for Player {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", format!("Player {0}", self.id))
+    }
+}
+
 #[derive(Component)]
 pub struct Stats {
     pub moves_left: i32,
+    pub win_points: i32,
 }
 
 
@@ -38,6 +46,7 @@ impl Default for PlayerBundle {
             player: Player { id: 0 },
             stats: Stats {
                 moves_left: INITIAL_MOVES,
+                win_points: 0,
             },
         }
     }
