@@ -24,9 +24,7 @@ impl Plugin for ActionPanelPlugin {
                 interaction::update_spawn_button_disabled,
                 interaction::update_move_button_disabled,
             ).in_set(UpdateUI::RenderStats))
-            .add_systems(OnEnter(TurnSwitchedState::OnTurnSwitched),
-                         (clear_selected,
-                          crate::world::actions::clear_action_state).in_set(FlipTurn),
+            .add_systems(OnEnter(TurnSwitchedState::OnTurnSwitched), (clear_selected, crate::world::actions::clear_action_state).in_set(FlipTurn),
             )
         ;
     }

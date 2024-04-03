@@ -11,7 +11,7 @@ use hexx::{Hex, HexLayout, HexOrientation, shapes};
 use crate::space_ships::SpaceShip;
 use crate::world::actions::ActionsState;
 use crate::world::ownership::OwnershipText;
-use crate::world::player::Player;
+use crate::world::player::{Movable, Player};
 use crate::world::resources::setup_resources;
 
 const HEX_SIZE: Vec2 = Vec2::splat(75.0);
@@ -268,6 +268,7 @@ pub(crate) fn handle_click_on_planet(
     mut tiles: Query<&mut TextureAtlasSprite>,
     mut selected_hex: ResMut<SelectedHex>,
     current_state: Res<State<ActionsState>>,
+    current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
 ) {
     let window = windows.single();
     let (camera, cam_transform) = cameras.single();
@@ -286,6 +287,11 @@ pub(crate) fn handle_click_on_planet(
                 // set_color_to_hex(&grid, &mut tiles, &prev_pos.hex, &DEFAULT_COLOR);
                 return;
             }
+
+            if current_player_query.get_single().unwrap().clone() != grid.planets.get(&cur_pos).unwrap().owner {
+                return;
+            };
+
 
             if selected_hex.hex_selected_for_move == cur_pos {
                 if selected_hex.is_selected_for_move {
