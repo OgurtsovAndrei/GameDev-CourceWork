@@ -66,15 +66,16 @@ impl Plugin for TurnPlugin {
 
 fn determine_turn(
     mut commands: Commands,
-    current_player_query: Query<(Entity, &Stats), (With<Player>, With<Movable>)>,
+    mut current_player_query: Query<(Entity, &mut Stats), (With<Player>, With<Movable>)>,
     opposite_player_query: Query<(Entity, &Stats), (With<Player>, Without<Movable>)>,
     turn_switch_state: Res<State<TurnSwitchedState>>,
     mut turn_switch_state_mutable: ResMut<NextState<TurnSwitchedState>>,
 ) {
     match turn_switch_state.get() {
         TurnSwitchedState::OnTurnSwitched => {
-            let (cur_id, cur_stats) = current_player_query.single();
+            let (cur_id, mut cur_stats) = current_player_query.single_mut();
             let (op_id, op_stats) = opposite_player_query.single();
+            cur_stats.moves_left -= 1;
             if op_stats.moves_left > 0 {
                 commands.entity(cur_id).remove::<Movable>();
                 commands.entity(op_id).insert(Movable);

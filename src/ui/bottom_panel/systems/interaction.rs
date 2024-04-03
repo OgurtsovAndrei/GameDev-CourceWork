@@ -18,7 +18,7 @@ pub fn handle_finish_moves_in_round_button_click(
     let mut current_stats = current_player_query.single_mut();
     match *interaction {
         Interaction::Pressed => {
-            current_stats.moves_left = 0;
+            current_stats.moves_left = 1;
             move_done_state.set(TurnSwitchedState::OnTurnSwitched)
         }
         _ => {}

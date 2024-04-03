@@ -65,7 +65,6 @@ pub fn handle_move_button_click(
 
 pub fn handle_dbg_button_click(
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor), (Changed<Interaction>, With<Button>, With<DebugButton>)>,
-    mut current_player_query: Query<&mut Stats, (With<Player>, With<Movable>)>,
     mut turn_switched_state: ResMut<NextState<TurnSwitchedState>>,
     current_state: Res<State<ActionsState>>
 ) {
@@ -83,8 +82,6 @@ pub fn handle_dbg_button_click(
     match interaction {
         Interaction::Pressed => {
             *color = PRESSED_BUTTON.into();
-            let mut cur_stats = current_player_query.single_mut();
-            cur_stats.moves_left -= 1;
             turn_switched_state.set(TurnSwitchedState::OnTurnSwitched);
         }
         Interaction::Hovered => {
