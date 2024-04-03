@@ -26,6 +26,7 @@ pub fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 resolution: (1_100.0, 1_100.0).into(),
+                title: "Empire twilight".to_string(),
                 ..default()
             }),
             ..default()
