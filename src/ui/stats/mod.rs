@@ -1,5 +1,6 @@
 pub(crate) mod components;
 pub(crate) mod resources;
 
-pub(crate) mod systems;
+mod systems;
 pub(crate) mod plugin;
+mod styles;

@@ -10,8 +10,8 @@ pub struct StatsPlugin;
 impl Plugin for StatsPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.insert_resource(Round::default())
-            .add_systems(Startup, setup_stats).add_systems(
-            Update,
+            .add_systems(Startup, setup_stats)
+            .add_systems(Update,
             (
                 update_round_number_text,
                 update_turn_text,
