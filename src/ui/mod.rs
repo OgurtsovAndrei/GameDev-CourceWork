@@ -1,5 +1,7 @@
 pub mod bottom_panel;
-pub mod stats;
+
 pub(crate) mod hud;
 
-pub mod action_panel;
+pub(crate) mod stats;
+
+pub(crate) mod action_panel;

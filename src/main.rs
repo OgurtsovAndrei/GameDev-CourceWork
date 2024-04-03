@@ -4,7 +4,6 @@ use bevy::prelude::*;
 use bevy_mod_picking::DefaultPickingPlugins;
 
 use game_state::{AppState, GameStatePlugin};
-use ui::stats::StatsPlugin;
 use world::player;
 use world::WorldPlugin;
 
@@ -12,6 +11,7 @@ use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
 use crate::ui::action_panel::plugin::ActionPanelPlugin;
 use crate::ui::bottom_panel::plugin::BottomPanelPlugin;
 use crate::ui::hud::HudPlugin;
+use crate::ui::stats::plugin::StatsPlugin;
 use crate::world::ownership::OwnershipPlugin;
 use crate::world::player::TurnPlugin;
 
