@@ -11,3 +11,7 @@ pub struct OpenMovePanelButton;
 
 #[derive(Component)]
 pub struct ActionPanel;
+
+#[derive(Component)]
+pub struct NextMoveButton;
+
