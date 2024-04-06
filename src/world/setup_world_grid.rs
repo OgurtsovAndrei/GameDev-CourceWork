@@ -10,6 +10,7 @@ use hexx::{Hex, HexLayout, HexOrientation, shapes};
 
 use crate::space_ships::SpaceShip;
 use crate::world::actions::ActionsState;
+use crate::world::create_map_layout;
 use crate::world::ownership::OwnershipText;
 use crate::world::player::{Movable, Player};
 use crate::world::resources::setup_resources;
@@ -98,12 +99,14 @@ pub(crate) fn setup_grid(
     };
     let sprite_size = layout.rect_size();
     let mut planets: HashMap<Hex, Planet> = HashMap::new();
-    let entities = shapes::hexagon(Hex::ZERO, 2)
+    let radius = 3;
+    let map = create_map_layout::create_setup_field_map_for_radius(radius);
+    let entities = shapes::hexagon(Hex::ZERO, radius)
         .enumerate()
         .map(|(i, coord)| {
             let pos = layout.hex_to_world_pos(coord);
-            let index = i % (FILE_GRID_HEIGHT_IN_FILE * GRID_WEIGHT_IN_FILE);
-            let planet = Planet::default(coord, (index + 1) as u32, (5 - index) as u32);
+            let index = map[&i]; // i % (FILE_GRID_HEIGHT_IN_FILE * GRID_WEIGHT_IN_FILE);
+            let planet = Planet::default(coord, (index + 1) as u32, i as u32);
 
             let entity = commands
                 .spawn(SpriteSheetBundle {
