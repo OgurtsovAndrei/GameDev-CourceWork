@@ -8,11 +8,12 @@ use bevy::utils::HashMap;
 use bevy::window::PrimaryWindow;
 use glam::{vec2, Vec2};
 use hexx::{Hex, HexLayout, HexOrientation, shapes};
+use rand::Rng;
 
 use crate::space_ships::SpaceShip;
 use crate::world::actions::ActionsState;
 use crate::world::create_map_layout;
-use crate::world::ownership::OwnershipText;
+use crate::world::ownership::OwnershipInfo;
 use crate::world::player::{Movable, Player};
 use crate::world::resources::setup_resources;
 
@@ -121,16 +122,21 @@ pub(crate) fn setup_grid(
                         ..default()
                     },
                     texture_atlas: atlas.clone(),
-                    transform: Transform::from_xyz(pos.x, pos.y, -10.0),
+                    transform: Transform {
+                        translation: Vec3 { x: pos.x, y: pos.y, z: -10.0 },
+                        scale: Vec3::splat(0.99),
+                        ..default()
+                    },
                     ..default()
                 })
                 .with_children(|parent| {
                     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
                     parent.spawn(create_resource_text_bundle(font.clone(), planet.resource));
                     parent.spawn(create_influence_text_bundle(font.clone(), planet.influence));
-                    parent.spawn((create_ownership_text_bundle(font.clone()), OwnershipText { hex: coord }));
+                    // parent.spawn((create_ownership_text_bundle(font.clone())/*, OwnershipText { hex: coord }*/));
                     parent.spawn(create_resource_sprite_bundle(&asset_server));
                     parent.spawn(create_influence_sprite_bundle(&asset_server));
+                    parent.spawn((get_ownership_frame(&asset_server, sprite_size), OwnershipInfo { hex: coord }));
                 })
                 .id();
             planets.insert(coord, planet);
@@ -141,6 +147,28 @@ pub(crate) fn setup_grid(
     let mut grid = HexGrid { entities, layout, planets };
     setup_resources(&mut commands, &mut grid);
     commands.insert_resource(grid);
+}
+
+fn get_ownership_frame(asset_server: &Res<AssetServer>, sprite_size: Vec2) -> SpriteBundle {
+    let image_path = "kenney - Simpe Icons/my_hex.png".to_string();
+    let transform = Transform {
+        translation: Vec3::new(0., 0., 0.01),
+        scale: Vec3::splat(1.003),
+        ..Default::default()
+    };
+    let c = if rand::thread_rng().gen_bool(0.5) { Color::DARK_GREEN } else { Color::MAROON };
+    let color = c;
+    return SpriteBundle {
+        texture: asset_server.load(image_path).clone().into(),
+        sprite: Sprite {
+            color,
+            anchor: Anchor::Center,
+            custom_size: Some(sprite_size),
+            ..default()
+        },
+        transform,
+        ..default()
+    };
 }
 
 fn create_resource_sprite_bundle(asset_server: &Res<AssetServer>) -> SpriteBundle {
