@@ -51,7 +51,7 @@ pub fn get_rhs_style() -> Style {
 
 pub fn get_image_style() -> Style {
     Style {
-        margin: UiRect::new(Val::Px(8.0), Val::Px(8.0), Val::Px(8.0), Val::Px(8.0)),
+        margin: UiRect::new(Val::Px(40.0), Val::Px(40.0), Val::Px(40.0), Val::Px(40.0)),
         ..Style::DEFAULT
     }
 }

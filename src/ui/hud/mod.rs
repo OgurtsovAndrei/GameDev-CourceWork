@@ -4,8 +4,8 @@ use crate::game_state::UpdateUI;
 use crate::ui::hud::systems::layout::spawn_hud;
 use crate::ui::hud::systems::updates::{update_enemy_text, update_score_text};
 
-mod components;
-mod styles;
+pub(crate) mod components;
+pub(crate) mod styles;
 mod systems;
 
 pub(crate) struct HudPlugin;

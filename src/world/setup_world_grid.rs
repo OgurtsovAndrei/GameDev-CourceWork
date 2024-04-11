@@ -2,6 +2,7 @@ use bevy::asset::{Assets, AssetServer};
 use bevy::input::Input;
 use bevy::input::mouse::MouseButtonInput;
 use bevy::prelude::*;
+use bevy::sprite::Anchor;
 use bevy::text::{BreakLineOn, Text2dBounds};
 use bevy::utils::HashMap;
 use bevy::window::PrimaryWindow;
@@ -22,6 +23,9 @@ const GRID_WEIGHT_IN_FILE: usize = 6;
 const DEFAULT_COLOR: bevy::prelude::Color = Color::WHITE;
 const SELECTED_FOR_MOVE_COLOR: bevy::prelude::Color = Color::GREEN;
 const SELECTED_COLOR: bevy::prelude::Color = Color::RED;
+
+const RESOURCE_COLOR: bevy::prelude::Color = Color::ORANGE;
+const INFLUENCE_COLOR: bevy::prelude::Color = Color::CYAN;
 
 /// 3D Orthogrpahic camera setup
 pub(crate) fn setup_camera(mut commands: Commands) {
@@ -124,9 +128,9 @@ pub(crate) fn setup_grid(
                     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
                     parent.spawn(create_resource_text_bundle(font.clone(), planet.resource));
                     parent.spawn(create_influence_text_bundle(font.clone(), planet.influence));
-                    parent.spawn((create_ownership_text_bundle(font.clone()), OwnershipText {
-                        hex: coord
-                    }));
+                    parent.spawn((create_ownership_text_bundle(font.clone()), OwnershipText { hex: coord }));
+                    parent.spawn(create_resource_sprite_bundle(&asset_server));
+                    parent.spawn(create_influence_sprite_bundle(&asset_server));
                 })
                 .id();
             planets.insert(coord, planet);
@@ -139,6 +143,39 @@ pub(crate) fn setup_grid(
     commands.insert_resource(grid);
 }
 
+fn create_resource_sprite_bundle(asset_server: &Res<AssetServer>) -> SpriteBundle {
+    let image_path = "kenney - Simpe Icons/resource_planks.png".to_string();
+    let transform = Transform {
+        translation: Vec3::new(-59., 40., 1.0),
+        scale: Vec3::splat(0.1),
+        ..Default::default()
+    };
+    create_sprite_bundle_with_image(asset_server, image_path, transform, RESOURCE_COLOR)
+}
+
+fn create_influence_sprite_bundle(asset_server: &Res<AssetServer>) -> SpriteBundle {
+    let image_path = "kenney - Simpe Icons/crown_b.png".to_string();
+    let transform = Transform {
+        translation: Vec3::new(-59., 25., 1.0),
+        scale: Vec3::splat(0.1),
+        ..Default::default()
+    };
+    create_sprite_bundle_with_image(asset_server, image_path, transform, INFLUENCE_COLOR)
+}
+
+fn create_sprite_bundle_with_image(asset_server: &Res<AssetServer>, image_path: String, transform: Transform, color: Color) -> SpriteBundle {
+    (SpriteBundle {
+        texture: asset_server.load(image_path).clone().into(),
+        sprite: Sprite {
+            color,
+            anchor: Anchor::TopCenter,
+            ..default()
+        },
+        transform,
+        ..default()
+    })
+}
+
 fn create_text_bundle(
     text: String,
     resource_text_style: TextStyle,
@@ -149,10 +186,11 @@ fn create_text_bundle(
         text: Text {
             sections: vec![TextSection::new(text, resource_text_style.clone())],
             linebreak_behavior: BreakLineOn::NoWrap,
-            alignment: Default::default(),
+            ..default()
         },
         text_2d_bounds: Text2dBounds { size: box_size },
         transform: resource_transform,
+        text_anchor: Anchor::TopCenter,
         ..default()
     }
 }
@@ -161,15 +199,15 @@ fn create_resource_text_bundle(font: Handle<Font>, value: u32) -> Text2dBundle {
     let resource_text_style: TextStyle = TextStyle {
         font,
         font_size: 42.0,
-        color: Color::ORANGE,
+        color: RESOURCE_COLOR,
     };
 
     let resource_transform = Transform {
-        translation: Vec3::new(-45., 33., 0.5),
-        scale: Vec3::splat(0.25), // Half the original size
+        translation: Vec3::new(-45., 40., 0.5),
+        scale: Vec3::splat(0.35),
         ..Default::default()
     };
-    let text: String = format!("Resource {}", value);
+    let text: String = format!("{}", value);
     create_text_bundle(text, resource_text_style, resource_transform)
 }
 
@@ -177,17 +215,17 @@ fn create_influence_text_bundle(font: Handle<Font>, value: u32) -> Text2dBundle 
     let resource_text_style: TextStyle = TextStyle {
         font,
         font_size: 42.0,
-        color: Color::CYAN,
+        color: INFLUENCE_COLOR,
     };
 
     let resource_transform = Transform {
         translation: Vec3::new(-45., 26., 0.5),
-        scale: Vec3::splat(0.25), // Half the original size
+        scale: Vec3::splat(0.35), // Half the original size
         ..Default::default()
     };
 
     create_text_bundle(
-        format!("Influence {}", value),
+        format!("{}", value),
         resource_text_style,
         resource_transform,
     )
