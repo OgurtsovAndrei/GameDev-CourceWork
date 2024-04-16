@@ -11,7 +11,7 @@ use hexx::{Hex, HexLayout, HexOrientation, shapes};
 use rand::Rng;
 
 use crate::space_ships::{get_spaceship_atlas, get_spaceship_sprite_bundle_by_type, SpaceShip};
-use crate::space_ships::SpaceShipType::{Battleship, Carrier, Destroyer, Fighter, Frigate};
+use crate::space_ships::SpaceShipType::{Carrier, Destroyer, Frigate};
 use crate::world::actions::ActionsState;
 use crate::world::create_map_layout;
 use crate::world::ownership::{OwnershipInfo, SpaceShipsInfo};
@@ -158,7 +158,7 @@ pub(crate) fn setup_grid(
 }
 
 fn spawn_space_ship_info_grid(parent: &mut ChildBuilder, spaceship_grid_texture: &Handle<TextureAtlas>, hex: Hex, font: Handle<Font>) {
-    let all_space_ships = vec![Carrier, Destroyer, Frigate, Battleship, Fighter];
+    let all_space_ships = vec![Carrier, Destroyer, Frigate /*, Battleship, Fighter*/];
 
     let spaceships_info_text_style: TextStyle = TextStyle {
         font,
