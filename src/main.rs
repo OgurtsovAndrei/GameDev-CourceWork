@@ -46,7 +46,7 @@ pub fn main() {
         .add_plugins(TurnPlugin)
         .add_systems(Startup, (
             player::spawn_players,
-            space_ships::spawn_ship,
+            // space_ships::spawn_ship,
         ),
         )
         .add_systems(Update, toggle_game)

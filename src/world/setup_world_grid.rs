@@ -10,10 +10,11 @@ use glam::{vec2, Vec2};
 use hexx::{Hex, HexLayout, HexOrientation, shapes};
 use rand::Rng;
 
-use crate::space_ships::SpaceShip;
+use crate::space_ships::{get_spaceship_atlas, get_spaceship_sprite_bundle_by_type, SpaceShip};
+use crate::space_ships::SpaceShipType::{Battleship, Carrier, Destroyer, Fighter, Frigate};
 use crate::world::actions::ActionsState;
 use crate::world::create_map_layout;
-use crate::world::ownership::OwnershipInfo;
+use crate::world::ownership::{OwnershipInfo, SpaceShipsInfo};
 use crate::world::player::{Movable, Player};
 use crate::world::resources::setup_resources;
 
@@ -106,6 +107,10 @@ pub(crate) fn setup_grid(
     let mut planets: HashMap<Hex, Planet> = HashMap::new();
     let radius = 3;
     let map = create_map_layout::create_setup_field_map_for_radius(radius);
+
+    let spaceship_grid_atlas = get_spaceship_atlas(&asset_server);
+    let spaceship_grid_texture: Handle<TextureAtlas> = atlases.add(spaceship_grid_atlas);
+
     let entities = shapes::hexagon(Hex::ZERO, radius)
         .enumerate()
         .map(|(i, coord)| {
@@ -133,10 +138,13 @@ pub(crate) fn setup_grid(
                     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
                     parent.spawn(create_resource_text_bundle(font.clone(), planet.resource));
                     parent.spawn(create_influence_text_bundle(font.clone(), planet.influence));
+
                     // parent.spawn((create_ownership_text_bundle(font.clone())/*, OwnershipText { hex: coord }*/));
+
                     parent.spawn(create_resource_sprite_bundle(&asset_server));
                     parent.spawn(create_influence_sprite_bundle(&asset_server));
-                    parent.spawn((get_ownership_frame(&asset_server, sprite_size), OwnershipInfo { hex: coord }));
+                    parent.spawn((get_ownership_frame(&asset_server, sprite_size), OwnershipInfo { hex: coord.clone() }));
+                    spawn_space_ship_info_grid(parent, &spaceship_grid_texture, coord.clone(), font.clone())
                 })
                 .id();
             planets.insert(coord, planet);
@@ -147,6 +155,43 @@ pub(crate) fn setup_grid(
     let mut grid = HexGrid { entities, layout, planets };
     setup_resources(&mut commands, &mut grid);
     commands.insert_resource(grid);
+}
+
+fn spawn_space_ship_info_grid(parent: &mut ChildBuilder, spaceship_grid_texture: &Handle<TextureAtlas>, hex: Hex, font: Handle<Font>) {
+    let all_space_ships = vec![Carrier, Destroyer, Frigate, Battleship, Fighter];
+
+    let spaceships_info_text_style: TextStyle = TextStyle {
+        font,
+        font_size: 42.0,
+        color: Color::WHITE,
+    };
+
+    for (id, space_ship_type) in all_space_ships.into_iter().enumerate() {
+        let transform = Transform {
+            translation: Vec3 { x: 60.0, y: (30.0 - 15.0 * id as f32), z: 1.0 },
+            scale: Vec3::splat(0.4),
+            ..default()
+        };
+        let image_sprite = (
+            get_spaceship_sprite_bundle_by_type(&spaceship_grid_texture, space_ship_type, transform),
+            SpaceShipsInfo { hex: hex.clone(), space_ship_type: space_ship_type.clone() }
+        );
+
+        let text_transform = Transform {
+            translation: Vec3::new(48., (30.0 - 15.0 * id as f32), 0.5),
+            scale: Vec3::splat(0.3),
+            ..Default::default()
+        };
+
+        let text_sprite = (
+            create_text_bundle_with_anchor("".to_string(), spaceships_info_text_style.clone(), text_transform, Anchor::CenterRight),
+            SpaceShipsInfo { hex: hex.clone(), space_ship_type: space_ship_type.clone() }
+        );
+
+
+        parent.spawn(image_sprite);
+        parent.spawn(text_sprite);
+    }
 }
 
 fn get_ownership_frame(asset_server: &Res<AssetServer>, sprite_size: Vec2) -> SpriteBundle {
@@ -209,6 +254,15 @@ fn create_text_bundle(
     resource_text_style: TextStyle,
     resource_transform: Transform,
 ) -> Text2dBundle {
+    create_text_bundle_with_anchor(text, resource_text_style, resource_transform, Anchor::TopCenter)
+}
+
+fn create_text_bundle_with_anchor(
+    text: String,
+    resource_text_style: TextStyle,
+    resource_transform: Transform,
+    anchor: Anchor,
+) -> Text2dBundle {
     let box_size = Vec2::new(50.0, 25.0);
     Text2dBundle {
         text: Text {
@@ -218,7 +272,7 @@ fn create_text_bundle(
         },
         text_2d_bounds: Text2dBounds { size: box_size },
         transform: resource_transform,
-        text_anchor: Anchor::TopCenter,
+        text_anchor: anchor,
         ..default()
     }
 }
