@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::space_ships::{get_count_spaceship_dict, SpaceShip, SpaceShipType};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::world::actions::{ActionsState, reset_selected_for_move_ships};
-use crate::world::actions::move_menu::components::{CancelButton, EndMoveButton, MoveShip1Button, SelectedSpaceshipsText};
+use crate::world::actions::move_menu::components::{CancelButton, EndMoveButton, MoveShipButton, SelectedSpaceshipsText};
 use crate::world::fonts_and_styles::colors::*;
 use crate::world::player::{Movable, Player};
 use crate::world::resources::GameResources;
@@ -94,17 +94,17 @@ pub(self) fn get_all_selected_ships(grid: &Res<HexGrid>) -> Vec<SpaceShip> {
     return ships;
 }
 
-pub(in crate::world::actions::move_menu) fn interact_with_move_ship1_button(
+pub(in crate::world::actions::move_menu) fn interact_with_move_ship_button(
     mut button_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<MoveShip1Button>),
+        (&Interaction, &mut BackgroundColor, &MoveShipButton),
+        Changed<Interaction>,
     >,
     mut resources: ResMut<GameResources>,
     mut grid: ResMut<HexGrid>,
     mut selected_hex: ResMut<SelectedHex>,
     current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
 ) {
-    for (interaction, mut color) in button_query.iter_mut() {
+    for (interaction, mut color, move_ship_button) in button_query.iter_mut() {
         let player = current_player_query.single();
         let current_hex = &selected_hex.hex_selected_for_move.clone();
         match *interaction {
@@ -114,18 +114,14 @@ pub(in crate::world::actions::move_menu) fn interact_with_move_ship1_button(
                 if !selected_hex.is_selected_for_move { return; }
                 if grid.planets[current_hex].owner != player.clone() { return; }
                 let mut planet = grid.planets.remove(current_hex).unwrap();
-                let mut id = 0;
-                let mut flag = true;
-                while id < planet.owner_army.len() && flag {
-                    if !planet.owner_army[id].is_selected_for_move {
-                        flag = false;
-                        continue;
-                    }
-                    id += 1;
-                }
-                if !flag {
-                    planet.owner_army[id].is_selected_for_move = true;
-                }
+                let selected_ship_idx = planet.owner_army.iter().position(|space_ship| {
+                    !space_ship.is_selected_for_buy && space_ship.ship_type == move_ship_button.space_ship_type
+                });
+
+                if let None = selected_ship_idx { return; }
+                let idx = selected_ship_idx.unwrap();
+
+                planet.owner_army[idx].is_selected_for_move = true;
 
                 grid.planets.insert(*current_hex, planet);
                 resources.set_changed();

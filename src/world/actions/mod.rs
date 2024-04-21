@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::game_state::UpdateUI;
 use crate::ui::action_panel::systems::interaction::{is_selected_hex_belongs_to_player, is_selected_hex_has_neighbours};
 
 use crate::world::actions::move_menu::plugin::MoveMenuPlugin;
@@ -19,7 +20,7 @@ impl Plugin for ActionsPlugin {
             .add_state::<ActionsState>()
             .add_plugins(MoveMenuPlugin)
             .add_plugins(SpawnMenuPlugin)
-            .add_systems(Update, change_action_state);
+            .add_systems(Update, change_action_state.in_set(UpdateUI::UserInput));
     }
 }
 

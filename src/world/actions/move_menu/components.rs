@@ -1,4 +1,5 @@
 use bevy::prelude::Component;
+use crate::space_ships::SpaceShipType;
 
 #[derive(Component)]
 pub(super) struct MoveMenu;
@@ -7,10 +8,10 @@ pub(super) struct MoveMenu;
 pub(super) struct EndMoveButton;
 
 #[derive(Component)]
-pub(super) struct MoveShip1Button;
+pub(super) struct MoveShipButton {
+    pub(crate) space_ship_type: SpaceShipType,
+}
 
-#[derive(Component)]
-pub(super) struct MoveShip2Button;
 
 #[derive(Component)]
 pub(super) struct CancelButton;

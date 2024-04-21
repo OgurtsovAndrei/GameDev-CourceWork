@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use crate::space_ships::SpaceShipType;
+use crate::space_ships::SpaceShipType::{Carrier, Destroyer, Frigate};
 
 use crate::world::actions::move_menu::components::*;
 use crate::world::actions::move_menu::components::MoveMenu;
@@ -126,54 +128,10 @@ pub(crate) fn build_move_menu(commands: &mut Commands, asset_server: &Res<AssetS
                             });
                         });
                     // Main Menu Button
-                    parent
-                        .spawn((
-                            ButtonBundle {
-                                style: get_button_style(),
-                                background_color: NORMAL_BUTTON.into(),
-                                ..default()
-                            },
-                            MoveShip1Button,
-                        ))
-                        .with_children(|parent| {
-                            parent.spawn(TextBundle {
-                                style: Style { ..default() },
-                                text: Text {
-                                    sections: vec![TextSection::new(
-                                        "Move Ship1",
-                                        get_button_text_style(&asset_server),
-                                    )],
-                                    alignment: TextAlignment::Center,
-                                    ..default()
-                                },
-                                ..default()
-                            });
-                        });
+                    build_move_space_ship_button(asset_server, parent, Carrier);
+                    build_move_space_ship_button(asset_server, parent, Destroyer);
+                    build_move_space_ship_button(asset_server, parent, Frigate);
                     // Spawn second ship type button
-                    parent
-                        .spawn((
-                            ButtonBundle {
-                                style: get_button_style(),
-                                background_color: NORMAL_BUTTON.into(),
-                                ..default()
-                            },
-                            MoveShip2Button,
-                        ))
-                        .with_children(|parent| {
-                            parent.spawn(TextBundle {
-                                style: Style { ..default() },
-                                text: Text {
-                                    sections: vec![TextSection::new(
-                                        "Move Ship2",
-                                        get_button_text_style(&asset_server),
-                                    )],
-                                    alignment: TextAlignment::Center,
-                                    ..default()
-                                },
-                                ..default()
-                            });
-                        });
-
                     parent
                         .spawn((
                             CancelButton,
@@ -202,6 +160,34 @@ pub(crate) fn build_move_menu(commands: &mut Commands, asset_server: &Res<AssetS
         .id();
 
     pause_menu_entity
+}
+
+fn build_move_space_ship_button(asset_server: &Res<AssetServer>, parent: &mut ChildBuilder, space_ship_type: SpaceShipType) {
+    parent
+        .spawn((
+            ButtonBundle {
+                style: get_button_style(),
+                background_color: NORMAL_BUTTON.into(),
+                ..default()
+            },
+            MoveShipButton {
+                space_ship_type
+            },
+        ))
+        .with_children(|parent| {
+            parent.spawn(TextBundle {
+                style: Style { ..default() },
+                text: Text {
+                    sections: vec![TextSection::new(
+                        format!("Move {}", space_ship_type),
+                        get_button_text_style(&asset_server),
+                    )],
+                    alignment: TextAlignment::Center,
+                    ..default()
+                },
+                ..default()
+            });
+        });
 }
 
 // References
