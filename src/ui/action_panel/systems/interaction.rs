@@ -11,7 +11,7 @@ use crate::world::fonts_and_styles::colors::{DISABLED_BUTTON, HOVERED_BUTTON, NO
 use crate::world::player::{Movable, Player, Stats};
 use crate::world::setup_world_grid::{HexGrid, SelectedHex};
 
-pub fn hire_army_button_click(
+pub fn spawn_menu_button_click(
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor), (Changed<Interaction>, With<Button>, With<HireArmyButton>)>,
     current_state: Res<State<ActionsState>>,
     mut mut_current_state: ResMut<NextState<ActionsState>>,
@@ -30,7 +30,7 @@ pub fn hire_army_button_click(
     }
 
     let current_player = current_player_query.single();
-    if !selected_hex.is_selected || grid.planets.get(&selected_hex.hex).unwrap().owner != *current_player {
+    if !selected_hex.is_selected || !is_selected_hex_belongs_to_player(current_player, &grid, &selected_hex.hex) {
         return;
     }
 
@@ -86,25 +86,22 @@ pub fn update_move_button_disabled(
     }
 }
 
-pub(crate) fn is_selected_hex_belongs_to_player(player: &Player, grid: &HexGrid, selected_hex: &Hex) -> bool {
-    grid.planets.get(selected_hex).unwrap().owner == *player
-}
-
-pub(crate) fn is_selected_hex_has_neighbours(player: &Player, grid: &HexGrid, selected_hex: &Hex) -> bool {
-    Hex::NEIGHBORS_COORDS.iter().any(|delta| {
-        let neighbour = *delta + *selected_hex;
-        grid.planets.contains_key(&neighbour) && grid.planets.get(&neighbour).unwrap().owner == *player
-    }
-    )
-}
-
 pub fn handle_move_button_click(
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor), (Changed<Interaction>, With<Button>, With<OpenMovePanelButton>)>,
     current_state: Res<State<ActionsState>>,
+    selected_hex: Res<SelectedHex>,
+    grid: Res<HexGrid>,
+    current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
     mut mut_current_state: ResMut<NextState<ActionsState>>) {
     if let Err(_) = interaction_query.get_single() {
         return;
     }
+
+    let player = current_player_query.single();
+    if !selected_hex.is_selected || !(is_selected_hex_belongs_to_player(player, &grid, &selected_hex.hex) || is_selected_hex_has_neighbours(player, &grid, &selected_hex.hex)) {
+        return;
+    }
+
     let (interaction, mut color) = interaction_query.single_mut();
     if *current_state.get() != NoActionRunning {
         *color = NORMAL_BUTTON.into();
@@ -180,4 +177,16 @@ pub fn handle_finish_moves_in_round_button_click(
             *color = NORMAL_BUTTON.into();
         }
     }
+}
+
+pub(crate) fn is_selected_hex_belongs_to_player(player: &Player, grid: &HexGrid, selected_hex: &Hex) -> bool {
+    grid.planets.get(selected_hex).unwrap().owner == *player
+}
+
+pub(crate) fn is_selected_hex_has_neighbours(player: &Player, grid: &HexGrid, selected_hex: &Hex) -> bool {
+    Hex::NEIGHBORS_COORDS.iter().any(|delta| {
+        let neighbour = *delta + *selected_hex;
+        grid.planets.contains_key(&neighbour) && grid.planets.get(&neighbour).unwrap().owner == *player
+    }
+    )
 }

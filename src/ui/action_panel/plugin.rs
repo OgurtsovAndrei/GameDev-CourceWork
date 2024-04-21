@@ -17,7 +17,7 @@ impl Plugin for ActionPanelPlugin {
             .add_systems(Update, (
                 interaction::handle_dbg_button_click,
                 interaction::handle_move_button_click,
-                interaction::hire_army_button_click,
+                interaction::spawn_menu_button_click,
                 handle_finish_moves_in_round_button_click,
             ).in_set(UpdateUI::UserInput))
             .add_systems(Update, (
