@@ -4,7 +4,7 @@ use crate::space_ships::{SpaceShip, SpaceShipType};
 use crate::space_ships::SpaceShipType::{Battleship, Destroyer};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::world::actions::{ActionsState, reset_selected_for_buy_ships};
-use crate::world::actions::spawn_menu::components::{CancelButton, EndSpawnButton, SpawnBattleshipButton, SpawnDestroyerButton};
+use crate::world::actions::spawn_menu::components::{CancelButton, EndSpawnButton, SpawnShipButton};
 use crate::world::fonts_and_styles::colors::*;
 use crate::world::player::{Movable, Player};
 use crate::world::resources::GameResources;
@@ -39,21 +39,6 @@ pub(in crate::world::actions::spawn_menu) fn interact_with_end_spawn_button(
     }
 }
 
-pub(in crate::world::actions::spawn_menu) fn interact_with_spawn_destroyer_button(
-    mut button_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<SpawnDestroyerButton>),
-    >,
-    mut resources: ResMut<GameResources>,
-    mut grid: ResMut<HexGrid>,
-    mut selected_hex: ResMut<SelectedHex>,
-    current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
-) {
-    for (interaction, mut color) in button_query.iter_mut() {
-        let player = current_player_query.single();
-        buy_ship(&mut resources, &mut grid, &mut selected_hex, player, interaction, &mut color, Destroyer);
-    }
-}
 
 fn buy_ship(resources: &mut ResMut<GameResources>, grid: &mut ResMut<HexGrid>, selected_hex: &mut ResMut<SelectedHex>, player: &Player, interaction: &Interaction, color: &mut BackgroundColor, space_ship_type: SpaceShipType) {
     let mut player_resources = &resources.resources[player];
@@ -92,19 +77,19 @@ fn buy_ship(resources: &mut ResMut<GameResources>, grid: &mut ResMut<HexGrid>, s
     }
 }
 
-pub(in crate::world::actions::spawn_menu) fn interact_with_spawn_battleship_button(
+pub(in crate::world::actions::spawn_menu) fn interact_with_spawn_ship_button(
     mut button_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<SpawnBattleshipButton>),
+        (&Interaction, &mut BackgroundColor, &SpawnShipButton),
+        (Changed<Interaction>),
     >,
     mut resources: ResMut<GameResources>,
     mut grid: ResMut<HexGrid>,
     mut selected_hex: ResMut<SelectedHex>,
     current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
 ) {
-    for (interaction, mut color) in button_query.iter_mut() {
+    for (interaction, mut color, spawn_ship_button) in button_query.iter_mut() {
         let player = current_player_query.single();
-        buy_ship(&mut resources, &mut grid, &mut selected_hex, player, interaction, &mut color, Battleship);
+        buy_ship(&mut resources, &mut grid, &mut selected_hex, player, interaction, &mut color, spawn_ship_button.space_ship_type);
     }
 }
 

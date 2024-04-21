@@ -47,7 +47,6 @@ impl SubAssign for PlayerResources {
     fn sub_assign(&mut self, rhs: Self) {
         self.influence -= rhs.influence;
         self.resources -= rhs.resources;
-
     }
 }
 
@@ -118,13 +117,6 @@ pub fn setup_resources(mut commands: &mut Commands, grid: &mut HexGrid) {
 
     let mut planet1 = planets.remove(&player1_home_hex).unwrap();
     planet1.owner = player1;
-    planet1.owner_army.push(SpaceShip {
-        ship_type: SpaceShipType::Battleship,
-        ship_owner: player1,
-        ship_hex: player1_home_hex,
-        is_selected_for_move: false,
-        is_selected_for_buy: false,
-    });
     planets.insert(player1_home_hex, planet1);
 
 

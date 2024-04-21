@@ -21,7 +21,7 @@ pub fn get_spawn_menu_container_style() -> Style {
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
         width: Val::Px(250.0),
-        height: Val::Px(350.0),
+        height: Val::Px(400.0),
         row_gap: Val::Px(8.0),
         column_gap: Val::Px(8.0),
         ..Style::DEFAULT

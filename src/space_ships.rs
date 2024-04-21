@@ -22,6 +22,19 @@ pub(crate) enum SpaceShipType {
 }
 
 
+impl fmt::Display for SpaceShipType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            Carrier => { "Carrier" }
+            Destroyer => { "Destroyer" }
+            Frigate => { "Frigate" }
+            Battleship => { "Battleship" }
+            Fighter => { "Fighter" }
+        }
+        )
+    }
+}
+
 pub(crate) fn get_random_spaceship() -> SpaceShipType {
     let n = rand::thread_rng().gen_range(0..5);
     let all_space_ships = vec![Carrier, Destroyer, Frigate, Battleship, Fighter];

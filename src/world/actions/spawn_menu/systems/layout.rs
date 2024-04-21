@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use crate::space_ships::SpaceShipType;
+use crate::space_ships::SpaceShipType::{Carrier, Destroyer, Frigate};
 
 use crate::world::actions::spawn_menu::components::*;
 use crate::world::actions::spawn_menu::components::SpawnMenu;
@@ -76,53 +78,10 @@ pub(crate) fn build_pause_menu(commands: &mut Commands, asset_server: &Res<Asset
                             });
                         });
                     // Main Menu Button
-                    parent
-                        .spawn((
-                            ButtonBundle {
-                                style: get_button_style(),
-                                background_color: NORMAL_BUTTON.into(),
-                                ..default()
-                            },
-                            SpawnDestroyerButton,
-                        ))
-                        .with_children(|parent| {
-                            parent.spawn(TextBundle {
-                                style: Style { ..default() },
-                                text: Text {
-                                    sections: vec![TextSection::new(
-                                        "Spawn Destroyer",
-                                        get_button_text_style(&asset_server),
-                                    )],
-                                    alignment: TextAlignment::Center,
-                                    ..default()
-                                },
-                                ..default()
-                            });
-                        });
+                    spawn_ship_button(&asset_server, parent, Carrier);
+                    spawn_ship_button(&asset_server, parent, Destroyer);
+                    spawn_ship_button(&asset_server, parent, Frigate);
                     // Spawn second type button
-                    parent
-                        .spawn((
-                            ButtonBundle {
-                                style: get_button_style(),
-                                background_color: NORMAL_BUTTON.into(),
-                                ..default()
-                            },
-                            SpawnBattleshipButton,
-                        ))
-                        .with_children(|parent| {
-                            parent.spawn(TextBundle {
-                                style: Style { ..default() },
-                                text: Text {
-                                    sections: vec![TextSection::new(
-                                        "Spawn Battleship",
-                                        get_button_text_style(&asset_server),
-                                    )],
-                                    alignment: TextAlignment::Center,
-                                    ..default()
-                                },
-                                ..default()
-                            });
-                        });
                     parent
                         .spawn((
                             ButtonBundle {
@@ -151,6 +110,34 @@ pub(crate) fn build_pause_menu(commands: &mut Commands, asset_server: &Res<Asset
         .id();
 
     pause_menu_entity
+}
+
+fn spawn_ship_button(asset_server: &&Res<AssetServer>, parent: &mut ChildBuilder, space_ship_type: SpaceShipType) {
+    parent
+        .spawn((
+            ButtonBundle {
+                style: get_button_style(),
+                background_color: NORMAL_BUTTON.into(),
+                ..default()
+            },
+            SpawnShipButton {
+                space_ship_type
+            },
+        ))
+        .with_children(|parent| {
+            parent.spawn(TextBundle {
+                style: Style { ..default() },
+                text: Text {
+                    sections: vec![TextSection::new(
+                        format!("Spawn {}", space_ship_type),
+                        get_button_text_style(&asset_server),
+                    )],
+                    alignment: TextAlignment::Center,
+                    ..default()
+                },
+                ..default()
+            });
+        });
 }
 
 // References
