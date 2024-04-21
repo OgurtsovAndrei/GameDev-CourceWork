@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::space_ships::{get_count_spaceship_dict, SpaceShip, SpaceShipType};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
-use crate::world::actions::{ActionsState, reset_selected_for_move_ships};
+use crate::world::actions::{ActionsState, get_spaceship_index_by_type, reset_selected_for_move_ships};
 use crate::world::actions::move_menu::components::{CancelButton, EndMoveButton, MoveShipButton, SelectedSpaceshipsText};
 use crate::world::fonts_and_styles::colors::*;
 use crate::world::player::{Movable, Player};
@@ -171,21 +171,12 @@ pub(in crate::world::actions::move_menu) fn update_selected_spaceships_text(
     }
     let all_ships = get_all_selected_ships(&grid);
     let dict = get_count_spaceship_dict(all_ships);
+
     let mut text = text_query.single_mut();
 
     for (t, count) in dict {
         let index = get_spaceship_index_by_type(t);
         text.sections.get_mut(index).unwrap().value = format!("{count}\n");
-    }
-}
-
-pub(self) fn get_spaceship_index_by_type(space_ship_type: SpaceShipType) -> usize {
-    match space_ship_type {
-        SpaceShipType::Carrier => { 1 }
-        SpaceShipType::Destroyer => { 3 }
-        SpaceShipType::Frigate => { 5 }
-        SpaceShipType::Battleship => { 7 }
-        SpaceShipType::Fighter => { 9 }
     }
 }
 

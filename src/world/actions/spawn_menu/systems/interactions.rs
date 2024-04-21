@@ -1,10 +1,9 @@
 use bevy::prelude::*;
 
-use crate::space_ships::{SpaceShip, SpaceShipType};
-use crate::space_ships::SpaceShipType::{Battleship, Destroyer};
+use crate::space_ships::{get_count_spaceship_dict, SpaceShip, SpaceShipType};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
-use crate::world::actions::{ActionsState, reset_selected_for_buy_ships};
-use crate::world::actions::spawn_menu::components::{CancelButton, EndSpawnButton, SpawnShipButton};
+use crate::world::actions::{ActionsState, get_spaceship_index_by_type, reset_selected_for_buy_ships};
+use crate::world::actions::spawn_menu::components::{CancelButton, EndSpawnButton, ShipsToBuyText, SpawnShipButton};
 use crate::world::fonts_and_styles::colors::*;
 use crate::world::player::{Movable, Player};
 use crate::world::resources::GameResources;
@@ -37,6 +36,39 @@ pub(in crate::world::actions::spawn_menu) fn interact_with_end_spawn_button(
             }
         }
     }
+}
+
+
+pub(in crate::world::actions::spawn_menu) fn update_ships_to_buy_text(
+    grid: Res<HexGrid>,
+    selected_hex: Res<SelectedHex>,
+    mut text_query: Query<(&mut Text), (With<ShipsToBuyText>)>,
+    game_state: Res<State<ActionsState>>,
+) {
+    if !selected_hex.is_selected || *game_state != ActionsState::SpawningSpaceShips { return; }
+
+    let ships_to_buy = get_all_ships_to_buy(&grid, &selected_hex);
+    let dict = get_count_spaceship_dict(ships_to_buy);
+
+    let mut text = text_query.single_mut();
+
+    for (t, count) in dict {
+        let index = get_spaceship_index_by_type(t);
+        text.sections.get_mut(index).unwrap().value = format!("{count}\n");
+    }
+}
+
+fn get_all_ships_to_buy(grid: &Res<HexGrid>, selected_hex: &Res<SelectedHex>) -> Vec<SpaceShip> {
+    let planet = &grid.planets[&selected_hex.hex];
+
+    let army = planet.owner_army.clone();
+    let mut vec: Vec<SpaceShip> = vec![];
+    for mut spaceship in army.iter() {
+        if spaceship.is_selected_for_buy {
+            vec.push(spaceship.clone())
+        }
+    }
+    vec
 }
 
 

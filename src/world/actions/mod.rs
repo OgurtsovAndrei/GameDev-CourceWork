@@ -1,9 +1,11 @@
 use bevy::prelude::*;
 use crate::game_state::UpdateUI;
+use crate::space_ships::SpaceShipType;
 use crate::ui::action_panel::systems::interaction::{is_selected_hex_belongs_to_player, is_selected_hex_has_neighbours};
 
 use crate::world::actions::move_menu::plugin::MoveMenuPlugin;
 use crate::world::actions::spawn_menu::plugin::SpawnMenuPlugin;
+use crate::world::fonts_and_styles::fonts::get_info_text_style;
 use crate::world::player::{Movable, Player};
 use crate::world::resources::{GameResources};
 use crate::world::setup_world_grid::{HexGrid, SelectedHex};
@@ -84,4 +86,66 @@ pub(self) fn reset_selected_for_move_ships(hex_grid: &mut ResMut<HexGrid>) {
     hex_grid.planets.iter_mut().for_each(|(_, mut planet)| {
         planet.owner_army.iter_mut().for_each(|ship| ship.is_selected_for_move = false);
     });
+}
+
+pub(self) fn get_ship_stats_text(asset_server: &Res<AssetServer>) -> TextBundle {
+    TextBundle {
+        text: Text {
+            sections: vec![
+                TextSection::new(
+                    "Carrier: ",
+                    get_info_text_style(&asset_server),
+                ),
+                TextSection::new(
+                    "0\n",
+                    get_info_text_style(&asset_server),
+                ),
+                TextSection::new(
+                    "Destroyer: ",
+                    get_info_text_style(&asset_server),
+                ),
+                TextSection::new(
+                    "0\n",
+                    get_info_text_style(&asset_server),
+                ),
+                TextSection::new(
+                    "Frigate: ",
+                    get_info_text_style(&asset_server),
+                ),
+                TextSection::new(
+                    "0\n",
+                    get_info_text_style(&asset_server),
+                ),
+                TextSection::new(
+                    "Battleship: ",
+                    get_info_text_style(&asset_server),
+                ),
+                TextSection::new(
+                    "0\n",
+                    get_info_text_style(&asset_server),
+                ),
+                TextSection::new(
+                    "Fighter: ",
+                    get_info_text_style(&asset_server),
+                ),
+                TextSection::new(
+                    "0\n",
+                    get_info_text_style(&asset_server),
+                ),
+            ],
+            alignment: TextAlignment::Center,
+            ..default()
+        },
+        ..default()
+    }
+}
+
+pub(self) fn get_spaceship_index_by_type(space_ship_type: SpaceShipType) -> usize {
+    match space_ship_type {
+        SpaceShipType::Carrier => { 1 }
+        SpaceShipType::Destroyer => { 3 }
+        SpaceShipType::Frigate => { 5 }
+        SpaceShipType::Battleship => { 7 }
+        SpaceShipType::Fighter => { 9 }
+    }
 }

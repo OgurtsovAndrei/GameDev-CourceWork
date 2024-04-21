@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use crate::space_ships::SpaceShipType;
 use crate::space_ships::SpaceShipType::{Carrier, Destroyer, Frigate};
+use crate::world::actions::get_ship_stats_text;
 
 use crate::world::actions::move_menu::components::*;
 use crate::world::actions::move_menu::components::MoveMenu;
@@ -53,57 +54,7 @@ pub(crate) fn build_move_menu(commands: &mut Commands, asset_server: &Res<AssetS
                         },
                         ..default()
                     });
-                    parent.spawn((TextBundle {
-                        text: Text {
-                            sections: vec![
-                                TextSection::new(
-                                    "Carrier: ",
-                                    get_info_text_style(&asset_server),
-                                ),
-                                TextSection::new(
-                                    "0\n",
-                                    get_info_text_style(&asset_server),
-                                ),
-                                TextSection::new(
-                                    "Destroyer: ",
-                                    get_info_text_style(&asset_server),
-                                ),
-                                TextSection::new(
-                                    "0\n",
-                                    get_info_text_style(&asset_server),
-                                ),
-                                TextSection::new(
-                                    "Frigate: ",
-                                    get_info_text_style(&asset_server),
-                                ),
-                                TextSection::new(
-                                    "0\n",
-                                    get_info_text_style(&asset_server),
-                                ),
-                                TextSection::new(
-                                    "Battleship: ",
-                                    get_info_text_style(&asset_server),
-                                ),
-                                TextSection::new(
-                                    "0\n",
-                                    get_info_text_style(&asset_server),
-                                ),
-                                TextSection::new(
-                                    "Fighter: ",
-                                    get_info_text_style(&asset_server),
-                                ),
-                                TextSection::new(
-                                    "0\n",
-                                    get_info_text_style(&asset_server),
-                                ),
-                            ],
-                            alignment: TextAlignment::Center,
-                            ..default()
-                        },
-                        ..default()
-                    },
-                                  SelectedSpaceshipsText));
-                    // End spawn actions Button
+                    parent.spawn((get_ship_stats_text(&asset_server), SelectedSpaceshipsText));
                     parent
                         .spawn((
                             ButtonBundle {

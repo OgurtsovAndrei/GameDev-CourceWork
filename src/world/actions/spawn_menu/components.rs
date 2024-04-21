@@ -8,6 +8,9 @@ pub(super) struct SpawnMenu;
 pub(super) struct EndSpawnButton;
 
 #[derive(Component)]
+pub(super) struct ShipsToBuyText;
+
+#[derive(Component)]
 pub(super) struct SpawnShipButton {
     pub(crate) space_ship_type: SpaceShipType
 }

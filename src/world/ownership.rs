@@ -75,7 +75,7 @@ fn update_spaceships_text_value(mut text_query: Query<(&mut Text, &SpaceShipsInf
                                 grid_res: Res<HexGrid>) {
     for (mut sprite, owner) in text_query.iter_mut() {
         let planet = &grid_res.planets[&owner.hex];
-        let count = planet.owner_army.iter().filter(|type1| { type1.ship_type == owner.space_ship_type }).count();
+        let count = planet.owner_army.iter().filter(|spaceship| { spaceship.ship_type == owner.space_ship_type && !spaceship.is_selected_for_move && !spaceship.is_selected_for_buy }).count();
         sprite.sections[0].value = format!("{count} - ").to_string();
         sprite.sections[0].style.color = match planet.owner.id {
             -1 => Color::Rgba { red: 0.0, green: 0.0, blue: 0.0, alpha: 0.0 },
