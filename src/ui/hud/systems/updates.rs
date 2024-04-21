@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 
 use crate::ui::hud::components::{ScoreText, SpaceShipsText};
+use crate::ui::hud::resources::{MOVE_MENU_SELECTED_HEX_HUD_TEXT, MOVE_MENU_UNSELECTED_HEX_HUD_TEXT, NO_ACTION_RUNNING_SELECTED_HEX_HUD_TEXT, NO_ACTION_RUNNING_UNSELECTED_HEX_HUD_TEXT, SPAWN_MENU_HUD_TEXT};
+use crate::world::actions::ActionsState;
 use crate::world::resources::GameResources;
 use crate::world::setup_world_grid::{HexGrid, SelectedHex};
 
@@ -14,22 +16,29 @@ pub fn update_score_text(mut text_query: Query<&mut Text, With<ScoreText>>, game
     }
 }
 
-pub fn update_enemy_text(
+pub fn update_hud_text(
     mut text_query: Query<&mut Text, With<SpaceShipsText>>,
     selected_hex: Res<SelectedHex>,
-    game_resources: Res<HexGrid>,
+    state: Res<State<ActionsState>>,
 ) {
-    let hex = &selected_hex.hex;
-    let is_selected = &selected_hex.is_selected;
-
-    for mut text in text_query.iter_mut() {
-        if !is_selected {
-            text.sections[1].value = "Nothing to show, hex not selected".to_string();
-        } else {
-            let planet = game_resources.planets.get(hex).unwrap();
-            let mut vec_for_show = vec![];
-            for ship in planet.owner_army.iter() { if !ship.is_selected_for_move { vec_for_show.push(ship.clone()) } }
-            text.sections[1].value = format!("{:?}", vec_for_show);
+    let mut text = text_query.single_mut();
+    match state.get() {
+        ActionsState::NoActionRunning => {
+            text.sections[0].value = if selected_hex.is_selected {
+                NO_ACTION_RUNNING_SELECTED_HEX_HUD_TEXT.to_string()
+            } else {
+                NO_ACTION_RUNNING_UNSELECTED_HEX_HUD_TEXT.to_string()
+            }
+        }
+        ActionsState::SpawningSpaceShips => {
+            debug_assert!(selected_hex.is_selected);
+            text.sections[0].value = SPAWN_MENU_HUD_TEXT.to_string()
+        }
+        ActionsState::MovingSpaceShips => {
+            debug_assert!(selected_hex.is_selected);
+            text.sections[0].value = if selected_hex.is_selected_for_move {
+                MOVE_MENU_SELECTED_HEX_HUD_TEXT.to_string()
+            } else { MOVE_MENU_UNSELECTED_HEX_HUD_TEXT.to_string() }
         }
     }
 }

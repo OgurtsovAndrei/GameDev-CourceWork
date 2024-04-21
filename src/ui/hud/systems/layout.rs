@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::ui::hud::components::*;
 use crate::ui::hud::styles::*;
 
+
 pub fn spawn_hud(mut commands: Commands, asset_server: Res<AssetServer>) {
     build_resource_hud(&mut commands, &asset_server);
     build_space_ship_hud(&mut commands, &asset_server);
@@ -87,11 +88,7 @@ pub fn build_space_ship_hud(commands: &mut Commands, asset_server: &Res<AssetSer
                             text: Text {
                                 sections: vec![
                                     TextSection::new(
-                                        "Spaceships in Hex:\n",
-                                        get_text_style(&asset_server),
-                                    ),
-                                    TextSection::new(
-                                        "",
+                                        "Select hex and choose action from left menu:",
                                         get_text_style(&asset_server),
                                     )],
                                 alignment: TextAlignment::Center,
