@@ -1,9 +1,10 @@
 use bevy::prelude::*;
+use crate::ui::action_panel::systems::interaction::{is_selected_hex_belongs_to_player, is_selected_hex_has_neighbours};
 
 use crate::world::actions::move_menu::plugin::MoveMenuPlugin;
 use crate::world::actions::spawn_menu::plugin::SpawnMenuPlugin;
 use crate::world::player::{Movable, Player};
-use crate::world::resources::{GameResources, PlayerResources};
+use crate::world::resources::{GameResources};
 use crate::world::setup_world_grid::{HexGrid, SelectedHex};
 
 pub(crate) mod spawn_menu;
@@ -39,24 +40,25 @@ fn change_action_state(
     mut commands: Commands,
     keyboard_input: Res<Input<KeyCode>>,
     current_state: Res<State<ActionsState>>,
-    mut grid: ResMut<HexGrid>,
+    mut grid_mut: ResMut<HexGrid>,
     mut player_resources: ResMut<GameResources>,
     selected_hex: Res<SelectedHex>,
     current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
 ) {
-    let current_player = current_player_query.single();
+    let player = current_player_query.single();
     match current_state.get() {
         ActionsState::NoActionRunning => {
-            if keyboard_input.just_pressed(KeyCode::S) && selected_hex.is_selected && grid.planets.get(&selected_hex.hex).unwrap().owner == *current_player {
+            let grid = grid_mut.as_ref();
+            if keyboard_input.just_pressed(KeyCode::S) && is_selected_hex_belongs_to_player(player, grid, &selected_hex.hex) {
                 commands.insert_resource(NextState(Some(ActionsState::SpawningSpaceShips)))
-            } else if keyboard_input.just_pressed(KeyCode::M) && selected_hex.is_selected {
+            } else if keyboard_input.just_pressed(KeyCode::M) && (is_selected_hex_belongs_to_player(player, grid, &selected_hex.hex) || is_selected_hex_has_neighbours(player, grid, &selected_hex.hex)) {
                 commands.insert_resource(NextState(Some(ActionsState::MovingSpaceShips)))
             }
         }
         _ => {
             if keyboard_input.just_pressed(KeyCode::C) {
-                reset_selected_for_move_ships(&mut grid);
-                reset_selected_for_buy_ships(&mut grid, &mut player_resources);
+                reset_selected_for_move_ships(&mut grid_mut);
+                reset_selected_for_buy_ships(&mut grid_mut, &mut player_resources);
                 commands.insert_resource(NextState(Some(ActionsState::NoActionRunning)))
             }
         }

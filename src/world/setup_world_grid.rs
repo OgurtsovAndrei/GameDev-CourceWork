@@ -4,7 +4,7 @@ use bevy::input::mouse::MouseButtonInput;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy::text::{BreakLineOn, Text2dBounds};
-use bevy::utils::HashMap;
+use bevy::utils::{HashMap};
 use bevy::window::PrimaryWindow;
 use glam::{vec2, Vec2};
 use hexx::{Hex, HexLayout, HexOrientation, shapes};
@@ -43,6 +43,7 @@ pub struct Planet {
     pub owner: Player,
     pub owner_army: Vec<SpaceShip>,
 }
+
 
 impl Planet {
     pub(crate) fn new(
@@ -158,7 +159,7 @@ pub(crate) fn setup_grid(
 }
 
 fn spawn_space_ship_info_grid(parent: &mut ChildBuilder, spaceship_grid_texture: &Handle<TextureAtlas>, hex: Hex, font: Handle<Font>) {
-    let all_space_ships = vec![Carrier, Destroyer, Battleship, /*Frigate, Fighter*/];
+    let all_space_ships = vec![Carrier, Destroyer, Battleship /*Frigate, Fighter*/];
 
     let spaceships_info_text_style: TextStyle = TextStyle {
         font,
@@ -416,6 +417,10 @@ pub(crate) fn handle_click_on_planet(
             };
 
 
+            if !are_hex_neighbours(&selected_hex.hex, &cur_pos) {
+                return;
+            }
+
             if selected_hex.hex_selected_for_move == cur_pos {
                 if selected_hex.is_selected_for_move {
                     set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR);
@@ -459,6 +464,11 @@ pub(crate) fn handle_click_on_planet(
             set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
         }
     }
+}
+
+fn are_hex_neighbours(first: &Hex, second: &Hex) -> bool {
+    let delta = *first - *second;
+    return Hex::NEIGHBORS_COORDS.contains(&delta);
 }
 
 

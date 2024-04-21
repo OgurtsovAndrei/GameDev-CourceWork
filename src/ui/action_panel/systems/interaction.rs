@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 
 use bevy::prelude::{BackgroundColor, Button, Changed, Interaction, NextState, Query, Res, ResMut, State, With};
+use hexx::{Hex};
 
 use crate::ui::action_panel::components::{DebugButton, HireArmyButton, NextMoveButton, OpenMovePanelButton};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
@@ -56,10 +57,27 @@ pub fn update_spawn_button_disabled(
     current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
 ) {
     let mut binding = interaction_query.get_single_mut().unwrap();
-    let mut color = binding.as_mut();
     let current_player = current_player_query.single();
-    if color.clone().0 == HOVERED_BUTTON || color.clone().0 == PRESSED_BUTTON { return; }
-    if !selected_hex.is_selected || grid.planets.get(&selected_hex.hex).unwrap().owner != *current_player {
+    if binding.clone().0 == HOVERED_BUTTON || binding.clone().0 == PRESSED_BUTTON { return; }
+    if !selected_hex.is_selected || !is_selected_hex_belongs_to_player(current_player, &grid, &selected_hex.hex) {
+        binding.0 = DISABLED_BUTTON.into();
+        return;
+    } else {
+        binding.0 = NORMAL_BUTTON.into();
+        return;
+    }
+}
+
+pub fn update_move_button_disabled(
+    mut interaction_query: Query<&mut BackgroundColor, (With<Button>, With<OpenMovePanelButton>, )>,
+    selected_hex: Res<SelectedHex>,
+    grid: Res<HexGrid>,
+    current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
+) {
+    let player = current_player_query.single();
+    let mut color = interaction_query.get_single_mut().unwrap();
+    if color.0 == HOVERED_BUTTON || color.clone().0 == PRESSED_BUTTON { return; }
+    if !selected_hex.is_selected || !(is_selected_hex_belongs_to_player(player, &grid, &selected_hex.hex) || is_selected_hex_has_neighbours(player, &grid, &selected_hex.hex)) {
         color.0 = DISABLED_BUTTON.into();
         return;
     } else {
@@ -68,20 +86,16 @@ pub fn update_spawn_button_disabled(
     }
 }
 
-pub fn update_move_button_disabled(
-    mut interaction_query: Query<&mut BackgroundColor, (With<Button>, With<OpenMovePanelButton>, )>,
-    selected_hex: Res<SelectedHex>,
-) {
-    let mut binding = interaction_query.get_single_mut().unwrap();
-    let mut color = binding.as_mut();
-    if color.clone().0 == HOVERED_BUTTON || color.clone().0 == PRESSED_BUTTON { return; }
-    if !selected_hex.is_selected {
-        color.0 = DISABLED_BUTTON.into();
-        return;
-    } else {
-        color.0 = NORMAL_BUTTON.into();
-        return;
+pub(crate) fn is_selected_hex_belongs_to_player(player: &Player, grid: &HexGrid, selected_hex: &Hex) -> bool {
+    grid.planets.get(selected_hex).unwrap().owner == *player
+}
+
+pub(crate) fn is_selected_hex_has_neighbours(player: &Player, grid: &HexGrid, selected_hex: &Hex) -> bool {
+    Hex::NEIGHBORS_COORDS.iter().any(|delta| {
+        let neighbour = *delta + *selected_hex;
+        grid.planets.contains_key(&neighbour) && grid.planets.get(&neighbour).unwrap().owner == *player
     }
+    )
 }
 
 pub fn handle_move_button_click(

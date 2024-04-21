@@ -4,7 +4,7 @@ use crate::ui::hud::components::{ScoreText, SpaceShipsText};
 use crate::ui::hud::resources::{MOVE_MENU_SELECTED_HEX_HUD_TEXT, MOVE_MENU_UNSELECTED_HEX_HUD_TEXT, NO_ACTION_RUNNING_SELECTED_HEX_HUD_TEXT, NO_ACTION_RUNNING_UNSELECTED_HEX_HUD_TEXT, SPAWN_MENU_HUD_TEXT};
 use crate::world::actions::ActionsState;
 use crate::world::resources::GameResources;
-use crate::world::setup_world_grid::{HexGrid, SelectedHex};
+use crate::world::setup_world_grid::{SelectedHex};
 
 pub fn update_score_text(mut text_query: Query<&mut Text, With<ScoreText>>, game_resources: Res<GameResources>) {
     if game_resources.is_changed() {
