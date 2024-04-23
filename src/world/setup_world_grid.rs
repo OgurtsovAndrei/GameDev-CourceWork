@@ -13,6 +13,7 @@ use rand::Rng;
 use crate::space_ships::{get_spaceship_atlas, get_spaceship_sprite_bundle_by_type, SpaceShip, SpaceSipTextureAtlas};
 use crate::space_ships::SpaceShipType::{Carrier, Destroyer, Frigate};
 use crate::world::actions::ActionsState;
+use crate::world::button_click::IsButtonClicked;
 use crate::world::create_map_layout;
 use crate::world::ownership::{OwnershipInfo, SpaceShipsInfo};
 use crate::world::player::{Movable, Player};
@@ -396,7 +397,9 @@ pub(crate) fn handle_click_on_planet(
     mut selected_hex: ResMut<SelectedHex>,
     current_state: Res<State<ActionsState>>,
     current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
+    is_button_clicked: Res<IsButtonClicked>,
 ) {
+    if is_button_clicked.value { return; }
     let window = windows.single();
     let (camera, cam_transform) = cameras.single();
     if let Some(pos) = window

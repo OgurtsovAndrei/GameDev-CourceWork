@@ -29,6 +29,7 @@ impl Plugin for GameStatePlugin {
                 UpdateUI::NewRound,
                 UpdateUI::RenderStats,
                 UpdateUI::UserInput,
+                UpdateUI::FieldSelect,
                 UpdateUI::FlipTurn,
             )
                 .chain(),
@@ -42,7 +43,7 @@ impl Plugin for GameStatePlugin {
             .add_systems(
                 Update,
                 (apply_state_transition::<TurnSwitchedState>)
-                    .after(UpdateUI::UserInput)
+                    .after(UpdateUI::FieldSelect)
                     .before(UpdateUI::FlipTurn),
             );
     }
@@ -53,6 +54,7 @@ pub enum UpdateUI {
     NewRound,
     RenderStats,
     UserInput,
+    FieldSelect,
     FlipTurn,
 }
 
