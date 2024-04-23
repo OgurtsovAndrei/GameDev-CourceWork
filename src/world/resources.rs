@@ -105,7 +105,7 @@ impl GameResources {
 }
 
 
-const INITIAL_RESOURCES: u32 = 10;
+const INITIAL_RESOURCES: u32 = 100;
 const INITIAL_INFLUENCE: u32 = 5;
 
 pub fn setup_resources(mut commands: &mut Commands, grid: &mut HexGrid) {

@@ -137,6 +137,11 @@ impl SpaceShipCharacteristics {
     ));
 }*/
 
+#[derive(Resource)]
+pub(crate) struct SpaceSipTextureAtlas {
+    pub(crate) spaceship_grid_atlas: Handle<TextureAtlas>,
+}
+
 pub(crate) fn get_spaceship_sprite_bundle_by_type(spaceship_grid_texture: &Handle<TextureAtlas>, ship_type: SpaceShipType, transform: Transform) -> SpriteSheetBundle {
     let sprite = get_sprite_by_type(ship_type);
     SpriteSheetBundle {

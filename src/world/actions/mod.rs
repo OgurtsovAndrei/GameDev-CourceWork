@@ -1,16 +1,18 @@
 use bevy::prelude::*;
+
 use crate::game_state::UpdateUI;
 use crate::space_ships::SpaceShipType;
 use crate::ui::action_panel::systems::interaction::{is_selected_hex_belongs_to_player, is_selected_hex_has_neighbours};
-
+use crate::world::actions::move_menu::animations::animation_tick;
 use crate::world::actions::move_menu::plugin::MoveMenuPlugin;
 use crate::world::actions::spawn_menu::plugin::SpawnMenuPlugin;
 use crate::world::fonts_and_styles::fonts::get_info_text_style;
 use crate::world::player::{Movable, Player};
-use crate::world::resources::{GameResources};
+use crate::world::resources::GameResources;
 use crate::world::setup_world_grid::{HexGrid, SelectedHex};
 
 pub(crate) mod spawn_menu;
+
 
 pub(crate) mod move_menu;
 
@@ -22,7 +24,8 @@ impl Plugin for ActionsPlugin {
             .add_state::<ActionsState>()
             .add_plugins(MoveMenuPlugin)
             .add_plugins(SpawnMenuPlugin)
-            .add_systems(Update, change_action_state.in_set(UpdateUI::UserInput));
+            .add_systems(Update, change_action_state.in_set(UpdateUI::UserInput))
+            .add_systems(Update, animation_tick);
     }
 }
 

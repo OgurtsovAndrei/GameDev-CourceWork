@@ -4,14 +4,14 @@ use bevy::input::mouse::MouseButtonInput;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy::text::{BreakLineOn, Text2dBounds};
-use bevy::utils::{HashMap};
+use bevy::utils::HashMap;
 use bevy::window::PrimaryWindow;
 use glam::{vec2, Vec2};
 use hexx::{Hex, HexLayout, HexOrientation, shapes};
 use rand::Rng;
 
-use crate::space_ships::{get_spaceship_atlas, get_spaceship_sprite_bundle_by_type, SpaceShip};
-use crate::space_ships::SpaceShipType::{Battleship, Carrier, Destroyer, Frigate};
+use crate::space_ships::{get_spaceship_atlas, get_spaceship_sprite_bundle_by_type, SpaceShip, SpaceSipTextureAtlas};
+use crate::space_ships::SpaceShipType::{Carrier, Destroyer, Frigate};
 use crate::world::actions::ActionsState;
 use crate::world::create_map_layout;
 use crate::world::ownership::{OwnershipInfo, SpaceShipsInfo};
@@ -111,6 +111,9 @@ pub(crate) fn setup_grid(
 
     let spaceship_grid_atlas = get_spaceship_atlas(&asset_server);
     let spaceship_grid_texture: Handle<TextureAtlas> = atlases.add(spaceship_grid_atlas);
+    commands.insert_resource(SpaceSipTextureAtlas {
+        spaceship_grid_atlas: spaceship_grid_texture.clone()
+    });
 
     let entities = shapes::hexagon(Hex::ZERO, radius)
         .enumerate()
@@ -159,7 +162,7 @@ pub(crate) fn setup_grid(
 }
 
 fn spawn_space_ship_info_grid(parent: &mut ChildBuilder, spaceship_grid_texture: &Handle<TextureAtlas>, hex: Hex, font: Handle<Font>) {
-    let all_space_ships = vec![Carrier, Destroyer, Frigate, /*Battleship, Fighter*/];
+    let all_space_ships = vec![Carrier, Destroyer, Frigate /*Battleship, Fighter*/];
 
     let spaceships_info_text_style: TextStyle = TextStyle {
         font,

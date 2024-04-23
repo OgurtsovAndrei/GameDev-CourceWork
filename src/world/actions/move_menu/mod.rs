@@ -9,6 +9,7 @@ mod styles;
 pub(crate) mod systems;
 pub(crate) mod resources;
 pub(crate) mod plugin;
+pub(crate) mod animations;
 
 /*
 use systems::interactions::*;

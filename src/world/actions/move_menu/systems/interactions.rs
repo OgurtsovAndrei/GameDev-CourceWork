@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 
-use crate::space_ships::{get_count_spaceship_dict, SpaceShip};
+use crate::space_ships::{get_count_spaceship_dict, SpaceShip, SpaceSipTextureAtlas};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::world::actions::{ActionsState, get_spaceship_index_by_type, reset_selected_for_move_ships};
+use crate::world::actions::move_menu::animations::run_spaceship_moving_animation;
 use crate::world::actions::move_menu::components::{CancelButton, EndMoveButton, MoveShipButton, SelectedSpaceshipsText};
 use crate::world::fonts_and_styles::colors::*;
 use crate::world::player::{Movable, Player};
@@ -19,6 +20,8 @@ pub(in crate::world::actions::move_menu) fn interact_with_end_move_button(
     mut selected_hex: ResMut<SelectedHex>,
     mut grid: ResMut<HexGrid>,
     mut switched_turn: ResMut<NextState<TurnSwitchedState>>,
+    mut handle: Res<SpaceSipTextureAtlas>,
+    mut commands: Commands,
 ) {
     let player = current_player_query.single().clone();
     let hex_under_fight = selected_hex.hex.clone();
@@ -29,6 +32,10 @@ pub(in crate::world::actions::move_menu) fn interact_with_end_move_button(
             Interaction::Pressed => {
                 *color = PRESSED_BUTTON.into();
                 let army = reset_selected_ships(&mut grid);
+                for ship in army.iter() {
+                    let ship = ship.clone();
+                    run_spaceship_moving_animation(ship.ship_type, ship.ship_hex, hex_under_fight.clone(), &grid, &handle, &mut commands)
+                }
                 for ship in army.iter() {
                     assert_eq!(ship.ship_owner, player.clone())
                 }
