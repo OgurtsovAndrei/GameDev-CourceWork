@@ -123,7 +123,7 @@ pub(in crate::world::actions::move_menu) fn interact_with_move_ship_button(
                 {   // Have to insert planet back
                     let mut planet = grid.planets.remove(current_hex).unwrap();
                     let selected_ship_idx = planet.owner_army.iter().position(|space_ship|
-                        { !space_ship.is_selected_for_buy && space_ship.ship_type == move_ship_button.space_ship_type });
+                        { !space_ship.is_selected_for_move && space_ship.ship_type == move_ship_button.space_ship_type });
                     if let Some(idx) = selected_ship_idx { planet.owner_army[idx].is_selected_for_move = true; }
                     grid.planets.insert(*current_hex, planet);
                 }

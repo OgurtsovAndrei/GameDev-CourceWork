@@ -88,11 +88,11 @@ impl SpaceShip {
 
     pub(crate) fn get_price(&self) -> PlayerResources {
         match self.ship_type {
-            Carrier => PlayerResources { influence: 1, resources: 5 },
-            Destroyer => PlayerResources { influence: 1, resources: 5 },
-            Frigate => PlayerResources { influence: 1, resources: 5 },
-            Battleship => PlayerResources { influence: 1, resources: 5 },
-            Fighter => PlayerResources { influence: 1, resources: 5 },
+            Carrier => PlayerResources { influence: 0, resources: 5 },
+            Destroyer => PlayerResources { influence: 0, resources: 5 },
+            Frigate => PlayerResources { influence: 0, resources: 5 },
+            Battleship => PlayerResources { influence: 0, resources: 5 },
+            Fighter => PlayerResources { influence: 0, resources: 5 },
         }
     }
 }
