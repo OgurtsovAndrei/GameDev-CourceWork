@@ -3,6 +3,7 @@ use bevy::prelude::{Commands, DetectChangesMut, Entity, NextState, Query, Res, R
 use bevy::prelude::shape::Plane;
 use bevy::utils::tracing::field::debug;
 use hexx::Hex;
+
 use crate::game_state::{AppState, GamePhaseState};
 use crate::ui::stats::components::{MovesLeftText, RoundText, TurnText};
 use crate::ui::stats::resources::Round;
@@ -11,7 +12,7 @@ use crate::world::resources::GameResources;
 use crate::world::setup_world_grid::{HexGrid, Planet};
 
 static CENTRAL_HEX: Hex = Hex { x: 0, y: 0 };
-pub(crate) const MAX_WIN_POINTS: i32 = 1;
+pub(crate) const MAX_WIN_POINTS: i32 = 5;
 
 pub(in crate::ui::stats) fn reset_player(commands: &mut Commands, id: Entity, stats: &mut Stats) {
     stats.moves_left = INITIAL_MOVES;
@@ -52,7 +53,7 @@ pub(in crate::ui::stats) fn update_moves_left_text(
 pub fn update_win_points_number(
     grid: Res<HexGrid>,
     mut players: Query<(&Player, &mut Stats)>,
-    mut game_phase: ResMut<NextState<AppState>>
+    mut game_phase: ResMut<NextState<AppState>>,
 ) {
     if players.iter().all(|(_, stats)| stats.moves_left == 0) {
         let planet: &Planet = grid.planets.get(&CENTRAL_HEX).unwrap();

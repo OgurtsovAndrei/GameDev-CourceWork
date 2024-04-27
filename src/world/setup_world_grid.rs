@@ -45,6 +45,17 @@ pub struct Planet {
     pub owner_army: Vec<SpaceShip>,
 }
 
+pub(crate) fn get_planet_resource_and_influence(id: usize) -> (u32, u32) {
+    return match id {
+        0 => { (5, 2) }
+        1 => { (4, 4) }
+        2 => { (10, 3) }
+        3 => { (5, 10) }
+        4 => { (0, 0) }
+        5 => { (0, 0) }
+        _ => { panic!() }
+    };
+}
 
 impl Planet {
     pub(crate) fn new(
@@ -121,7 +132,8 @@ pub(crate) fn setup_grid(
         .map(|(i, coord)| {
             let pos = layout.hex_to_world_pos(coord);
             let index = map[&i]; // i % (FILE_GRID_HEIGHT_IN_FILE * GRID_WEIGHT_IN_FILE);
-            let planet = Planet::default(coord, (index + 1) as u32, i as u32);
+            let (planet_resource_value, planet_influence_value) = get_planet_resource_and_influence(index);
+            let planet = Planet::default(coord, planet_resource_value, planet_influence_value);
 
             let entity = commands
                 .spawn(SpriteSheetBundle {
@@ -141,13 +153,17 @@ pub(crate) fn setup_grid(
                 })
                 .with_children(|parent| {
                     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
-                    parent.spawn(create_resource_text_bundle(font.clone(), planet.resource));
-                    parent.spawn(create_influence_text_bundle(font.clone(), planet.influence));
 
                     // parent.spawn((create_ownership_text_bundle(font.clone())/*, OwnershipText { hex: coord }*/));
 
-                    parent.spawn(create_resource_sprite_bundle(&asset_server));
-                    parent.spawn(create_influence_sprite_bundle(&asset_server));
+                    if planet.resource != 0 {
+                        parent.spawn(create_resource_text_bundle(font.clone(), planet.resource));
+                        parent.spawn(create_resource_sprite_bundle(&asset_server));
+                    }
+                    if planet.influence != 0 {
+                        parent.spawn(create_influence_sprite_bundle(&asset_server));
+                        parent.spawn(create_influence_text_bundle(font.clone(), planet.influence));
+                    }
                     parent.spawn((get_ownership_frame(&asset_server, sprite_size), OwnershipInfo { hex: coord.clone() }));
                     spawn_space_ship_info_grid(parent, &spaceship_grid_texture, coord.clone(), font.clone())
                 })

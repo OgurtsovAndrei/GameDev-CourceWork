@@ -1,4 +1,5 @@
 use std::fmt::Display;
+
 use bevy::app::{Plugin, Update};
 use bevy::ecs::{
     bundle::Bundle,
@@ -10,7 +11,7 @@ use bevy::prelude::{Entity, IntoSystemConfigs, NextState, Query, Res, ResMut, St
 use crate::game_state::UpdateUI;
 use crate::ui::action_panel::plugin::TurnSwitchedState;
 
-pub const INITIAL_MOVES: i32 = 10;
+pub const INITIAL_MOVES: i32 = 1;
 
 #[derive(Debug, Component, Copy, Clone, Eq, Hash, PartialEq)]
 pub struct Player {
