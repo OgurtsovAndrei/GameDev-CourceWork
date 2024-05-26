@@ -21,9 +21,6 @@ pub(in crate::ui::stats) fn set_round_number_text(text: &mut Text, value: i32) {
     text.sections[0].value = format!("Round: {}", value.to_string());
 }
 
-pub(in crate::ui::stats) fn set_moves_left_text(text: &mut Text, value: i32) {
-    text.sections[0].value = format!("Moves left: {}", value.to_string());
-}
 
 pub(in crate::ui::stats) fn set_player_turn_text(text: &mut Text, value: i32) {
     text.sections[0].value = format!("Player: {}", value.to_string());
@@ -37,15 +34,6 @@ pub(in crate::ui::stats) fn update_turn_text(
     let player = current_player_query.single();
     let mut turn_text = turn_text_query.single_mut();
     set_player_turn_text(&mut turn_text, player.id);
-}
-
-pub(in crate::ui::stats) fn update_moves_left_text(
-    current_player_query: Query<&Stats, (With<Player>, With<Movable>)>,
-    mut moves_left_text_query: Query<&mut Text, With<MovesLeftText>>,
-) {
-    let stats = current_player_query.single();
-    let mut moves_left_text = moves_left_text_query.single_mut();
-    set_moves_left_text(&mut moves_left_text, stats.moves_left);
 }
 
 pub fn update_win_points_number(

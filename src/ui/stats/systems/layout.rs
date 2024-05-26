@@ -4,7 +4,7 @@ use bevy::prelude::{Commands, NodeBundle, Res, TextBundle};
 use bevy::utils::default;
 use crate::ui::stats::components::{MovesLeftText, RoundText, TurnText};
 use crate::ui::stats::styles::{get_stats_container_style, get_stats_style, get_stats_text_style};
-use crate::ui::stats::systems::interaction::{set_moves_left_text, set_player_turn_text, set_round_number_text};
+use crate::ui::stats::systems::interaction::{set_player_turn_text, set_round_number_text};
 use crate::world::fonts_and_styles::colors::BACKGROUND_COLOR;
 use crate::world::player::INITIAL_MOVES;
 
@@ -25,13 +25,6 @@ fn spawn_player_turn(parent: &mut ChildBuilder, asset_server: &Res<AssetServer>)
     parent.spawn(player_turn_text).insert(TurnText);
 }
 
-fn spawn_player_moves(parent: &mut ChildBuilder, asset_server: &Res<AssetServer>) {
-    let mut moves_left_text = TextBundle::from_section(
-        String::new(), get_stats_text_style(asset_server),
-    );
-    set_moves_left_text(&mut moves_left_text.text, INITIAL_MOVES);
-    parent.spawn(moves_left_text).insert(MovesLeftText);
-}
 
 pub(in crate::ui::stats) fn setup_stats(mut commands: Commands,
                                         asset_server: Res<AssetServer>) {
@@ -47,7 +40,6 @@ pub(in crate::ui::stats) fn setup_stats(mut commands: Commands,
                 ..default()
             }).with_children(|parent| {
                 spawn_round_number(parent, &asset_server);
-                spawn_player_moves(parent, &asset_server);
                 spawn_player_turn(parent, &asset_server);
             });
         });
