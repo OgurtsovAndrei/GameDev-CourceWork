@@ -81,11 +81,21 @@ pub(crate) fn build_move_menu(selected_hex: Res<SelectedHex>,
                             EndMoveButton,
                         ))
                         .with_children(|parent| {
+                            let text = if let Ok(player) = current_player_query.get_single() {
+                                let id = hex_grid.planets[&selected_hex.hex].owner.id;
+                                if player.id == id {
+                                    "Perform move"
+                                } else {
+                                    "Perform attack"
+                                }
+                            } else {
+                                "Perform move"
+                            };
                             parent.spawn(TextBundle {
                                 style: Style { ..default() },
                                 text: Text {
                                     sections: vec![TextSection::new(
-                                        "Perform Move",
+                                        text,
                                         get_button_text_style(&asset_server),
                                     )],
                                     alignment: TextAlignment::Center,
