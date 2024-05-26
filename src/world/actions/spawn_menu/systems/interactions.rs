@@ -9,6 +9,23 @@ use crate::world::player::{Movable, Player};
 use crate::world::resources::GameResources;
 use crate::world::setup_world_grid::{HexGrid, SelectedHex};
 
+
+pub(in crate::world::actions::spawn_menu) fn update_end_spawn_button_disabled(
+    mut button_query: Query<&mut BackgroundColor, With<EndSpawnButton>>,
+    hex_grid: ResMut<HexGrid>,
+) {
+    if let Err(_) = button_query.get_single() {
+        return;
+    }
+    let mut color = button_query.single_mut();
+    if color.0 == HOVERED_BUTTON.into() || color.0 == PRESSED_BUTTON.into() { return; }
+    if hex_grid.planets.iter().any(|(hex, planet)| planet.owner_army.iter().any(|unit| unit.is_selected_for_buy)) {
+        *color = NORMAL_BUTTON.into();
+    } else {
+        *color = DISABLED_BUTTON.into();
+    }
+}
+
 pub(in crate::world::actions::spawn_menu) fn interact_with_end_spawn_button(
     mut button_query: Query<
         (&Interaction, &mut BackgroundColor),
@@ -19,6 +36,7 @@ pub(in crate::world::actions::spawn_menu) fn interact_with_end_spawn_button(
     mut switched_turn: ResMut<NextState<TurnSwitchedState>>,
 ) {
     for (interaction, mut color) in button_query.iter_mut() {
+        if color.0 == DISABLED_BUTTON.into() { return; }
         match *interaction {
             Interaction::Pressed => {
                 *color = PRESSED_BUTTON.into();

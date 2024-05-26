@@ -1,6 +1,4 @@
 use bevy::prelude::*;
-use bevy_editor_pls::egui::Grid;
-use hexx::Hex;
 
 use crate::space_ships::{get_count_spaceship_dict, SpaceShip, SpaceSipTextureAtlas};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
@@ -23,9 +21,9 @@ pub (in crate::world::actions::move_menu) fn update_end_move_button_disabled(
     let mut color = button_query.single_mut();
     if color.0 == HOVERED_BUTTON || color.clone().0 == PRESSED_BUTTON { return; }
     if get_selected_ships(&grid).len() == 0 {
-        color.0 = DISABLED_BUTTON.clone()
+        *color = DISABLED_BUTTON.into();
     } else {
-        color.0 = NORMAL_BUTTON.clone();
+        *color = NORMAL_BUTTON.into();
     }
 }
 
