@@ -11,8 +11,7 @@ use crate::world::player::{Movable, Player};
 use crate::world::resources::GameResources;
 use crate::world::setup_world_grid::{HEX_NOWHERE, HexGrid, Planet, SelectedHex};
 
-
-pub (in crate::world::actions::move_menu) fn update_end_move_button_disabled(
+pub(in crate::world::actions::move_menu) fn update_end_move_button_disabled(
     mut button_query: Query<&mut BackgroundColor, With<EndMoveButton>>,
     grid: ResMut<HexGrid>,
 ) {
@@ -47,7 +46,7 @@ pub(in crate::world::actions::move_menu) fn interact_with_end_move_button(
 
 
     for (interaction, mut color) in button_query.iter_mut() {
-        if color.0 == DISABLED_BUTTON.into() { return }
+        if color.0 == DISABLED_BUTTON.into() { return; }
         match *interaction {
             Interaction::Pressed => {
                 *color = PRESSED_BUTTON.into();
@@ -64,6 +63,9 @@ pub(in crate::world::actions::move_menu) fn interact_with_end_move_button(
                 let (winner, winner_army) = perform_fight(player, player2, army, planet_under_fight.owner_army);
                 planet_under_fight.owner = winner;
                 planet_under_fight.owner_army = winner_army;
+                for ship in planet_under_fight.owner_army.iter_mut() {
+                    ship.ship_hex = hex_under_fight
+                }
                 grid.planets.insert(selected_hex.hex, planet_under_fight);
                 simulation_state_next_state.set(ActionsState::NoActionRunning);
                 switched_turn.set(TurnSwitchedState::OnTurnSwitched)
