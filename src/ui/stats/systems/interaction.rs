@@ -1,8 +1,9 @@
 use bevy::log::info;
-use bevy::prelude::{Commands, Entity, NextState, Query, Res, ResMut, Text, With};
+use bevy::prelude::{Commands, Entity, NextState, Query, Res, ResMut, State, Text, With};
 use hexx::Hex;
 
 use crate::game_state::{AppState, GamePhaseState};
+use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::ui::stats::components::{MovesLeftText, RoundText, TurnText};
 use crate::ui::stats::resources::Round;
 use crate::world::player::{INITIAL_MOVES, Movable, Player, Stats};
@@ -61,21 +62,24 @@ pub fn update_round_number_text(
     mut round_text_query: Query<&mut Text, With<RoundText>>,
     mut players: Query<(Entity, &Player, &mut Stats)>,
     mut round_res: ResMut<Round>,
-    grid: Res<HexGrid>,
-    mut game_resources: ResMut<GameResources>,
+    turn_switch_state: Res<State<TurnSwitchedState>>,
+    mut turn_switch_state_mutable: ResMut<NextState<TurnSwitchedState>>,
 ) {
     let mut round_text = round_text_query.single_mut();
-
-    if players.iter().all(|(_, _, stats)| stats.moves_left == 0) {
-        let round = round_res.as_mut();
-        round.number += 1;
-        set_round_number_text(&mut round_text, round.number);
-        players.iter_mut().for_each(|(entity, player, mut stats)| {
-            reset_player(&mut commands, entity, &mut stats);
-            if player.id == 1 {
-                commands.entity(entity).insert(Movable);
-            }
-        });
-        game_resources.update(&grid);
+    match turn_switch_state.get() {
+        TurnSwitchedState::OnTurnSwitched => {
+            let round = round_res.as_mut();
+            round.number += 1;
+            set_round_number_text(&mut round_text, round.number);
+            players.iter_mut().for_each(|(entity, player, mut stats)| {
+                reset_player(&mut commands, entity, &mut stats);
+                if player.id == 1 {
+                    commands.entity(entity).insert(Movable);
+                }
+            });
+            turn_switch_state_mutable.set(TurnSwitchedState::OnDefaultState);
+        }
+        _ => {
+        }
     }
 }

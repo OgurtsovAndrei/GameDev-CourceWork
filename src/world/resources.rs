@@ -5,9 +5,8 @@ use bevy::prelude::*;
 use bevy::utils::HashMap;
 use hexx::Hex;
 
-use crate::space_ships::{SpaceShip, SpaceShipType};
 use crate::world::player::Player;
-use crate::world::setup_world_grid::{HexGrid, Planet};
+use crate::world::setup_world_grid::{HexGrid};
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct PlayerResources {
@@ -76,31 +75,15 @@ impl GameResources {
 }
 
 impl GameResources {
-    pub fn update(&mut self, value: &HexGrid) {
-        let mut players_stats_map: HashMap<Player, PlayerResources> = HashMap::from(
-            [(Player { id: -1 }, PlayerResources::default()), (Player { id: 1 }, PlayerResources::default()), (Player { id: 2 }, PlayerResources::default())]
-        );
-
+    pub fn update(&mut self, value: &HexGrid, player : &Player) {
+        let mut current_resources = self.resources.remove(player).unwrap();
         for (_, planet) in &value.planets {
-            let mut player_map = players_stats_map.remove(&planet.owner).unwrap();
-            player_map.resources += planet.resource;
-            player_map.influence += planet.influence;
-            players_stats_map.insert(planet.owner, player_map);
-        }
-
-
-        for (player, stats) in players_stats_map {
-            if let None = self.resources.get(&player) {
-                continue;
+            if planet.owner.id == player.id {
+                current_resources.influence += planet.influence;
+                current_resources.resources += planet.resource;
             }
-            let mut current_resources = self.resources.remove(&player).unwrap();
-
-            info!("{:?}, {:?}, {:?}", player, stats.influence, stats.resources);
-            current_resources.influence += stats.influence;
-            current_resources.resources += stats.resources;
-
-            self.resources.insert(player, current_resources);
-        }
+         }
+        self.resources.insert(player.clone(), current_resources);
     }
 }
 

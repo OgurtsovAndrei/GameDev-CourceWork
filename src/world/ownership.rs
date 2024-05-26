@@ -1,10 +1,13 @@
 use bevy::app::{App, Update};
-use bevy::prelude::{Color, Component, IntoSystemConfigs, Plugin, Query, Res, Text, TextureAtlasSprite};
+use bevy::prelude::{Color, Component, IntoSystemConfigs, OnEnter,  Plugin, Query, Res, ResMut, Text, TextureAtlasSprite, With};
 use bevy::sprite::Sprite;
 use hexx::Hex;
 
 use crate::game_state::UpdateUI;
 use crate::space_ships::SpaceShipType;
+use crate::ui::action_panel::plugin::TurnSwitchedState;
+use crate::world::player::{Movable, Player};
+use crate::world::resources::{GameResources};
 use crate::world::setup_world_grid::HexGrid;
 
 #[derive(Component, Debug, Clone)]
@@ -25,6 +28,7 @@ impl Plugin for OwnershipPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, update_ownership_texts.in_set(UpdateUI::RenderStats));
         app.add_systems(Update, update_spaceships_texture.in_set(UpdateUI::RenderStats));
+        app.add_systems(OnEnter(TurnSwitchedState::OnDefaultState), update_player_resources.in_set(UpdateUI::NewRound));
         app.add_systems(Update, update_spaceships_text_value.in_set(UpdateUI::RenderStats));
     }
 }
@@ -69,6 +73,14 @@ fn update_spaceships_texture(mut image_query: Query<(&mut TextureAtlasSprite, &S
             _ => { panic!() }
         }
     }
+}
+
+pub(self) fn update_player_resources(player_query: Query<&Player, With<Movable>>,
+                           hex_grid: Res<HexGrid>, 
+                           mut game_resources: ResMut<GameResources>,) {
+    if let Err(_) = player_query.get_single() { return; }
+    let player = player_query.single();
+    game_resources.update(&hex_grid, player);
 }
 
 fn update_spaceships_text_value(mut text_query: Query<(&mut Text, &SpaceShipsInfo)>,

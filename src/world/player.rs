@@ -89,12 +89,12 @@ fn determine_turn(
             if op_stats.moves_left > 0 {
                 commands.entity(cur_id).remove::<Movable>();
                 commands.entity(op_id).insert(Movable);
+                turn_switch_state_mutable.set(TurnSwitchedState::OnDefaultState);
             } else if op_stats.moves_left == 0 && cur_stats.moves_left > 0 {} else if cur_stats.moves_left == 0 && cur_stats.moves_left == 0 {
                 commands.entity(cur_id).remove::<Movable>();
             } else {
                 panic!("Should never happen");
             }
-            turn_switch_state_mutable.set(TurnSwitchedState::OnDefaultState);
         }
         _ => {}
     }

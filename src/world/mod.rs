@@ -14,7 +14,6 @@ pub(crate) mod fonts_and_styles;
 pub mod ownership;
 mod create_map_layout;
 mod button_click;
-
 pub struct WorldPlugin;
 
 impl Plugin for WorldPlugin {
