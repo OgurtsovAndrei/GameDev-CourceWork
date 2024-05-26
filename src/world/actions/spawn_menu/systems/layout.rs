@@ -11,7 +11,7 @@ use crate::world::fonts_and_styles::fonts::*;
 
 pub fn spawn_pause_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     println!("Spawning Pause Menu");
-    build_pause_menu(&mut commands, &asset_server);
+    build_spawn_menu(&mut commands, &asset_server);
 }
 
 pub(crate) fn despawn_pause_menu(
@@ -24,7 +24,7 @@ pub(crate) fn despawn_pause_menu(
 }
 
 // System Piping Example
-pub(crate) fn build_pause_menu(commands: &mut Commands, asset_server: &Res<AssetServer>) -> Entity {
+pub(crate) fn build_spawn_menu(commands: &mut Commands, asset_server: &Res<AssetServer>) -> Entity {
     let pause_menu_entity = commands
         .spawn((
             NodeBundle {
@@ -36,11 +36,11 @@ pub(crate) fn build_pause_menu(commands: &mut Commands, asset_server: &Res<Asset
         ))
         .with_children(|parent| {
             parent
-                .spawn(NodeBundle {
+                .spawn((NodeBundle {
                     style: get_spawn_menu_container_style(),
                     background_color: BACKGROUND_COLOR.into(),
                     ..default()
-                })
+                }, Interaction::None))
                 .with_children(|parent| {
                     // Title
                     parent.spawn(TextBundle {

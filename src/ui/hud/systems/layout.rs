@@ -17,7 +17,9 @@ pub fn build_resource_hud(commands: &mut Commands, asset_server: &Res<AssetServe
                 ..default()
             },
             HUD {},
-        ))
+            Interaction::None
+        ),
+        )
         .with_children(|parent| {
             // LHS
             parent
@@ -77,15 +79,16 @@ pub fn build_space_ship_hud(commands: &mut Commands, asset_server: &Res<AssetSer
                 ..default()
             },
             HUD {},
+            Interaction::None
         ))
         .with_children(|parent| {
             // RHS
             parent
-                .spawn(NodeBundle {
+                .spawn((NodeBundle {
                     style: get_rhs_style(),
                     background_color: BACKGROUND_COLOR.into(),
                     ..default()
-                })
+                }))
                 .with_children(|parent| {
                     parent.spawn((
                         TextBundle {
@@ -133,6 +136,7 @@ pub fn setup_bottom_panel_buttons(commands: &mut Commands, asset_server: &Res<As
                 ..Default::default()
             },
             HUD {},
+            Interaction::None
         )
         )
         .with_children(|parent| {

@@ -1,5 +1,5 @@
 use bevy::app::{App, Plugin, Update};
-use bevy::prelude::{Button, Changed, Entity, IntoSystemConfigs, Query, ResMut, Resource, With};
+use bevy::prelude::{Changed, Entity, IntoSystemConfigs, Query, ResMut, Resource, With};
 use bevy::ui::{Interaction};
 use crate::game_state::UpdateUI;
 
@@ -18,7 +18,7 @@ impl Plugin for UIClickPlugin {
     }
 }
 
-pub fn set_ui_clicked(query: Query<(&Interaction, Entity), (With<Button>, Changed<Interaction>)>,
+pub fn set_ui_clicked(query: Query<(&Interaction, Entity), Changed<Interaction>>,
                   mut is_button_clicked: ResMut<IsButtonClicked>) {
     if !query.is_empty() {
         is_button_clicked.value = true

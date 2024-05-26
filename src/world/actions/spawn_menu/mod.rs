@@ -2,7 +2,7 @@ use bevy::asset::AssetServer;
 use bevy::prelude::{Commands, Entity, Query, Res, With};
 
 use crate::world::actions::spawn_menu::components::SpawnMenu;
-use crate::world::actions::spawn_menu::systems::layout::{build_pause_menu, despawn_pause_menu};
+use crate::world::actions::spawn_menu::systems::layout::{build_spawn_menu, despawn_pause_menu};
 
 pub(crate) mod components;
 mod styles;
@@ -41,7 +41,7 @@ impl Plugin for PauseMenuPlugin {
 
 pub fn spawn_spawning_space_ships_window(mut commands: Commands, asset_server: Res<AssetServer>) {
     println!("Spawning Spawn Menu");
-    build_pause_menu(&mut commands, &asset_server);
+    build_spawn_menu(&mut commands, &asset_server);
 }
 
 pub fn despawn_spawning_space_ships_window(

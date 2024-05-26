@@ -33,7 +33,7 @@ pub(crate) fn build_move_menu(selected_hex: Res<SelectedHex>,
                               hex_grid: Res<HexGrid>,
                               current_player_query: Query<&Player, With<Movable>>, 
                               mut commands: Commands, asset_server: &Res<AssetServer>) -> Entity {
-    let pause_menu_entity = commands
+    let move_menu_entity = commands
         .spawn((
             NodeBundle {
                 style: get_move_menu_style(),
@@ -44,11 +44,11 @@ pub(crate) fn build_move_menu(selected_hex: Res<SelectedHex>,
         ))
         .with_children(|parent| {
             parent
-                .spawn(NodeBundle {
+                .spawn((NodeBundle {
                     style: get_move_menu_container_style(),
                     background_color: BACKGROUND_COLOR.into(),
                     ..default()
-                })
+                }, Interaction::None))
                 .with_children(|parent| {
                     // Title
                     parent.spawn(TextBundle {
@@ -126,7 +126,7 @@ pub(crate) fn build_move_menu(selected_hex: Res<SelectedHex>,
         })
         .id();
 
-    pause_menu_entity
+    move_menu_entity
 }
 
 fn build_move_space_ship_button(asset_server: &Res<AssetServer>, parent: &mut ChildBuilder, space_ship_type: SpaceShipType) {

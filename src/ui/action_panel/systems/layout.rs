@@ -1,6 +1,7 @@
 use bevy::asset::AssetServer;
 use bevy::hierarchy::ChildBuilder;
 use bevy::prelude::{BuildChildren, ButtonBundle, Commands, default, NodeBundle, Res, TextBundle};
+use bevy::ui::Interaction;
 
 use crate::ui::action_panel::components::{ActionPanel, HireArmyButton, SkipRoundButton, OpenMovePanelButton};
 use crate::ui::action_panel::styles::{get_actions_menu_container_style, get_actions_menu_style, get_button_style};
@@ -68,13 +69,13 @@ pub fn setup_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
             style: get_actions_menu_style(),
             ..Default::default()
         },
-                ActionPanel))
+                ActionPanel, Interaction::None))
         .with_children(|parent| {
-            parent.spawn(NodeBundle {
+            parent.spawn((NodeBundle {
                 style: get_actions_menu_container_style(),
                 background_color: BACKGROUND_COLOR.into(),
                 ..default()
-            }).with_children(|parent| {
+            }, Interaction::None)).with_children(|parent| {
                 add_title(parent, &asset_server);
                 add_hire_army_button(parent, &asset_server);
                 add_open_move_panel_button(parent, &asset_server);
