@@ -425,65 +425,69 @@ pub(crate) fn handle_click_on_planet(
         let cur_pos: Hex = grid.layout.world_pos_to_hex(pos);
         if !buttons.just_pressed(MouseButton::Left) { return; }
 
-        if let ActionsState::MovingSpaceShips = current_state.get() {
-            if !selected_hex.is_selected || selected_hex.hex == cur_pos { return; }
-
-            if grid.entities.get(&cur_pos).is_none() {
-                // prev_pos.is_selected = false;
-                // set_color_to_hex(&grid, &mut tiles, &prev_pos.hex, &DEFAULT_COLOR);
-                return;
-            }
-
-            if current_player_query.get_single().unwrap().clone() != grid.planets.get(&cur_pos).unwrap().owner {
-                return;
-            };
-
-
-            if !are_hex_neighbours(&selected_hex.hex, &cur_pos) {
-                return;
-            }
-
-            if selected_hex.hex_selected_for_move == cur_pos {
-                if selected_hex.is_selected_for_move {
-                    set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR);
-                    selected_hex.is_selected_for_move = false;
-                    selected_hex.hex_selected_for_move = HEX_NOWHERE;
-                } else {
-                    set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_FOR_MOVE_COLOR);
-                    selected_hex.is_selected_for_move = true;
+        match current_state.get() {
+            ActionsState::NoActionRunning => {
+                if grid.entities.get(&cur_pos).is_none() {
+                    // prev_pos.is_selected = false;
+                    // set_color_to_hex(&grid, &mut tiles, &prev_pos.hex, &DEFAULT_COLOR);
+                    return;
                 }
-            } else {
-                let prv_pos_copy = selected_hex.hex_selected_for_move.clone();
-                selected_hex.hex_selected_for_move = cur_pos;
-                selected_hex.is_selected_for_move = true;
-                set_color_to_hex(&grid, &mut tiles, &prv_pos_copy, &DEFAULT_COLOR);
-                set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_FOR_MOVE_COLOR);
+
+                if selected_hex.hex == cur_pos {
+                    if selected_hex.is_selected {
+                        set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR);
+                        selected_hex.is_selected = false;
+                        selected_hex.hex = HEX_NOWHERE;
+                    } else {
+                        set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
+                        selected_hex.is_selected = true;
+                    }
+                } else {
+                    let prv_pos_copy = selected_hex.hex.clone();
+                    selected_hex.hex = cur_pos;
+                    selected_hex.is_selected = true;
+                    set_color_to_hex(&grid, &mut tiles, &prv_pos_copy, &DEFAULT_COLOR);
+                    set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
+                }
             }
+            ActionsState::SpawningSpaceShips => {}
+            ActionsState::MovingSpaceShips => {
+                if !selected_hex.is_selected || selected_hex.hex == cur_pos { return; }
 
-            return;
-        }
+                if grid.entities.get(&cur_pos).is_none() {
+                    // prev_pos.is_selected = false;
+                    // set_color_to_hex(&grid, &mut tiles, &prev_pos.hex, &DEFAULT_COLOR);
+                    return;
+                }
 
-        if grid.entities.get(&cur_pos).is_none() {
-            // prev_pos.is_selected = false;
-            // set_color_to_hex(&grid, &mut tiles, &prev_pos.hex, &DEFAULT_COLOR);
-            return;
-        }
+                if current_player_query.get_single().unwrap().clone() != grid.planets.get(&cur_pos).unwrap().owner {
+                    return;
+                };
 
-        if selected_hex.hex == cur_pos {
-            if selected_hex.is_selected {
-                set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR);
-                selected_hex.is_selected = false;
-                selected_hex.hex = HEX_NOWHERE;
-            } else {
-                set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
-                selected_hex.is_selected = true;
+
+                if !are_hex_neighbours(&selected_hex.hex, &cur_pos) {
+                    return;
+                }
+
+                if selected_hex.hex_selected_for_move == cur_pos {
+                    if selected_hex.is_selected_for_move {
+                        set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR);
+                        selected_hex.is_selected_for_move = false;
+                        selected_hex.hex_selected_for_move = HEX_NOWHERE;
+                    } else {
+                        set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_FOR_MOVE_COLOR);
+                        selected_hex.is_selected_for_move = true;
+                    }
+                } else {
+                    let prv_pos_copy = selected_hex.hex_selected_for_move.clone();
+                    selected_hex.hex_selected_for_move = cur_pos;
+                    selected_hex.is_selected_for_move = true;
+                    set_color_to_hex(&grid, &mut tiles, &prv_pos_copy, &DEFAULT_COLOR);
+                    set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_FOR_MOVE_COLOR);
+                }
+
+                return;
             }
-        } else {
-            let prv_pos_copy = selected_hex.hex.clone();
-            selected_hex.hex = cur_pos;
-            selected_hex.is_selected = true;
-            set_color_to_hex(&grid, &mut tiles, &prv_pos_copy, &DEFAULT_COLOR);
-            set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
         }
     }
 }

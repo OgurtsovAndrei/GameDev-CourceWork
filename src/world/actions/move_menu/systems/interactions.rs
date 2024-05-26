@@ -39,7 +39,7 @@ pub(in crate::world::actions::move_menu) fn interact_with_end_move_button(
     >,
     mut simulation_state_next_state: ResMut<NextState<ActionsState>>,
     current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
-    mut selected_hex: ResMut<SelectedHex>,
+    selected_hex: Res<SelectedHex>,
     mut grid: ResMut<HexGrid>,
     mut switched_turn: ResMut<NextState<TurnSwitchedState>>,
     handle: Res<SpaceSipTextureAtlas>,
@@ -142,7 +142,7 @@ pub(in crate::world::actions::move_menu) fn interact_with_move_ship_button(
     keyboard_input: Res<Input<KeyCode>>,
     mut resources: ResMut<GameResources>,
     mut grid: ResMut<HexGrid>,
-    mut selected_hex: ResMut<SelectedHex>,
+    selected_hex: Res<SelectedHex>,
     mut event_writer: EventWriter<ShipMoved>,
     current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
 ) {
@@ -173,7 +173,6 @@ pub(in crate::world::actions::move_menu) fn interact_with_move_ship_button(
                 }
                 resources.set_changed();
                 grid.set_changed();
-                selected_hex.set_changed();
             }
             Interaction::Hovered => {
                 *color = HOVERED_BUTTON.into();

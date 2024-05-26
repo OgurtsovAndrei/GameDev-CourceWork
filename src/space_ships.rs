@@ -112,7 +112,7 @@ impl fmt::Debug for SpaceShip {
 impl SpaceShipCharacteristics {
     pub fn get_by_spaceship_type(ship_type: SpaceShipType) -> Self {
         match ship_type {
-            Carrier => SpaceShipCharacteristics { id: 6, power: 1 },
+            Carrier => SpaceShipCharacteristics { id: 6, power: 2 },
             Fighter => SpaceShipCharacteristics { id: 1, power: 8 },
             Destroyer => SpaceShipCharacteristics { id: 18, power: 6 },
             Frigate => SpaceShipCharacteristics { id: 11, power: 9 },
