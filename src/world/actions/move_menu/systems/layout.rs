@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::space_ships::SpaceShipType;
 use crate::space_ships::SpaceShipType::{Carrier, Destroyer, Frigate};
-use crate::world::actions::{get_ship_stats_text, get_win_probability_text};
+use crate::world::actions::{get_move_ship_stats_text, get_win_probability_text};
 
 use crate::world::actions::move_menu::components::*;
 use crate::world::actions::move_menu::components::MoveMenu;
@@ -70,7 +70,7 @@ pub(crate) fn build_move_menu(selected_hex: Res<SelectedHex>,
                         }
                     }
                     
-                    parent.spawn((get_ship_stats_text(asset_server), SelectedSpaceshipsText));
+                    parent.spawn((get_move_ship_stats_text(asset_server), SelectedSpaceshipsText));
                     parent
                         .spawn((
                             ButtonBundle {

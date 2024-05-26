@@ -10,7 +10,6 @@ use rand::Rng;
 use crate::space_ships::SpaceShipType::{Battleship, Carrier, Destroyer, Fighter, Frigate};
 use crate::world::player::Player;
 use crate::world::resources::PlayerResources;
-use crate::world::setup_world_grid::HEX_NOWHERE;
 
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub(crate) enum SpaceShipType {
@@ -48,8 +47,6 @@ pub(crate) fn get_count_spaceship_dict(spaceship_list: Vec<SpaceShip>) -> HashMa
             (Carrier, 0),
             (Destroyer, 0),
             (Frigate, 0),
-            (Battleship, 0),
-            (Fighter, 0)
         ]);
 
     spaceship_list.iter().for_each(|spaceship| {
@@ -64,6 +61,7 @@ pub(crate) fn get_count_spaceship_dict(spaceship_list: Vec<SpaceShip>) -> HashMa
 pub struct SpaceShipCharacteristics {
     pub id: usize,
     pub power: u32,
+    pub price: PlayerResources
 }
 
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Component)]
@@ -73,28 +71,6 @@ pub(crate) struct SpaceShip {
     pub ship_hex: Hex,
     pub is_selected_for_move: bool,
     pub is_selected_for_buy: bool,
-}
-
-impl SpaceShip {
-    fn new(ship_type: SpaceShipType) -> Self {
-        Self {
-            ship_type,
-            ship_owner: Player { id: -1 },
-            ship_hex: HEX_NOWHERE,
-            is_selected_for_move: false,
-            is_selected_for_buy: false,
-        }
-    }
-
-    pub(crate) fn get_price(&self) -> PlayerResources {
-        match self.ship_type {
-            Carrier => PlayerResources { influence: 0, resources: 5 },
-            Destroyer => PlayerResources { influence: 0, resources: 5 },
-            Frigate => PlayerResources { influence: 0, resources: 5 },
-            Battleship => PlayerResources { influence: 0, resources: 5 },
-            Fighter => PlayerResources { influence: 0, resources: 5 },
-        }
-    }
 }
 
 impl SpaceShip {
@@ -112,11 +88,11 @@ impl fmt::Debug for SpaceShip {
 impl SpaceShipCharacteristics {
     pub fn get_by_spaceship_type(ship_type: SpaceShipType) -> Self {
         match ship_type {
-            Carrier => SpaceShipCharacteristics { id: 6, power: 2 },
-            Fighter => SpaceShipCharacteristics { id: 1, power: 8 },
-            Destroyer => SpaceShipCharacteristics { id: 18, power: 6 },
-            Frigate => SpaceShipCharacteristics { id: 11, power: 9 },
-            Battleship => SpaceShipCharacteristics { id: 22, power: 5 },
+            Carrier => SpaceShipCharacteristics { id: 6, power: 2, price: PlayerResources { influence: 0, resources: 3 }},
+            Destroyer => SpaceShipCharacteristics { id: 18, power: 6, price: PlayerResources { influence: 0, resources: 8 } },
+            Frigate => SpaceShipCharacteristics { id: 11, power: 9, price: PlayerResources { influence: 0, resources: 12 } },
+            Fighter => SpaceShipCharacteristics { id: 1, power: 8, price: PlayerResources { influence: 0, resources: 5 }},
+            Battleship => SpaceShipCharacteristics { id: 22, power: 5, price: PlayerResources { influence: 0, resources: 5 }},
         }
     }
 }

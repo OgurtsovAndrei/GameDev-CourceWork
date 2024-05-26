@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::space_ships::{get_count_spaceship_dict, SpaceShip, SpaceShipType};
+use crate::space_ships::{get_count_spaceship_dict, SpaceShip, SpaceShipCharacteristics, SpaceShipType};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::world::actions::{ActionsState, get_spaceship_index_by_type, reset_selected_for_buy_ships};
 use crate::world::actions::spawn_menu::components::{CancelButton, EndSpawnButton, ShipsToBuyText, SpawnShipButton};
@@ -72,7 +72,7 @@ pub(in crate::world::actions::spawn_menu) fn update_ships_to_buy_text(
 
     for (t, count) in dict {
         let index = get_spaceship_index_by_type(t);
-        text.sections.get_mut(index).unwrap().value = format!("{count}\n");
+        text.sections.get_mut(index).unwrap().value = format!("{count}");
     }
 }
 
@@ -104,7 +104,7 @@ fn buy_ship(resources: &mut ResMut<GameResources>, grid: &mut ResMut<HexGrid>, s
                 is_selected_for_move: false,
                 is_selected_for_buy: true,
             };
-            let price = spaceship.get_price();
+            let price = SpaceShipCharacteristics::get_by_spaceship_type(spaceship.ship_type).price;
 
             if player_resources.influence < price.influence || player_resources.resources < price.resources { return false; }
             let mut player_resources = resources.resources.remove(player).unwrap();

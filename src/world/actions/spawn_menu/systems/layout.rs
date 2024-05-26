@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::space_ships::SpaceShipType;
 use crate::space_ships::SpaceShipType::{Carrier, Destroyer, Frigate};
-use crate::world::actions::get_ship_stats_text;
+use crate::world::actions::get_buy_ship_stats_text;
 
 use crate::world::actions::spawn_menu::components::*;
 use crate::world::actions::spawn_menu::components::SpawnMenu;
@@ -54,7 +54,7 @@ pub(crate) fn build_spawn_menu(commands: &mut Commands, asset_server: &Res<Asset
                         },
                         ..default()
                     });
-                    parent.spawn((get_ship_stats_text(&asset_server), ShipsToBuyText));
+                    parent.spawn((get_buy_ship_stats_text(&asset_server), ShipsToBuyText));
                     parent
                         .spawn((
                             ButtonBundle {

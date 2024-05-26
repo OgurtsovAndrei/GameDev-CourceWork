@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 
 use crate::game_state::UpdateUI;
-use crate::space_ships::SpaceShipType;
+use crate::space_ships::{SpaceShipCharacteristics, SpaceShipType};
+use crate::space_ships::SpaceShipType::{Carrier, Destroyer, Frigate};
 use crate::ui::action_panel::systems::interaction::{is_selected_hex_belongs_to_player, is_selected_hex_has_neighbours};
 use crate::world::actions::move_menu::animations::animation_tick;
 use crate::world::actions::move_menu::plugin::MoveMenuPlugin;
@@ -77,7 +78,7 @@ pub(self) fn reset_selected_for_buy_ships(hex_grid: &mut ResMut<HexGrid>, mut pl
         if (player.id != -1) {
             let mut resources = player_resources.resources.remove(&player).unwrap();
             planet.owner_army.iter_mut().filter(|spaceship| spaceship.is_selected_for_buy).for_each(
-                |spaceship| resources += spaceship.get_price()
+                |spaceship| resources += SpaceShipCharacteristics::get_by_spaceship_type(spaceship.ship_type).price
             );
             planet.owner_army.retain(|spaceship| !spaceship.is_selected_for_buy);
             player_resources.resources.insert(player, resources);
@@ -111,48 +112,98 @@ pub(self) fn get_win_probability_text(asset_server: &Res<AssetServer>) -> TextBu
 }
 
 
-pub(self) fn get_ship_stats_text(asset_server: &Res<AssetServer>) -> TextBundle {
+pub(self) fn get_buy_ship_stats_text(asset_server: &Res<AssetServer>) -> TextBundle {
+    let carrier = SpaceShipCharacteristics::get_by_spaceship_type(Carrier);
+    let destroyer = SpaceShipCharacteristics::get_by_spaceship_type(Destroyer);
+    let frigate = SpaceShipCharacteristics::get_by_spaceship_type(Frigate);
     TextBundle {
         text: Text {
             sections: vec![
                 TextSection::new(
-                    "Carrier: ",
+                    "0",
                     get_info_text_style(asset_server),
                 ),
                 TextSection::new(
-                    "0\n",
+                    " - Carrier ",
                     get_info_text_style(asset_server),
                 ),
                 TextSection::new(
-                    "Destroyer: ",
+                    format!("(cost - {}; power - {})\n", carrier.price.resources, carrier.power),
                     get_info_text_style(asset_server),
                 ),
                 TextSection::new(
-                    "0\n",
+                    "0",
                     get_info_text_style(asset_server),
                 ),
                 TextSection::new(
-                    "Frigate: ",
+                    " - Destroyer ",
                     get_info_text_style(asset_server),
                 ),
                 TextSection::new(
-                    "0\n",
+                    format!("(cost - {}; power - {})\n", destroyer.price.resources, destroyer.power),
                     get_info_text_style(asset_server),
                 ),
                 TextSection::new(
-                    "Battleship: ",
+                    "0",
                     get_info_text_style(asset_server),
                 ),
                 TextSection::new(
-                    "0\n",
+                    " - Frigate ",
                     get_info_text_style(asset_server),
                 ),
                 TextSection::new(
-                    "Fighter: ",
+                    format!("(cost - {}; power - {})\n", frigate.price.resources, frigate.power),
+                    get_info_text_style(asset_server),
+                ),
+            ],
+            alignment: TextAlignment::Center,
+            ..default()
+        },
+        ..default()
+    }
+}
+
+pub(self) fn get_move_ship_stats_text(asset_server: &Res<AssetServer>) -> TextBundle {
+    let carrier = SpaceShipCharacteristics::get_by_spaceship_type(Carrier);
+    let destroyer = SpaceShipCharacteristics::get_by_spaceship_type(Destroyer);
+    let frigate = SpaceShipCharacteristics::get_by_spaceship_type(Frigate);
+    TextBundle {
+        text: Text {
+            sections: vec![
+                TextSection::new(
+                    "0",
                     get_info_text_style(asset_server),
                 ),
                 TextSection::new(
-                    "0\n",
+                    " - Carrier ",
+                    get_info_text_style(asset_server),
+                ),
+                TextSection::new(
+                    format!("(power - {})\n", carrier.power),
+                    get_info_text_style(asset_server),
+                ),
+                TextSection::new(
+                    "0",
+                    get_info_text_style(asset_server),
+                ),
+                TextSection::new(
+                    " - Destroyer ",
+                    get_info_text_style(asset_server),
+                ),
+                TextSection::new(
+                    format!("(power - {})\n", destroyer.power),
+                    get_info_text_style(asset_server),
+                ),
+                TextSection::new(
+                    "0",
+                    get_info_text_style(asset_server),
+                ),
+                TextSection::new(
+                    " - Frigate ",
+                    get_info_text_style(asset_server),
+                ),
+                TextSection::new(
+                    format!("(power - {})\n", frigate.power),
                     get_info_text_style(asset_server),
                 ),
             ],
@@ -165,10 +216,10 @@ pub(self) fn get_ship_stats_text(asset_server: &Res<AssetServer>) -> TextBundle 
 
 pub(self) fn get_spaceship_index_by_type(space_ship_type: SpaceShipType) -> usize {
     match space_ship_type {
-        SpaceShipType::Carrier => { 1 }
+        SpaceShipType::Carrier => { 0 }
         SpaceShipType::Destroyer => { 3 }
-        SpaceShipType::Frigate => { 5 }
-        SpaceShipType::Battleship => { 7 }
-        SpaceShipType::Fighter => { 9 }
+        SpaceShipType::Frigate => { 6 }
+        SpaceShipType::Battleship => { 9 }
+        SpaceShipType::Fighter => { 12 }
     }
 }

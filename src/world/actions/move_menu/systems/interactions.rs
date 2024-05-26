@@ -222,7 +222,7 @@ pub(in crate::world::actions::move_menu) fn update_selected_spaceships_text(
 
     for (t, count) in dict {
         let index = get_spaceship_index_by_type(t);
-        text.sections.get_mut(index).unwrap().value = format!("{count}\n");
+        text.sections.get_mut(index).unwrap().value = format!("{count}");
     }
 }
 
