@@ -23,9 +23,9 @@ const HEX_SIZE: Vec2 = Vec2::splat(75.0);
 const FILE_GRID_HEIGHT_IN_FILE: usize = 1;
 const GRID_WEIGHT_IN_FILE: usize = 6;
 
-const DEFAULT_COLOR: bevy::prelude::Color = Color::WHITE;
-const SELECTED_FOR_MOVE_COLOR: bevy::prelude::Color = Color::GREEN;
-const SELECTED_COLOR: bevy::prelude::Color = Color::RED;
+// const DEFAULT_COLOR: bevy::prelude::Color = Color::WHITE;
+// const SELECTED_FOR_MOVE_COLOR: bevy::prelude::Color = Color::GREEN;
+// const SELECTED_COLOR: bevy::prelude::Color = Color::RED;
 
 const RESOURCE_COLOR: bevy::prelude::Color = Color::ORANGE;
 const INFLUENCE_COLOR: bevy::prelude::Color = Color::CYAN;
@@ -138,7 +138,7 @@ pub(crate) fn setup_grid(
             let entity = commands
                 .spawn(SpriteSheetBundle {
                     sprite: TextureAtlasSprite {
-                        color: DEFAULT_COLOR,
+                        color: Color::WHITE,
                         index,
                         custom_size: Some(sprite_size),
                         ..default()
@@ -372,35 +372,113 @@ pub(crate) struct SelectedHex {
     pub is_selected: bool,
     pub hex_selected_for_move: Hex,
     pub is_selected_for_move: bool,
+    pub in_entity: Option<Entity>,
+    pub out_entity: Option<Entity>,
 }
 
 pub fn clear_selected(
     mut selecred_hex: ResMut<SelectedHex>,
     grid: Res<HexGrid>,
-    mut tiles: Query<&mut TextureAtlasSprite>) {
+    mut tiles: Query<&mut TextureAtlasSprite>,
+    mut commands: Commands,
+) {
     selecred_hex.is_selected = false;
     selecred_hex.is_selected_for_move = false;
-    set_color_to_hex(&grid, &mut tiles, &selecred_hex.hex, &DEFAULT_COLOR);
-    set_color_to_hex(&grid, &mut tiles, &selecred_hex.hex_selected_for_move, &DEFAULT_COLOR);
+    // set_color_to_hex(&grid, &mut tiles, &selecred_hex.hex, &DEFAULT_COLOR);
+    // set_color_to_hex(&grid, &mut tiles, &selecred_hex.hex_selected_for_move, &DEFAULT_COLOR);
     selecred_hex.hex = HEX_NOWHERE;
     selecred_hex.hex_selected_for_move = HEX_NOWHERE;
+    despawn_in_entity(&mut selecred_hex, &mut commands);
+    despawn_out_entity(&mut selecred_hex, &mut commands);
 }
 
+fn despawn_in_entity(selecred_hex: &mut ResMut<SelectedHex>, commands: &mut Commands) {
+    if let Some(entity) = selecred_hex.in_entity {
+        if let Some(mut entity_details) = commands.get_entity(entity) {
+            entity_details.despawn();
+        }
+        selecred_hex.in_entity = None;
+    }
+}
+
+fn despawn_out_entity(selecred_hex: &mut ResMut<SelectedHex>, commands: &mut Commands) {
+    if let Some(entity) = selecred_hex.out_entity {
+        if let Some(mut entity_details) = commands.get_entity(entity) {
+            entity_details.despawn();
+        }
+        selecred_hex.out_entity = None;
+    }
+}
+
+fn create_move_out_sprite_bundle(asset_server: &Res<AssetServer>) -> SpriteBundle {
+    print!("123");
+    let image_path = "kenney - Simpe Icons/hexagon_out.png".to_string();
+    let transform = Transform {
+        translation: Vec3::new(-53., -12., 1.0),
+        scale: Vec3::splat(0.25),
+        ..Default::default()
+    };
+    create_sprite_bundle_with_image(asset_server, image_path, transform, Color::WHITE)
+}
+
+fn create_move_in_sprite_bundle(asset_server: &Res<AssetServer>) -> SpriteBundle {
+    let image_path = "kenney - Simpe Icons/hexagon_in.png".to_string();
+    let transform = Transform {
+        translation: Vec3::new(-53., -13., 1.0),
+        scale: Vec3::splat(0.25),
+        ..Default::default()
+    };
+    create_sprite_bundle_with_image(asset_server, image_path, transform, Color::WHITE)
+}
+
+fn spawn_bundle_on_hex(
+    grid: &Res<HexGrid>,
+    pos: &Hex,
+    commands: &mut Commands,
+    bundle: SpriteBundle,
+) -> Option<Entity> {
+    let Some(cur_entity) = grid.entities.get(pos).copied() else {
+        return None;
+    };
+    let parent_entity = commands.get_entity(cur_entity);
+    let mut entity = None;
+    parent_entity.unwrap().with_children(|parent| {
+        entity = Some(parent.spawn(bundle).id());
+    });
+    return entity;
+}
+
+
 pub(crate) fn register_selected_hex(mut commands: Commands) {
-    let hex = SelectedHex { hex: HEX_NOWHERE, is_selected: false, hex_selected_for_move: HEX_NOWHERE, is_selected_for_move: false };
+    let hex = SelectedHex { hex: HEX_NOWHERE, is_selected: false, hex_selected_for_move: HEX_NOWHERE, is_selected_for_move: false, in_entity: None, out_entity: None };
     commands.insert_resource(hex);
 }
 
 pub(crate) const HEX_NOWHERE: Hex = Hex::new(i32::MAX, i32::MAX);
 
+
 pub(crate) fn clear_move_selected(
     mut selecred_hex: ResMut<SelectedHex>,
     grid: Res<HexGrid>,
-    mut tiles: Query<&mut TextureAtlasSprite>)
-{
+    mut tiles: Query<&mut TextureAtlasSprite>,
+    mut commands: Commands,
+) {
     selecred_hex.is_selected_for_move = false;
-    set_color_to_hex(&grid, &mut tiles, &selecred_hex.hex_selected_for_move, &DEFAULT_COLOR);
+    // set_color_to_hex(&grid, &mut tiles, &selecred_hex.hex_selected_for_move, &DEFAULT_COLOR);
     selecred_hex.hex_selected_for_move = HEX_NOWHERE;
+    despawn_out_entity(&mut selecred_hex, &mut commands);
+}
+
+pub(crate) fn clear_from_selected(
+    mut selected_hex: ResMut<SelectedHex>,
+    grid: Res<HexGrid>,
+    mut tiles: Query<&mut TextureAtlasSprite>,
+    commands: &mut Commands,
+) {
+    selected_hex.is_selected = false;
+    // set_color_to_hex(&grid, &mut tiles, &selected_hex.hex, &DEFAULT_COLOR);
+    selected_hex.hex = HEX_NOWHERE;
+    despawn_in_entity(&mut selected_hex, commands);
 }
 
 /// Input interaction
@@ -414,6 +492,8 @@ pub(crate) fn handle_click_on_planet(
     current_state: Res<State<ActionsState>>,
     current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
     is_button_clicked: Res<IsButtonClicked>,
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
 ) {
     if is_button_clicked.value { return; }
     let window = windows.single();
@@ -428,26 +508,25 @@ pub(crate) fn handle_click_on_planet(
         match current_state.get() {
             ActionsState::NoActionRunning => {
                 if grid.entities.get(&cur_pos).is_none() {
-                    // prev_pos.is_selected = false;
-                    // set_color_to_hex(&grid, &mut tiles, &prev_pos.hex, &DEFAULT_COLOR);
                     return;
                 }
 
                 if selected_hex.hex == cur_pos {
                     if selected_hex.is_selected {
-                        set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR);
-                        selected_hex.is_selected = false;
-                        selected_hex.hex = HEX_NOWHERE;
+                        clear_from_selected(selected_hex, grid, tiles, &mut commands)
                     } else {
-                        set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
+                        // set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
                         selected_hex.is_selected = true;
+                        selected_hex.in_entity = spawn_bundle_on_hex(&grid, &cur_pos, &mut commands, create_move_in_sprite_bundle(&asset_server))
                     }
                 } else {
                     let prv_pos_copy = selected_hex.hex.clone();
                     selected_hex.hex = cur_pos;
                     selected_hex.is_selected = true;
-                    set_color_to_hex(&grid, &mut tiles, &prv_pos_copy, &DEFAULT_COLOR);
-                    set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
+                    // set_color_to_hex(&grid, &mut tiles, &prv_pos_copy, &DEFAULT_COLOR);
+                    despawn_in_entity(&mut selected_hex, &mut commands);
+                    // set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_COLOR);
+                    selected_hex.in_entity = spawn_bundle_on_hex(&grid, &cur_pos, &mut commands, create_move_in_sprite_bundle(&asset_server))
                 }
             }
             ActionsState::SpawningSpaceShips => {}
@@ -471,19 +550,24 @@ pub(crate) fn handle_click_on_planet(
 
                 if selected_hex.hex_selected_for_move == cur_pos {
                     if selected_hex.is_selected_for_move {
-                        set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR);
+                        // set_color_to_hex(&grid, &mut tiles, &cur_pos, &DEFAULT_COLOR);
                         selected_hex.is_selected_for_move = false;
                         selected_hex.hex_selected_for_move = HEX_NOWHERE;
+                        despawn_out_entity(&mut selected_hex, &mut commands);
                     } else {
-                        set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_FOR_MOVE_COLOR);
+                        // set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_FOR_MOVE_COLOR);
                         selected_hex.is_selected_for_move = true;
+                        println!("456");
+                        selected_hex.out_entity = spawn_bundle_on_hex(&grid, &cur_pos, &mut commands, create_move_out_sprite_bundle(&asset_server))
                     }
                 } else {
                     let prv_pos_copy = selected_hex.hex_selected_for_move.clone();
                     selected_hex.hex_selected_for_move = cur_pos;
                     selected_hex.is_selected_for_move = true;
-                    set_color_to_hex(&grid, &mut tiles, &prv_pos_copy, &DEFAULT_COLOR);
-                    set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_FOR_MOVE_COLOR);
+                    // set_color_to_hex(&grid, &mut tiles, &prv_pos_copy, &DEFAULT_COLOR);
+                    despawn_out_entity(&mut selected_hex, &mut commands);
+                    // set_color_to_hex(&grid, &mut tiles, &cur_pos, &SELECTED_FOR_MOVE_COLOR);
+                    selected_hex.out_entity = spawn_bundle_on_hex(&grid, &cur_pos, &mut commands, create_move_out_sprite_bundle(&asset_server))
                 }
 
                 return;
@@ -514,6 +598,7 @@ fn set_color_to_hex(
 
     cur_sprite.color = *color;
 }
+
 
 fn handle_clicks(
     buttons: Res<Input<MouseButton>>,
