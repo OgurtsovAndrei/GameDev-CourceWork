@@ -62,8 +62,8 @@ pub(crate) fn get_count_spaceship_dict(spaceship_list: Vec<SpaceShip>) -> HashMa
 }
 
 pub struct SpaceShipCharacteristics {
-    id: usize,
-    power: u32,
+    pub id: usize,
+    pub power: u32,
 }
 
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Component)]
@@ -112,11 +112,11 @@ impl fmt::Debug for SpaceShip {
 impl SpaceShipCharacteristics {
     pub fn get_by_spaceship_type(ship_type: SpaceShipType) -> Self {
         match ship_type {
-            SpaceShipType::Carrier => SpaceShipCharacteristics { id: 6, power: 8 },
-            SpaceShipType::Fighter => SpaceShipCharacteristics { id: 1, power: 9 },
-            SpaceShipType::Destroyer => SpaceShipCharacteristics { id: 18, power: 5 },
-            SpaceShipType::Frigate => SpaceShipCharacteristics { id: 11, power: 8 },
-            SpaceShipType::Battleship => SpaceShipCharacteristics { id: 22, power: 3 },
+            Carrier => SpaceShipCharacteristics { id: 6, power: 1 },
+            Fighter => SpaceShipCharacteristics { id: 1, power: 8 },
+            Destroyer => SpaceShipCharacteristics { id: 18, power: 6 },
+            Frigate => SpaceShipCharacteristics { id: 11, power: 9 },
+            Battleship => SpaceShipCharacteristics { id: 22, power: 5 },
         }
     }
 }

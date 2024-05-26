@@ -12,6 +12,7 @@ pub(crate) mod systems;
 pub(crate) mod resources;
 pub(crate) mod plugin;
 pub(crate) mod animations;
+mod events;
 
 /*
 use systems::interactions::*;

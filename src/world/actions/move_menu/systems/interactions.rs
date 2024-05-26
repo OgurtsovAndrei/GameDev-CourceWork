@@ -1,3 +1,4 @@
+use std::io::repeat;
 use bevy::prelude::*;
 use bevy::prelude::KeyCode;
 
@@ -5,11 +6,16 @@ use crate::space_ships::{get_count_spaceship_dict, SpaceShip, SpaceSipTextureAtl
 use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::world::actions::{ActionsState, get_spaceship_index_by_type, reset_selected_for_move_ships};
 use crate::world::actions::move_menu::animations::run_spaceship_moving_animation;
-use crate::world::actions::move_menu::components::{CancelButton, EndMoveButton, MoveShipButton, SelectedSpaceshipsText};
+use crate::world::actions::move_menu::components::{CancelButton, EndMoveButton, MoveShipButton, SelectedSpaceshipsText, WinProbabilityText};
+use crate::world::actions::move_menu::events::ShipMoved;
+use crate::world::actions::move_menu::systems::battle::{move_army_to_planet, perform_fight};
 use crate::world::fonts_and_styles::colors::*;
 use crate::world::player::{Movable, Player};
 use crate::world::resources::GameResources;
 use crate::world::setup_world_grid::{HEX_NOWHERE, HexGrid, Planet, SelectedHex};
+
+
+const TOTAL_NUMBER_OF_SIMULATIONS: u32 = 100;
 
 pub(in crate::world::actions::move_menu) fn update_end_move_button_disabled(
     mut button_query: Query<&mut BackgroundColor, With<EndMoveButton>>,
@@ -60,7 +66,7 @@ pub(in crate::world::actions::move_menu) fn interact_with_end_move_button(
                     assert_eq!(ship.ship_owner, player.clone())
                 }
                 let mut planet_under_fight: Planet = grid.planets.remove(&hex_under_fight).unwrap();
-                let (winner, winner_army) = perform_fight(player, player2, army, planet_under_fight.owner_army);
+                let (winner, winner_army) = move_army_to_planet(player, player2, army, planet_under_fight.owner_army);
                 planet_under_fight.owner = winner;
                 planet_under_fight.owner_army = winner_army;
                 for ship in planet_under_fight.owner_army.iter_mut() {
@@ -80,9 +86,6 @@ pub(in crate::world::actions::move_menu) fn interact_with_end_move_button(
     }
 }
 
-fn perform_fight(player1: Player, player2: Player, army1: Vec<SpaceShip>, army2: Vec<SpaceShip>) -> (Player, Vec<SpaceShip>) {
-    if army1.len() > army2.len() { return (player1, army1); } else { return (player2, army2); }
-}
 
 pub(crate) fn clear_spaceships_selection(mut grid: ResMut<HexGrid>) {
     for (_, planet) in grid.planets.iter_mut() {
@@ -141,6 +144,7 @@ pub(in crate::world::actions::move_menu) fn interact_with_move_ship_button(
     mut resources: ResMut<GameResources>,
     mut grid: ResMut<HexGrid>,
     mut selected_hex: ResMut<SelectedHex>,
+    mut event_writer: EventWriter<ShipMoved>,
     current_player_query: Query<&Player, (With<Player>, With<Movable>)>,
 ) {
     for (interaction, mut color, move_ship_button) in button_query.iter_mut() {
@@ -155,14 +159,17 @@ pub(in crate::world::actions::move_menu) fn interact_with_move_ship_button(
                 if grid.planets[current_hex].owner != player.clone() { return; }
                 {   // Have to insert planet back
                     let mut planet = grid.planets.remove(current_hex).unwrap();
-
+                    let mut is_new_ship_selected_to_move = false;
                     for ship in &mut planet.owner_army {
                         if ship.ship_type == move_ship_button.space_ship_type && !ship.is_selected_for_move {
                             ship.is_selected_for_move = true;
+                            is_new_ship_selected_to_move = true;
                             if !all_ships_move { break; }
                         }
                     }
-
+                    if is_new_ship_selected_to_move {
+                        event_writer.send(ShipMoved);
+                    }
                     grid.planets.insert(*current_hex, planet);
                 }
                 resources.set_changed();
@@ -221,26 +228,31 @@ pub(in crate::world::actions::move_menu) fn update_selected_spaceships_text(
     }
 }
 
-/*
-pub fn interact_with_quit_button(
-    mut app_exit_event_writer: EventWriter<AppExit>,
-    mut button_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<QuitButton>),
-    >,
+pub(in crate::world::actions::move_menu) fn recalculate_probability(
+    mut event_reader: EventReader<ShipMoved>,
+    current_player_query: Query<&Player, With<Movable>>,
+    hex_grid: Res<HexGrid>,
+    selected_hex: Res<SelectedHex>,
+    mut text_query: Query<&mut Text, With<WinProbabilityText>>,
 ) {
-    for (interaction, mut color) in button_query.iter_mut() {
-        match *interaction {
-            Interaction::Clicked => {
-                *color = PRESSED_BUTTON.into();
-                app_exit_event_writer.send(AppExit);
-            }
-            Interaction::Hovered => {
-                *color = HOVERED_BUTTON.into();
-            }
-            Interaction::None => {
-                *color = NORMAL_BUTTON.into();
+    if let Err(_) = current_player_query.get_single() { return; }
+    let current_player = current_player_query.single();
+    if let Err(_) = text_query.get_single() { return; }
+    let mut text = text_query.single_mut();
+    for _ in event_reader.read() {
+        let attack_player_army = get_all_selected_ships(&hex_grid);
+        let hex_under_fight = selected_hex.hex.clone();
+        let selected_planet = &hex_grid.planets[&hex_under_fight];
+        let defense_player = selected_planet.owner.clone();
+        let defense_player_army = selected_planet.owner_army.clone();
+        let mut number_of_success: u32 = 0;
+        for _ in 0..TOTAL_NUMBER_OF_SIMULATIONS {
+            let (player, _) = move_army_to_planet(current_player.clone(), defense_player.clone(), attack_player_army.clone(), defense_player_army.clone());
+            if player.id == current_player.id {
+                number_of_success += 1;
             }
         }
+        let probability = ((number_of_success as f64 / TOTAL_NUMBER_OF_SIMULATIONS as f64) * 100.0) as u32;
+        text.sections[1].value = format!("{}", probability);
     }
-}*/
+}
