@@ -90,12 +90,12 @@ fn get_all_ships_to_buy(grid: &Res<HexGrid>, selected_hex: &Res<SelectedHex>) ->
 }
 
 
-fn buy_ship(resources: &mut ResMut<GameResources>, grid: &mut ResMut<HexGrid>, selected_hex: &mut ResMut<SelectedHex>, player: &Player, interaction: &Interaction, color: &mut BackgroundColor, space_ship_type: SpaceShipType) {
+fn buy_ship(resources: &mut ResMut<GameResources>, grid: &mut ResMut<HexGrid>, selected_hex: &mut ResMut<SelectedHex>, player: &Player, interaction: &Interaction, color: &mut BackgroundColor, space_ship_type: SpaceShipType) -> bool {
     let mut player_resources = &resources.resources[player];
     match *interaction {
         Interaction::Pressed => {
             *color = PRESSED_BUTTON.into();
-            if !selected_hex.is_selected { return; }
+            if !selected_hex.is_selected { return false; }
 
             let spaceship = SpaceShip {
                 ship_type: space_ship_type,
@@ -106,7 +106,7 @@ fn buy_ship(resources: &mut ResMut<GameResources>, grid: &mut ResMut<HexGrid>, s
             };
             let price = spaceship.get_price();
 
-            if player_resources.influence < price.influence || player_resources.resources < price.resources { return; }
+            if player_resources.influence < price.influence || player_resources.resources < price.resources { return false; }
             let mut player_resources = resources.resources.remove(player).unwrap();
             player_resources -= price;
 
@@ -117,12 +117,15 @@ fn buy_ship(resources: &mut ResMut<GameResources>, grid: &mut ResMut<HexGrid>, s
             resources.set_changed();
             grid.set_changed();
             selected_hex.set_changed();
+            true
         }
         Interaction::Hovered => {
             *color = HOVERED_BUTTON.into();
+            false
         }
         Interaction::None => {
             *color = NORMAL_BUTTON.into();
+            false
         }
     }
 }
@@ -132,6 +135,7 @@ pub(in crate::world::actions::spawn_menu) fn interact_with_spawn_ship_button(
         (&Interaction, &mut BackgroundColor, &SpawnShipButton),
         (Changed<Interaction>),
     >,
+    keyboard_input: Res<Input<KeyCode>>, // Include keyboard input for shortcut detection
     mut resources: ResMut<GameResources>,
     mut grid: ResMut<HexGrid>,
     mut selected_hex: ResMut<SelectedHex>,
@@ -139,7 +143,9 @@ pub(in crate::world::actions::spawn_menu) fn interact_with_spawn_ship_button(
 ) {
     for (interaction, mut color, spawn_ship_button) in button_query.iter_mut() {
         let player = current_player_query.single();
-        buy_ship(&mut resources, &mut grid, &mut selected_hex, player, interaction, &mut color, spawn_ship_button.space_ship_type);
+        if keyboard_input.pressed(KeyCode::Space) {
+            while buy_ship(&mut resources, &mut grid, &mut selected_hex, player, interaction, &mut color, spawn_ship_button.space_ship_type) {}
+        } else { buy_ship(&mut resources, &mut grid, &mut selected_hex, player, interaction, &mut color, spawn_ship_button.space_ship_type); }
     }
 }
 

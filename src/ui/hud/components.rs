@@ -4,7 +4,10 @@ use bevy::prelude::Component;
 pub struct HUD {}
 
 #[derive(Component)]
-pub struct SpaceShipsText {}
+pub struct HudTipsText {}
+
+#[derive(Component)]
+pub struct HudShortcutTipsText {}
 
 #[derive(Component)]
 pub struct ScoreText {}

@@ -67,7 +67,7 @@ pub fn get_info_text_style(asset_server: &Res<AssetServer>) -> TextStyle {
 pub fn get_text_style(asset_server: &Res<AssetServer>) -> TextStyle {
     TextStyle {
         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-        font_size: 35.0,
+        font_size: 30.0,
         color: Color::rgb(1.0, 1.0, 1.0),
     }
 }

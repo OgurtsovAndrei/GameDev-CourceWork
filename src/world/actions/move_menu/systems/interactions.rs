@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::prelude::KeyCode;
 
 use crate::space_ships::{get_count_spaceship_dict, SpaceShip, SpaceSipTextureAtlas};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
@@ -134,6 +135,7 @@ pub(in crate::world::actions::move_menu) fn interact_with_move_ship_button(
         (&Interaction, &mut BackgroundColor, &MoveShipButton),
         Changed<Interaction>,
     >,
+    keyboard_input: Res<Input<KeyCode>>,
     mut resources: ResMut<GameResources>,
     mut grid: ResMut<HexGrid>,
     mut selected_hex: ResMut<SelectedHex>,
@@ -145,14 +147,20 @@ pub(in crate::world::actions::move_menu) fn interact_with_move_ship_button(
         match *interaction {
             Interaction::Pressed => {
                 *color = PRESSED_BUTTON.into();
+                let all_ships_move = keyboard_input.pressed(KeyCode::Space);
                 if current_hex.clone() == HEX_NOWHERE { return; }
                 if !selected_hex.is_selected_for_move { return; }
                 if grid.planets[current_hex].owner != player.clone() { return; }
                 {   // Have to insert planet back
                     let mut planet = grid.planets.remove(current_hex).unwrap();
-                    let selected_ship_idx = planet.owner_army.iter().position(|space_ship|
-                        { !space_ship.is_selected_for_move && space_ship.ship_type == move_ship_button.space_ship_type });
-                    if let Some(idx) = selected_ship_idx { planet.owner_army[idx].is_selected_for_move = true; }
+
+                    for ship in &mut planet.owner_army {
+                        if ship.ship_type == move_ship_button.space_ship_type && !ship.is_selected_for_move {
+                            ship.is_selected_for_move = true;
+                            if !all_ships_move { break; }
+                        }
+                    }
+
                     grid.planets.insert(*current_hex, planet);
                 }
                 resources.set_changed();

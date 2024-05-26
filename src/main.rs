@@ -9,7 +9,6 @@ use world::WorldPlugin;
 
 use crate::game_state::{change_game_phase, GamePhaseState, toggle_game};
 use crate::ui::action_panel::plugin::ActionPanelPlugin;
-use crate::ui::bottom_panel::plugin::BottomPanelPlugin;
 use crate::ui::game_result::plugin::GameResultPlugin;
 use crate::ui::hud::HudPlugin;
 use crate::ui::stats::plugin::StatsPlugin;
@@ -37,7 +36,6 @@ pub fn main() {
         .add_plugins(OwnershipPlugin)
         .add_plugins(DefaultPickingPlugins)
         .add_plugins(StatsPlugin)
-        .add_plugins(BottomPanelPlugin)
         .add_plugins(HudPlugin)
         .add_plugins(GameResultPlugin)
         .add_plugins(ActionPanelPlugin)
