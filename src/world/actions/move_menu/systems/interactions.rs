@@ -1,4 +1,3 @@
-use std::io::repeat;
 use bevy::prelude::*;
 use bevy::prelude::KeyCode;
 
@@ -8,7 +7,7 @@ use crate::world::actions::{ActionsState, get_spaceship_index_by_type, reset_sel
 use crate::world::actions::move_menu::animations::run_spaceship_moving_animation;
 use crate::world::actions::move_menu::components::{CancelButton, EndMoveButton, MoveShipButton, SelectedSpaceshipsText, WinProbabilityText};
 use crate::world::actions::move_menu::events::ShipMoved;
-use crate::world::actions::move_menu::systems::battle::{move_army_to_planet, perform_fight};
+use crate::world::actions::move_menu::systems::battle::{move_army_to_planet};
 use crate::world::fonts_and_styles::colors::*;
 use crate::world::player::{Movable, Player};
 use crate::world::resources::GameResources;
