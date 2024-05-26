@@ -8,6 +8,3 @@ pub struct MovesLeftText;
 
 #[derive(Component)]
 pub struct RoundText;
-
-#[derive(Component)]
-pub struct StatsPanel;

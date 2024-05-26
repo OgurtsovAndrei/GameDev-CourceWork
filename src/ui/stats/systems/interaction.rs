@@ -1,7 +1,5 @@
 use bevy::log::info;
-use bevy::prelude::{Commands, DetectChangesMut, Entity, NextState, Query, Res, ResMut, Text, With};
-use bevy::prelude::shape::Plane;
-use bevy::utils::tracing::field::debug;
+use bevy::prelude::{Commands, Entity, NextState, Query, Res, ResMut, Text, With};
 use hexx::Hex;
 
 use crate::game_state::{AppState, GamePhaseState};
@@ -59,7 +57,7 @@ pub fn update_win_points_number(
         let planet: &Planet = grid.planets.get(&CENTRAL_HEX).unwrap();
         players.iter_mut().for_each(|(player, mut stats)| {
             info!("Before Player: {:?} win_points: {:?}", player.id, stats.win_points);
-            if (planet.owner.id == player.id) {
+            if planet.owner.id == player.id {
                 stats.win_points += 1;
                 if (stats.win_points == MAX_WIN_POINTS) {
                     game_phase.set(AppState::GameOver)
