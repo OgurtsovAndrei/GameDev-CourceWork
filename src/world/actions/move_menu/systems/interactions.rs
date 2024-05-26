@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use bevy_editor_pls::egui::Grid;
+use hexx::Hex;
 
 use crate::space_ships::{get_count_spaceship_dict, SpaceShip, SpaceSipTextureAtlas};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
@@ -10,6 +12,23 @@ use crate::world::player::{Movable, Player};
 use crate::world::resources::GameResources;
 use crate::world::setup_world_grid::{HEX_NOWHERE, HexGrid, Planet, SelectedHex};
 
+
+pub (in crate::world::actions::move_menu) fn update_end_move_button_disabled(
+    mut button_query: Query<&mut BackgroundColor, With<EndMoveButton>>,
+    grid: ResMut<HexGrid>,
+) {
+    if let Err(_) = button_query.get_single() {
+        return;
+    }
+    let mut color = button_query.single_mut();
+    if color.0 == HOVERED_BUTTON || color.clone().0 == PRESSED_BUTTON { return; }
+    if get_selected_ships(&grid).len() == 0 {
+        color.0 = DISABLED_BUTTON.clone()
+    } else {
+        color.0 = NORMAL_BUTTON.clone();
+    }
+}
+
 pub(in crate::world::actions::move_menu) fn interact_with_end_move_button(
     mut button_query: Query<
         (&Interaction, &mut BackgroundColor),
@@ -20,18 +39,21 @@ pub(in crate::world::actions::move_menu) fn interact_with_end_move_button(
     mut selected_hex: ResMut<SelectedHex>,
     mut grid: ResMut<HexGrid>,
     mut switched_turn: ResMut<NextState<TurnSwitchedState>>,
-    mut handle: Res<SpaceSipTextureAtlas>,
+    handle: Res<SpaceSipTextureAtlas>,
     mut commands: Commands,
 ) {
     let player = current_player_query.single().clone();
     let hex_under_fight = selected_hex.hex.clone();
     let player2 = grid.planets.get(&hex_under_fight).unwrap().owner;
 
+
     for (interaction, mut color) in button_query.iter_mut() {
+        if color.0 == DISABLED_BUTTON.into() { return }
         match *interaction {
             Interaction::Pressed => {
                 *color = PRESSED_BUTTON.into();
-                let army = reset_selected_ships(&mut grid);
+                let army = get_selected_ships(&grid);
+                reset_selected_ships(&mut grid);
                 for ship in army.iter() {
                     let ship = ship.clone();
                     run_spaceship_moving_animation(ship.ship_type, ship.ship_hex, hex_under_fight.clone(), &grid, &handle, &mut commands)
@@ -70,22 +92,30 @@ pub(crate) fn clear_spaceships_selection(mut grid: ResMut<HexGrid>) {
     }
 }
 
-pub(self) fn reset_selected_ships(grid: &mut ResMut<HexGrid>) -> Vec<SpaceShip> {
+pub(self) fn get_selected_ships(grid: &ResMut<HexGrid>) -> Vec<SpaceShip> {
     let mut ships = vec![];
-    for (_, planet) in grid.planets.iter_mut() {
-        let mut ships_left = vec![];
+    for (_, planet) in grid.planets.iter() {
         let army = planet.owner_army.clone();
         for mut spaceship in army.into_iter() {
             if spaceship.is_selected_for_move {
                 ships.push(spaceship.clone())
-            } else {
+            }
+        }
+    }
+    return ships;
+}
+
+pub(self) fn reset_selected_ships(grid: &mut ResMut<HexGrid>) {
+    for (_, planet) in grid.planets.iter_mut() {
+        let mut ships_left = vec![];
+        let army = planet.owner_army.clone();
+        for mut spaceship in army.into_iter() {
+            if !spaceship.is_selected_for_move {
                 ships_left.push(spaceship);
             }
-            spaceship.is_selected_for_move = false
         }
         planet.owner_army = ships_left;
     }
-    return ships;
 }
 
 pub(self) fn get_all_selected_ships(grid: &Res<HexGrid>) -> Vec<SpaceShip> {

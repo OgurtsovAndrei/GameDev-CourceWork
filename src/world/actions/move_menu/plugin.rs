@@ -4,7 +4,7 @@ use crate::game_state::UpdateUI;
 use crate::world::actions::{ActionsState, move_menu};
 use crate::world::actions::move_menu::despawn_move_space_ships_window;
 use crate::world::actions::move_menu::resources::setup_selected_for_move_army;
-use crate::world::actions::move_menu::systems::interactions::{clear_spaceships_selection, interact_with_cancel_button, interact_with_end_move_button, interact_with_move_ship_button, update_selected_spaceships_text};
+use crate::world::actions::move_menu::systems::interactions::{clear_spaceships_selection, interact_with_cancel_button, interact_with_end_move_button, interact_with_move_ship_button, update_end_move_button_disabled, update_selected_spaceships_text};
 use crate::world::setup_world_grid::clear_move_selected;
 
 pub(in crate::world::actions) struct MoveMenuPlugin;
@@ -19,12 +19,13 @@ impl Plugin for MoveMenuPlugin {
             .add_systems(Update, (
                 interact_with_end_move_button,
                 interact_with_move_ship_button,
-                interact_with_cancel_button
+                interact_with_cancel_button,
+                update_end_move_button_disabled
             ).run_if(in_state(ActionsState::MovingSpaceShips)))
             .add_systems(OnExit(ActionsState::MovingSpaceShips), (
                 despawn_move_space_ships_window,
                 clear_move_selected,
-                clear_spaceships_selection,
+                clear_spaceships_selection
             ))
             .add_systems(Startup, setup_selected_for_move_army);
     }
