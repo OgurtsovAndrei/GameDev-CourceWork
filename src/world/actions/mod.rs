@@ -6,7 +6,7 @@ use crate::ui::action_panel::systems::interaction::{is_selected_hex_belongs_to_p
 use crate::world::actions::move_menu::animations::animation_tick;
 use crate::world::actions::move_menu::plugin::MoveMenuPlugin;
 use crate::world::actions::spawn_menu::plugin::SpawnMenuPlugin;
-use crate::world::fonts_and_styles::fonts::get_info_text_style;
+use crate::world::fonts_and_styles::fonts::{get_info_text_style, get_win_probability_text_style};
 use crate::world::player::{Movable, Player};
 use crate::world::resources::GameResources;
 use crate::world::setup_world_grid::{HexGrid, SelectedHex};
@@ -91,49 +91,69 @@ pub(self) fn reset_selected_for_move_ships(hex_grid: &mut ResMut<HexGrid>) {
     });
 }
 
+pub(self) fn get_win_probability_text(asset_server: &Res<AssetServer>) -> TextBundle {
+    TextBundle::from_sections(
+        [
+            TextSection::new(
+                "Win probability: ",
+                get_win_probability_text_style(asset_server)
+            ),
+            TextSection::new(
+              "0",
+                get_win_probability_text_style(asset_server)
+            ),
+            TextSection::new(
+                "%",
+                get_win_probability_text_style(asset_server)
+            )
+        ]
+    )
+}
+
+
 pub(self) fn get_ship_stats_text(asset_server: &Res<AssetServer>) -> TextBundle {
     TextBundle {
         text: Text {
             sections: vec![
                 TextSection::new(
                     "Carrier: ",
-                    get_info_text_style(&asset_server),
+                    get_info_text_style(asset_server),
                 ),
                 TextSection::new(
                     "0\n",
-                    get_info_text_style(&asset_server),
+                    get_info_text_style(asset_server),
                 ),
                 TextSection::new(
                     "Destroyer: ",
-                    get_info_text_style(&asset_server),
+                    get_info_text_style(asset_server),
                 ),
                 TextSection::new(
                     "0\n",
-                    get_info_text_style(&asset_server),
+                    get_info_text_style(asset_server),
                 ),
                 TextSection::new(
                     "Frigate: ",
-                    get_info_text_style(&asset_server),
+                    get_info_text_style(asset_server),
                 ),
                 TextSection::new(
                     "0\n",
-                    get_info_text_style(&asset_server),
+                    get_info_text_style(asset_server),
                 ),
                 TextSection::new(
                     "Battleship: ",
-                    get_info_text_style(&asset_server),
+                    get_info_text_style(asset_server),
                 ),
                 TextSection::new(
                     "0\n",
-                    get_info_text_style(&asset_server),
+                    get_info_text_style(asset_server),
                 ),
                 TextSection::new(
                     "Fighter: ",
-                    get_info_text_style(&asset_server),
+                    get_info_text_style(asset_server),
                 ),
                 TextSection::new(
                     "0\n",
-                    get_info_text_style(&asset_server),
+                    get_info_text_style(asset_server),
                 ),
             ],
             alignment: TextAlignment::Center,

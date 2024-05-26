@@ -3,6 +3,8 @@ use bevy::prelude::{Commands, Entity, Query, Res, With};
 
 use crate::world::actions::move_menu::components::MoveMenu;
 use crate::world::actions::move_menu::systems::layout::{build_move_menu, despawn_move_menu};
+use crate::world::player::{Movable, Player};
+use crate::world::setup_world_grid::{HexGrid, SelectedHex};
 
 pub(crate) mod components;
 mod styles;
@@ -41,13 +43,17 @@ impl Plugin for PauseMenuPlugin {
 }
 */
 
-pub fn spawn_move_space_ships_window(mut commands: Commands, asset_server: Res<AssetServer>) {
-    println!("Spawning Move Menu");
-    build_move_menu(&mut commands, &asset_server);
+pub(self) fn spawn_move_space_ships_window(selected_hex: Res<SelectedHex>,
+                       hex_grid: Res<HexGrid>,
+                       current_player_query: Query<&Player, With<Movable>>,
+                       commands: Commands,
+                       asset_server: Res<AssetServer>) {
+    println!("Spawning Pause Menu");
+    build_move_menu(selected_hex, hex_grid, current_player_query, commands, &asset_server);
 }
 
-pub fn despawn_move_space_ships_window(
-    mut commands: Commands,
+pub(self) fn despawn_move_space_ships_window(
+    commands: Commands,
     pause_menu_query: Query<Entity, With<MoveMenu>>,
 ) {
     println!("DeSpawning Move Menu");

@@ -18,4 +18,7 @@ pub(super) struct CancelButton;
 
 
 #[derive(Component)]
+pub(super) struct WinProbabilityText;
+
+#[derive(Component)]
 pub(super) struct SelectedSpaceshipsText;

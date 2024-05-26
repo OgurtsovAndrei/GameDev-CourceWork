@@ -1,17 +1,23 @@
 use bevy::prelude::*;
 use crate::space_ships::SpaceShipType;
 use crate::space_ships::SpaceShipType::{Carrier, Destroyer, Frigate};
-use crate::world::actions::get_ship_stats_text;
+use crate::world::actions::{get_ship_stats_text, get_win_probability_text};
 
 use crate::world::actions::move_menu::components::*;
 use crate::world::actions::move_menu::components::MoveMenu;
 use crate::world::actions::move_menu::styles::*;
 use crate::world::fonts_and_styles::colors::*;
 use crate::world::fonts_and_styles::fonts::*;
+use crate::world::player::{Movable, Player};
+use crate::world::setup_world_grid::{HexGrid, SelectedHex};
 
-pub fn spawn_move_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn spawn_move_menu(selected_hex: Res<SelectedHex>,
+                       hex_grid: Res<HexGrid>,
+                       current_player_query: Query<&Player, With<Movable>>,
+                       commands: Commands,
+                       asset_server: Res<AssetServer>) {
     println!("Spawning Pause Menu");
-    build_move_menu(&mut commands, &asset_server);
+    build_move_menu(selected_hex, hex_grid, current_player_query, commands, &asset_server);
 }
 
 pub(crate) fn despawn_move_menu(
@@ -23,8 +29,10 @@ pub(crate) fn despawn_move_menu(
     }
 }
 
-// System Piping Example
-pub(crate) fn build_move_menu(commands: &mut Commands, asset_server: &Res<AssetServer>) -> Entity {
+pub(crate) fn build_move_menu(selected_hex: Res<SelectedHex>,
+                              hex_grid: Res<HexGrid>,
+                              current_player_query: Query<&Player, With<Movable>>, 
+                              mut commands: Commands, asset_server: &Res<AssetServer>) -> Entity {
     let pause_menu_entity = commands
         .spawn((
             NodeBundle {
@@ -54,7 +62,15 @@ pub(crate) fn build_move_menu(commands: &mut Commands, asset_server: &Res<AssetS
                         },
                         ..default()
                     });
-                    parent.spawn((get_ship_stats_text(&asset_server), SelectedSpaceshipsText));
+                    
+                    if let Ok(player) = current_player_query.get_single() {
+                        let id = hex_grid.planets[&selected_hex.hex].owner.id;
+                        if player.id != id {
+                            parent.spawn((get_win_probability_text(asset_server), WinProbabilityText));
+                        }
+                    }
+                    
+                    parent.spawn((get_ship_stats_text(asset_server), SelectedSpaceshipsText));
                     parent
                         .spawn((
                             ButtonBundle {
