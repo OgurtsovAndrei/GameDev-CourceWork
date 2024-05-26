@@ -15,7 +15,6 @@ impl Plugin for ActionPanelPlugin {
         app.add_systems(Startup, layout::setup_buttons)
             .add_state::<TurnSwitchedState>()
             .add_systems(Update, (
-                interaction::handle_dbg_button_click,
                 interaction::handle_move_button_click,
                 interaction::spawn_menu_button_click,
                 handle_finish_moves_in_round_button_click,

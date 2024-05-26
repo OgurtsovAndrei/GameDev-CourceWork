@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use bevy::prelude::{BackgroundColor, Button, Changed, Interaction, NextState, Query, Res, ResMut, State, With};
 use hexx::{Hex};
 
-use crate::ui::action_panel::components::{DebugButton, HireArmyButton, NextMoveButton, OpenMovePanelButton};
+use crate::ui::action_panel::components::{HireArmyButton, NextMoveButton, OpenMovePanelButton};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::world::actions::ActionsState;
 use crate::world::actions::ActionsState::{MovingSpaceShips, NoActionRunning, SpawningSpaceShips};
@@ -112,36 +112,6 @@ pub fn handle_move_button_click(
         Interaction::Pressed => {
             *color = PRESSED_BUTTON.into();
             mut_current_state.set(MovingSpaceShips);
-        }
-        Interaction::Hovered => {
-            *color = HOVERED_BUTTON.into();
-        }
-        Interaction::None => {
-            *color = NORMAL_BUTTON.into()
-        }
-    }
-}
-
-pub fn handle_dbg_button_click(
-    mut interaction_query: Query<(&Interaction, &mut BackgroundColor), (Changed<Interaction>, With<Button>, With<DebugButton>)>,
-    mut turn_switched_state: ResMut<NextState<TurnSwitchedState>>,
-    current_state: Res<State<ActionsState>>,
-) {
-    if let Err(_) = interaction_query.get_single() {
-        return;
-    }
-
-    let (interaction, mut color) = interaction_query.single_mut();
-
-    if *current_state.get() != NoActionRunning {
-        *color = NORMAL_BUTTON.into();
-        return;
-    }
-
-    match interaction {
-        Interaction::Pressed => {
-            *color = PRESSED_BUTTON.into();
-            turn_switched_state.set(TurnSwitchedState::OnTurnSwitched);
         }
         Interaction::Hovered => {
             *color = HOVERED_BUTTON.into();
