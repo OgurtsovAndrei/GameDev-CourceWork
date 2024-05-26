@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use bevy::prelude::{BackgroundColor, Button, Changed, Interaction, NextState, Query, Res, ResMut, State, With};
 use hexx::{Hex};
 
-use crate::ui::action_panel::components::{HireArmyButton, NextMoveButton, OpenMovePanelButton};
+use crate::ui::action_panel::components::{HireArmyButton, SkipRoundButton, OpenMovePanelButton};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::world::actions::ActionsState;
 use crate::world::actions::ActionsState::{MovingSpaceShips, NoActionRunning, SpawningSpaceShips};
@@ -124,15 +124,21 @@ pub fn handle_move_button_click(
 
 pub fn handle_finish_moves_in_round_button_click(
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<Button>, With<NextMoveButton>),
-    >,
+        (Changed<Interaction>, With<Button>, With<SkipRoundButton>)>,
     mut current_player_query: Query<&mut Stats, (With<Player>, With<Movable>)>,
     mut move_done_state: ResMut<NextState<TurnSwitchedState>>,
+    current_state: Res<State<ActionsState>>,
 ) {
     if let Err(_) = interaction_query.get_single() {
         return;
     }
     let (interaction, mut color) = interaction_query.single_mut();
+
+    if *current_state.get() != NoActionRunning {
+        *color = NORMAL_BUTTON.into();
+        return;
+    }
+    
     let mut current_stats = current_player_query.single_mut();
     match *interaction {
         Interaction::Pressed => {

@@ -2,7 +2,7 @@ use bevy::asset::AssetServer;
 use bevy::hierarchy::ChildBuilder;
 use bevy::prelude::{BuildChildren, ButtonBundle, Commands, default, NodeBundle, Res, TextBundle};
 
-use crate::ui::action_panel::components::{ActionPanel, HireArmyButton, NextMoveButton, OpenMovePanelButton};
+use crate::ui::action_panel::components::{ActionPanel, HireArmyButton, SkipRoundButton, OpenMovePanelButton};
 use crate::ui::action_panel::styles::{get_actions_menu_container_style, get_actions_menu_style, get_button_style};
 use crate::world::fonts_and_styles::colors::*;
 use crate::world::fonts_and_styles::fonts::*;
@@ -53,7 +53,7 @@ fn add_finish_moves_in_round_button(parent: &mut ChildBuilder, asset_server: &Re
             background_color: NORMAL_BUTTON.into(),
             ..Default::default()
         })
-        .insert(NextMoveButton)
+        .insert(SkipRoundButton)
         .with_children(|parent| {
             parent.spawn(TextBundle::from_section(
                 "Skip round",
