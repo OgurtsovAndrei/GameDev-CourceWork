@@ -1,15 +1,16 @@
 use std::fmt::Debug;
 
 use bevy::prelude::{BackgroundColor, Button, Changed, Interaction, NextState, Query, Res, ResMut, State, With};
-use hexx::{Hex};
+use bevy::utils::HashMap;
+use hexx::Hex;
 
-use crate::ui::action_panel::components::{HireArmyButton, SkipRoundButton, OpenMovePanelButton};
+use crate::ui::action_panel::components::{HireArmyButton, OpenMovePanelButton, SkipRoundButton};
 use crate::ui::action_panel::plugin::TurnSwitchedState;
 use crate::world::actions::ActionsState;
 use crate::world::actions::ActionsState::{MovingSpaceShips, NoActionRunning, SpawningSpaceShips};
 use crate::world::fonts_and_styles::colors::{DISABLED_BUTTON, HOVERED_BUTTON, NORMAL_BUTTON, PRESSED_BUTTON};
 use crate::world::player::{Movable, Player, Stats};
-use crate::world::setup_world_grid::{HexGrid, SelectedHex};
+use crate::world::setup_world_grid::{HexGrid, Planet, SelectedHex};
 
 pub fn spawn_menu_button_click(
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor), (Changed<Interaction>, With<Button>, With<HireArmyButton>)>,
@@ -138,7 +139,7 @@ pub fn handle_finish_moves_in_round_button_click(
         *color = NORMAL_BUTTON.into();
         return;
     }
-    
+
     let mut current_stats = current_player_query.single_mut();
     match *interaction {
         Interaction::Pressed => {
@@ -160,9 +161,13 @@ pub(crate) fn is_selected_hex_belongs_to_player(player: &Player, grid: &HexGrid,
 }
 
 pub(crate) fn is_selected_hex_has_neighbours(player: &Player, grid: &HexGrid, selected_hex: &Hex) -> bool {
+    let planets = &grid.planets;
+    has_neighbour_in_planets(player, selected_hex, planets)
+}
+
+pub fn has_neighbour_in_planets(player: &Player, selected_hex: &Hex, planets: &HashMap<Hex, Planet>) -> bool {
     Hex::NEIGHBORS_COORDS.iter().any(|delta| {
         let neighbour = *delta + *selected_hex;
-        grid.planets.contains_key(&neighbour) && grid.planets.get(&neighbour).unwrap().owner == *player
-    }
-    )
+        planets.contains_key(&neighbour) && planets.get(&neighbour).unwrap().owner == *player
+    })
 }

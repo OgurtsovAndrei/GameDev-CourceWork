@@ -43,6 +43,7 @@ pub struct Planet {
     pub influence: u32,
     pub owner: Player,
     pub owner_army: Vec<SpaceShip>,
+    pub planet_locked_entity: Option<Entity>,
 }
 
 pub(crate) fn get_planet_resource_and_influence(id: usize) -> (u32, u32) {
@@ -70,6 +71,7 @@ impl Planet {
             influence,
             owner,
             owner_army,
+            planet_locked_entity: None,
         }
     }
 
@@ -83,6 +85,7 @@ impl Planet {
             influence,
             owner: Player { id: -1 },
             owner_army: vec![],
+            planet_locked_entity: None,
         }
     }
 }
@@ -93,6 +96,12 @@ pub struct HexGrid {
     pub entities: HashMap<Hex, Entity>,
     pub layout: HexLayout,
     pub planets: HashMap<Hex, Planet>,
+}
+
+impl HexGrid {
+    pub(crate) fn get_tuple(self: &mut Self) -> (&mut HashMap<Hex, Entity>, &mut HexLayout, &mut HashMap<Hex, Planet>) {
+        return (&mut self.entities, &mut self.layout, &mut self.planets);
+    }
 }
 
 pub(crate) fn setup_grid(
@@ -257,7 +266,7 @@ fn create_influence_sprite_bundle(asset_server: &Res<AssetServer>) -> SpriteBund
     create_sprite_bundle_with_image(asset_server, image_path, transform, INFLUENCE_COLOR)
 }
 
-fn create_sprite_bundle_with_image(asset_server: &Res<AssetServer>, image_path: String, transform: Transform, color: Color) -> SpriteBundle {
+pub(crate) fn create_sprite_bundle_with_image(asset_server: &Res<AssetServer>, image_path: String, transform: Transform, color: Color) -> SpriteBundle {
     (SpriteBundle {
         texture: asset_server.load(image_path).clone().into(),
         sprite: Sprite {
@@ -510,6 +519,8 @@ pub(crate) fn handle_click_on_planet(
                 if grid.entities.get(&cur_pos).is_none() {
                     return;
                 }
+                if grid.planets.get(&cur_pos).is_none() { return; }
+                if grid.planets.get(&cur_pos).unwrap().planet_locked_entity.is_some() { return; }
 
                 if selected_hex.hex == cur_pos {
                     if selected_hex.is_selected {
