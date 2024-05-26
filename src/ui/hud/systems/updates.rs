@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::reflect::List;
 
 use crate::ui::hud::components::{HudShortcutTipsText, HudTipsText, ScoreText};
 use crate::ui::hud::resources::{MOVE_MENU_SELECTED_HEX_HUD_TEXT, MOVE_MENU_SELECTED_HEX_SHORTCUT_TEXT, MOVE_MENU_UNSELECTED_HEX_HUD_TEXT, MOVE_MENU_UNSELECTED_HEX_SHORTCUT_TEXT, NO_ACTION_RUNNING_SELECTED_HEX_HUD_TEXT, NO_ACTION_RUNNING_SELECTED_HEX_SHORTCUT_TEXT, NO_ACTION_RUNNING_UNSELECTED_HEX_HUD_TEXT, NO_ACTION_RUNNING_UNSELECTED_HEX_SHORTCUT_TEXT, SPAWN_MENU_HUD_TEXT, SPAWN_MENU_SHORTCUT_TEXT};
@@ -16,19 +17,23 @@ pub fn update_score_text(
         let res = game_resources.clone();
         let resource_text = res.to_string();
         for mut text in text_query.iter_mut() {
-            let winning_points_text = get_wnning_points_str(&player_query);
+            let winning_points_text = get_winning_points_str(&player_query);
             text.sections[1].value = format!("{}", resource_text);
             text.sections[3].value = winning_points_text.clone()
         }
     }
 }
 
-fn get_wnning_points_str(player_query: &Query<(&Player, &Stats)>) -> String {
-    let mut winning_points_text = "".to_string();
-    for (player, stats) in player_query.iter() {
-        winning_points_text += &*format!("Player {} -> {}\n", player.id, stats.win_points).to_string()
+fn get_winning_points_str(player_query: &Query<(&Player, &Stats)>) -> String {
+    let mut winning_points_text = String::new();
+    let mut vec: Vec<(i32, i32)> = player_query.iter().map(|(player, stats)| {
+        (player.id, stats.win_points)
+    }).collect::<Vec<(i32, i32)>>();
+    vec.sort();
+    for (id, win_points) in vec {
+        winning_points_text.push_str(format!("Player {} -> {}\n", id, win_points).as_str())
     }
-    winning_points_text
+    return winning_points_text;
 }
 
 pub fn update_hud_text(
